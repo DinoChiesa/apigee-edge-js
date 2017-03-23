@@ -1,7 +1,8 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The missing library for automating the administration of Apigee Edge from nodejs.",
+  "main" : "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
