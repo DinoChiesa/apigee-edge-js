@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.DS_Store
+
+**/Icon*
+**/Icon
+*/Icon
+Icon
+
+**/target/
+**/*.jar
+**/*.class
+
+**/*.*~
+**/#*.*#
+
