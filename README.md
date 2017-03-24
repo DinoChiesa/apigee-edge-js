@@ -41,8 +41,8 @@ apigeeEdge.createDeveloper(options, function(e, result){
 
 Pretty much all the basic stuff you want to do with Apigee Edge administration is here.
 
-||      entity type    ||  operations                                   ||
-|----------------------|------------------------------------------------|
+|    entity type       |  operations                                    |
+| -------------------- | ---------------------------------------------- |
 | api proxies          | import, export, deploy, undeploy, delete, list | 
 | API products         | create, list, update, delete  |
 | cache                | create, list, delete |
