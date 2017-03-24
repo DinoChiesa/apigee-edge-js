@@ -53,8 +53,13 @@ Pretty much all the basic stuff you want to do with Apigee Edge administration i
 
 You can examine the lib/edge.js file to see the full list of operations.
 
+
 ## License?
 
 This code is copyright (C) 2017 Google Inc, and is licensed under the Apache 2.0 source license.
+
+## Related
+
+See also, [this Powershell module](https://github.com/DinoChiesa/Edge-Powershell-Admin)
 
 
