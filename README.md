@@ -11,30 +11,38 @@ Example:
 To create a new developer account:
 
 ```js
-apigeeEdge.setEdgeConnection(opt.options.mgmtserver, opt.options.org, {
-  headers : { accept: 'application/json' },
-  auth : {
-    user: config.username,
-    pass: config.password
-  }});
-
 var options = {
-      developerEmail : "JDimaggio@example.org",
-      lastName : "Dimaggio",
-      firstName : "Josephine",
-      userName : "JD1",
-      attributes: { "uuid": uuidV4() }
+      mgmtserver: config.mgmtserver,
+      org : config.org,
+      user: config.username,
+      pass: config.password
     };
 
-apigeeEdge.createDeveloper(options, function(e, result){
+apigeeEdge.connect(options, function(e, result){
   if (e) {
     console.log(e);
     console.log(e.stack);
     process.exit(1);
   }
-  console.log(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
-});
+  common.logWrite('connected');
 
+  var options = {
+        developerEmail : "JDimaggio@example.org",
+        lastName : "Dimaggio",
+        firstName : "Josephine",
+        userName : "JD1",
+        attributes: { "uuid": uuidV4() }
+      };
+
+  apigeeEdge.createDeveloper(options, function(e, result){
+    if (e) {
+      console.log(e);
+      console.log(e.stack);
+      process.exit(1);
+    }
+    common.logWrite(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
+  });
+});
 ```
 
 ## What is possible here?
