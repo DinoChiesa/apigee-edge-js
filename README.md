@@ -12,10 +12,10 @@ To create a new developer account:
 
 ```js
 var options = {
-      mgmtserver: config.mgmtserver,
+      mgmtServer: config.mgmtserver,
       org : config.org,
       user: config.username,
-      pass: config.password
+      password: config.password
     };
 
 apigeeEdge.connect(options, function(e, result){
