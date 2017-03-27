@@ -11,6 +11,10 @@ Example:
 To create a new developer account:
 
 ```js
+var edgejs = require('apigee-edge-js'),
+    common = edgejs.utility,
+    apigeeEdge = edgejs.edge;
+
 var options = {
       mgmtServer: config.mgmtserver,
       org : config.org,
