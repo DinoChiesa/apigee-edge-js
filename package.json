@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "The missing library for automating the administration of Apigee Edge from nodejs.",
   "main" : "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+git@github.com:DinoChiesa/apigee-edge-js.git"
+    "url": "git://github.com/DinoChiesa/apigee-edge-js.git"
   },
   "keywords": [
     "apigee",
