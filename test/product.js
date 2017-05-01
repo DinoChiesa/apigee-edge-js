@@ -4,34 +4,13 @@
 // tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:10:01>
+// last saved: <2017-April-30 19:38:51>
 
-var assert = require('chai').assert;
-var path = require('path');
-var aej = require('../index.js');
-var apigeeEdge = aej.edge;
-var common = aej.utility;
-var config = require('../testConfig.json');
-var faker = require('faker');
-
-function connectEdge(cb) {
-  var options = {
-        mgmtServer: config.mgmtServer,
-        org : config.org,
-        user: config.user,
-        password: config.password,
-        verbosity: config.verbosity
-      };
-  apigeeEdge.connect(options, function(e, org){
-    assert.isNull(e, e);
-    common.logWrite('Connected...');
-    cb(org);
-  });
-}
+var common = require('./common');
 
 describe('Product', function() {
   this.timeout(15000);
-  connectEdge(function(edgeOrg){
+  common.connectEdge(function(edgeOrg){
 
     var productName = faker.random.alphaNumeric(12);
     var options = {
@@ -47,7 +26,7 @@ describe('Product', function() {
       it('should create an apiproduct', function(done) {
         edgeOrg.products.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          common.logWrite(JSON.stringify(result, null, 2));
+          utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
@@ -68,7 +47,7 @@ describe('Product', function() {
       it('should delete an apiproduct', function(done) {
         edgeOrg.products.del({productName:productName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          common.logWrite(JSON.stringify(result, null, 2));
+          utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });

@@ -4,14 +4,9 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-April-30 19:10:24>
+// last saved: <2017-April-30 19:38:58>
 
-var assert = require('chai').assert;
-var aej = require('../index.js');
-var apigeeEdge = aej.edge;
-var common = aej.utility;
-var config = require('../testConfig.json');
-var faker = require('faker');
+var common = require('./common');
 
 describe('Connect', function() {
   this.timeout(15000);
@@ -26,7 +21,7 @@ describe('Connect', function() {
 
       apigeeEdge.connect(options, function(e, org){
         assert.isNull(e);
-        common.logWrite(org.conn);
+        utility.logWrite(org.conn);
         assert.equal(org.conn.org, config.org);
         done();
       });

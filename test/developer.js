@@ -4,33 +4,13 @@
 // Tests for Developer operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:10:36>
+// last saved: <2017-April-30 19:39:09>
 
-var assert = require('chai').assert;
-var aej = require('../index.js');
-var apigeeEdge = aej.edge;
-var common = aej.utility;
-var config = require('../testConfig.json');
-var faker = require('faker');
-
-function connectEdge(cb) {
-  var options = {
-        mgmtServer: config.mgmtServer,
-        org : config.org,
-        user: config.user,
-        password: config.password,
-        verbosity: config.verbosity
-      };
-  apigeeEdge.connect(options, function(e, org){
-    assert.isNull(e, e);
-    common.logWrite('Connected...');
-    cb(org);
-  });
-}
+var common = require('./common');
 
 describe('Developer', function() {
   this.timeout(15000);
-  connectEdge(function(edgeOrg){
+  common.connectEdge(function(edgeOrg){
 
     var firstName = faker.name.firstName(); // Rowan
     var lastName = faker.name.lastName(); // Nikolaus
@@ -46,7 +26,7 @@ describe('Developer', function() {
       it('should create a developer', function(done) {
         edgeOrg.developers.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          common.logWrite(JSON.stringify(result, null, 2));
+          utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
@@ -67,7 +47,7 @@ describe('Developer', function() {
       it('should delete a developer', function(done) {
         edgeOrg.developers.del({developerEmail:options.developerEmail}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          common.logWrite(JSON.stringify(result, null, 2));
+          utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
