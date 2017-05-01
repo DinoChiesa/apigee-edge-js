@@ -75,6 +75,25 @@ You can examine the lib/edge.js file to see the full list of operations.  Or see
 
 Pull requests are welcomed.
 
+## To Run Tests
+
+To run tests you should create a file called testConfig.json and put it in the toplevel dir of the repo.
+It should have contents like this:
+
+```json
+{
+  "org" : "my-org-name",
+  "user": "username@example.com",
+  "password": "password-goes-here",
+  "verbosity": 1
+}
+```
+
+Then:
+```sh
+npm test
+```
+
 
 ## License?
 
