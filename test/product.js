@@ -4,7 +4,7 @@
 // tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:46:30>
+// last saved: <2017-May-01 09:46:11>
 
 var common = require('./common');
 
@@ -54,7 +54,7 @@ describe('Product', function() {
     });
 
     describe('delete-fail', function() {
-      it('should fail to delete an apiproduct', function(done) {
+      it('should fail to delete a non-existent apiproduct', function(done) {
         let badOptions = Object.assign({}, options);
         badOptions.productName = faker.random.alphaNumeric(12);
         edgeOrg.products.del(badOptions, function(e, result){

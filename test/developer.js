@@ -4,7 +4,7 @@
 // Tests for Developer operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:46:23>
+// last saved: <2017-May-01 09:49:04>
 
 var common = require('./common');
 
@@ -54,9 +54,18 @@ describe('Developer', function() {
     });
 
     describe('delete-fail', function() {
-      it('should fail to delete a developer', function(done) {
+
+      it('should fail to delete a developer because no email was specified', function(done) {
         let badOptions = Object.assign({}, options);
         delete badOptions.developerEmail;
+        edgeOrg.developers.del(badOptions, function(e, result){
+          assert.isNotNull(e, "the expected error did not occur");
+          done();
+        });
+      });
+      it('should fail to delete a non-existent developer', function(done) {
+        let badOptions = Object.assign({}, options);
+        badOptions.developerEmail = faker.random.alphaNumeric(22) + "@apigee-edge-js-test.org";
         edgeOrg.developers.del(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
