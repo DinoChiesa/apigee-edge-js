@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-April-30 17:12:18>
+// last saved: <2017-April-30 17:41:40>
 
 var assert = require('chai').assert;
 var aej = require('../index.js');
@@ -32,13 +32,14 @@ describe('Connect', function() {
     });
   });
 
-  describe('#fail1', function() {
+  describe('connect-fail', function() {
     it('should fail to connect to an org - wrong password', function(done) {
       var options = {
             mgmtServer: config.mgmtServer,
             org : config.org,
             user: config.user,
-            password: faker.random.alphaNumeric(12)
+            password: faker.random.alphaNumeric(12),
+            no_token : true
           };
 
       apigeeEdge.connect(options, function(e, conn){
@@ -47,14 +48,26 @@ describe('Connect', function() {
       });
     });
 
-  });
-
-  describe('#fail2', function() {
     it('should fail to connect to an org - unknown org', function(done) {
       var options = {
             mgmtServer: config.mgmtServer,
             org : faker.random.alphaNumeric(11),
             user: config.user,
+            password: faker.random.alphaNumeric(16),
+            no_token : true
+          };
+
+      apigeeEdge.connect(options, function(e, conn){
+        assert.isNotNull(e, "the expected error did not occur");
+        done(!e);
+      });
+    });
+
+    it('should fail to connect to an org - unknown user', function(done) {
+      var options = {
+            mgmtServer: config.mgmtServer,
+            org : config.org,
+            user: faker.random.alphaNumeric(11),
             password: faker.random.alphaNumeric(16)
           };
 
@@ -63,6 +76,7 @@ describe('Connect', function() {
         done(!e);
       });
     });
+
   });
 
 });
