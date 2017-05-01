@@ -40,14 +40,27 @@ apigeeEdge.connect(options, function(e, org){
 
   org.developers.create(options, function(e, result){
     if (e) {
-      console.log(e);
-      console.log(e.stack);
+      utility.logWrite(JSON.stringify(e));
       process.exit(1);
     }
-    common.logWrite(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
+    utility.logWrite(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
   });
 });
 ```
+
+You can also tell the library to read credentials from .netrc :
+
+```js
+var edgejs = require('apigee-edge-js'),
+    utility = edgejs.utility,
+    apigeeEdge = edgejs.edge;
+
+var options = { org : config.org, netrc: true };
+apigeeEdge.connect(options, function(e, org){
+ ...
+});
+```
+
 
 ## The Basic Object Model
 
