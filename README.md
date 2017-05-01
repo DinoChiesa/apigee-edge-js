@@ -22,7 +22,7 @@ var options = {
       password: config.password
     };
 
-apigeeEdge.connect(options, function(e, result){
+apigeeEdge.connect(options, function(e, org){
   if (e) {
     console.log(e);
     console.log(e.stack);
@@ -38,7 +38,7 @@ apigeeEdge.connect(options, function(e, result){
         attributes: { "uuid": uuidV4() }
       };
 
-  apigeeEdge.createDeveloper(options, function(e, result){
+  org.developers.create(options, function(e, result){
     if (e) {
       console.log(e);
       console.log(e.stack);
@@ -49,21 +49,31 @@ apigeeEdge.connect(options, function(e, result){
 });
 ```
 
+## The Basic Object Model
+
+To start, you call apigeeEdge.connect.  This will connect to an Edge organization. If it is a SaaS organization, this method will try to find a stashed OAuth token and if not will get an OAuth token.
+The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is a hash and has child members as functions: 
+
+
+| member               | functions                                                |
+| -------------------- | -------------------------------------------------------- |
+| proxies              | get, deploy, undeploy, del, importFromDir, importFromZip |
+| caches               | get, create, del                                         |
+| kvms                 | get, create, put, del                                    |
+| sharedflows          | deploy, undeploy, importFromDir, importFromZip           |
+| products             | get, create, del                                         |
+| developers           | get, create, del                                         |
+| developerapps        | get, create, del                                         |
+| appcredentials       | add, del                                                 |
+
+
 ## What is possible here?
 
-Pretty much all the basic stuff you want to do with Apigee Edge administration is here.
+As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
 
-|    entity type       |  operations                                    |
-| -------------------- | ---------------------------------------------- |
-| api proxies          | import, export, deploy, undeploy, delete, list | 
-| API products         | create, list, update, delete  |
-| cache                | create, list, delete |
-| shared flow          | import, export, deploym undeploy |
-| KVM                  | create, list, update, delete, populate |
-| developer app        | create, delete, add credential, delete credential  |
-| developer            | create, delete  |
+You can examine the lib/edge.js file to see the full list of operations.  Or see the tests directory for example code. 
 
-You can examine the lib/edge.js file to see the full list of operations.
+Pull requests are welcomed.
 
 
 ## License?
