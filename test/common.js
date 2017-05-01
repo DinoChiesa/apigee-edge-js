@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-April-30 19:36:37>
+// last saved: <2017-April-30 19:46:08>
 
 var assert = require('chai').assert;
 var path = require('path');
@@ -36,3 +36,4 @@ function connectEdge(cb) {
 }
 
 exports.connectEdge = connectEdge;
+exports.testTimeout = 15000;

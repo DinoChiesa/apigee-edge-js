@@ -4,12 +4,12 @@
 // Tests for API Proxy operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:39:17>
+// last saved: <2017-April-30 19:46:35>
 
 var common = require('./common');
 
 describe('Proxy', function() {
-  this.timeout(15000);
+  this.timeout(common.testTimeout);
   common.connectEdge(function(edgeOrg){
 
     describe('get-success', function() {

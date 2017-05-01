@@ -4,12 +4,12 @@
 // tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:43:24>
+// last saved: <2017-April-30 19:46:30>
 
 var common = require('./common');
 
 describe('Product', function() {
-  this.timeout(15000);
+  this.timeout(common.testTimeout);
   common.connectEdge(function(edgeOrg){
 
     var productName = "APIPROD-" + faker.random.alphaNumeric(12);

@@ -4,12 +4,12 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-April-30 19:38:58>
+// last saved: <2017-April-30 19:45:55>
 
 var common = require('./common');
 
 describe('Connect', function() {
-  this.timeout(15000);
+  this.timeout(common.testTimeout);
   describe('connect-success', function() {
     it('should connect to an org', function(done) {
       var options = {
@@ -21,7 +21,7 @@ describe('Connect', function() {
 
       apigeeEdge.connect(options, function(e, org){
         assert.isNull(e);
-        utility.logWrite(org.conn);
+        //utility.logWrite(org.conn);
         assert.equal(org.conn.org, config.org);
         done();
       });

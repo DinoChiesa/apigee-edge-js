@@ -4,12 +4,12 @@
 // Tests for Developer operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:43:46>
+// last saved: <2017-April-30 19:46:23>
 
 var common = require('./common');
 
 describe('Developer', function() {
-  this.timeout(15000);
+  this.timeout(common.testTimeout);
   common.connectEdge(function(edgeOrg){
 
     var firstName = faker.name.firstName(); // Rowan
