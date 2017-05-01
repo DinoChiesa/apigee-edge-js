@@ -4,13 +4,31 @@
 // Description goes here....
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-May-01 09:52:01>
+// last saved: <2017-May-01 10:06:53>
 
 var assert = require('chai').assert;
 var path = require('path');
 var aej = require('../index.js');
-var config = require('../testConfig.json');
 var faker = require('faker');
+var config = require('../testConfig.json');
+// testConfig.json ought to look something like this:
+//
+// {
+//   "mgmtServer" : "https://api.enterprise.apigee.com",
+//   "org"        : "my-edge-org-name",
+//   "netrc"      : true
+// }
+//
+// or
+// {
+//   "mgmtServer" : "https://api.enterprise.apigee.com",
+//   "org"        : "my-edge-org-name",
+//   "user"       : "Dchiesa@google.com"
+//   "password"   : "Secret-BB208846F523"
+// }
+//
+// It can also have a verbosity flag. (truthy/falsy)
+//
 
 global.assert = assert;
 global.path = path;
@@ -23,17 +41,8 @@ global.apigeeEdge = aej.edge;
 function connectEdge(cb) {
   var options = Object.assign({}, config);
   //options.verbosity = 1;
-
-  // var options = {
-  //       mgmtServer: config.mgmtServer,
-  //       org : config.org,
-  //       user: config.user,
-  //       password: config.password,
-  //       verbosity: config.verbosity
-  //     };
   apigeeEdge.connect(options, function(e, org){
     assert.isNull(e, JSON.stringify(e));
-    //utility.logWrite('Connected...');
     cb(org);
   });
 }

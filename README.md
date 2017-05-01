@@ -102,13 +102,23 @@ It should have contents like this:
 }
 ```
 
-Then:
+or: 
+```json
+{
+  "org" : "my-org-name",
+  "netrc": true
+}
+```
+
+The latter example will retrieve credentials from .netrc.
+
+Then, to run tests:
 ```sh
 npm test
 ```
 
 
-## License?
+## License
 
 This code is copyright (C) 2017 Google Inc, and is licensed under the Apache 2.0 source license.
 
