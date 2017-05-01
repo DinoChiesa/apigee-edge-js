@@ -4,7 +4,7 @@
 // Tests for Developer operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:39:09>
+// last saved: <2017-April-30 19:43:46>
 
 var common = require('./common');
 
@@ -26,7 +26,7 @@ describe('Developer', function() {
       it('should create a developer', function(done) {
         edgeOrg.developers.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          utility.logWrite(JSON.stringify(result, null, 2));
+          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
@@ -47,7 +47,7 @@ describe('Developer', function() {
       it('should delete a developer', function(done) {
         edgeOrg.developers.del({developerEmail:options.developerEmail}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          utility.logWrite(JSON.stringify(result, null, 2));
+          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });

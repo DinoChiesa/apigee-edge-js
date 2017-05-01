@@ -4,7 +4,7 @@
 // tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:38:51>
+// last saved: <2017-April-30 19:43:24>
 
 var common = require('./common');
 
@@ -12,7 +12,7 @@ describe('Product', function() {
   this.timeout(15000);
   common.connectEdge(function(edgeOrg){
 
-    var productName = faker.random.alphaNumeric(12);
+    var productName = "APIPROD-" + faker.random.alphaNumeric(12);
     var options = {
           productName : productName,
           approvalType: 'auto',
@@ -26,14 +26,14 @@ describe('Product', function() {
       it('should create an apiproduct', function(done) {
         edgeOrg.products.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          utility.logWrite(JSON.stringify(result, null, 2));
+          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
     });
 
     describe('create-fail', function() {
-      it('should fail to create a developer', function(done) {
+      it('should fail to create an apiproduct', function(done) {
         let badOptions = Object.assign({}, options);
         delete badOptions.productName;
         edgeOrg.products.create(badOptions, function(e, result){
@@ -47,7 +47,7 @@ describe('Product', function() {
       it('should delete an apiproduct', function(done) {
         edgeOrg.products.del({productName:productName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          utility.logWrite(JSON.stringify(result, null, 2));
+          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
