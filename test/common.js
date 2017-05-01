@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-April-30 19:46:08>
+// last saved: <2017-May-01 09:52:01>
 
 var assert = require('chai').assert;
 var path = require('path');
@@ -21,16 +21,19 @@ global.utility = aej.utility;
 global.apigeeEdge = aej.edge;
 
 function connectEdge(cb) {
-  var options = {
-        mgmtServer: config.mgmtServer,
-        org : config.org,
-        user: config.user,
-        password: config.password,
-        verbosity: config.verbosity
-      };
+  var options = Object.assign({}, config);
+  //options.verbosity = 1;
+
+  // var options = {
+  //       mgmtServer: config.mgmtServer,
+  //       org : config.org,
+  //       user: config.user,
+  //       password: config.password,
+  //       verbosity: config.verbosity
+  //     };
   apigeeEdge.connect(options, function(e, org){
-    assert.isNull(e, e);
-    //common.logWrite('Connected...');
+    assert.isNull(e, JSON.stringify(e));
+    //utility.logWrite('Connected...');
     cb(org);
   });
 }
