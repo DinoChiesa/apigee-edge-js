@@ -1,12 +1,13 @@
-// developer.js
+// product.js
 // ------------------------------------------------------------------
 //
-// Tests for Developer operations.
+// tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-April-30 19:10:36>
+// last saved: <2017-April-30 19:10:01>
 
 var assert = require('chai').assert;
+var path = require('path');
 var aej = require('../index.js');
 var apigeeEdge = aej.edge;
 var common = aej.utility;
@@ -28,23 +29,23 @@ function connectEdge(cb) {
   });
 }
 
-describe('Developer', function() {
+describe('Product', function() {
   this.timeout(15000);
   connectEdge(function(edgeOrg){
 
-    var firstName = faker.name.firstName(); // Rowan
-    var lastName = faker.name.lastName(); // Nikolaus
+    var productName = faker.random.alphaNumeric(12);
     var options = {
-          developerEmail : lastName + '.' + firstName + "@apigee-edge-js-test.org",
-          lastName : lastName,
-          firstName : firstName,
-          userName : firstName + lastName,
-          attributes: { uuid: faker.random.uuid() }
+          productName : productName,
+          approvalType: 'auto',
+          attributes: {
+            uuid: faker.random.uuid(),
+            "tool" : path.basename(process.argv[1])
+          }
         };
 
     describe('create-success', function() {
-      it('should create a developer', function(done) {
-        edgeOrg.developers.create(options, function(e, result){
+      it('should create an apiproduct', function(done) {
+        edgeOrg.products.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
           common.logWrite(JSON.stringify(result, null, 2));
           done();
@@ -55,8 +56,8 @@ describe('Developer', function() {
     describe('create-fail', function() {
       it('should fail to create a developer', function(done) {
         let badOptions = Object.assign({}, options);
-        delete badOptions.developerEmail;
-        edgeOrg.developers.create(badOptions, function(e, result){
+        delete badOptions.productName;
+        edgeOrg.products.create(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -64,8 +65,8 @@ describe('Developer', function() {
     });
 
     describe('delete-success', function() {
-      it('should delete a developer', function(done) {
-        edgeOrg.developers.del({developerEmail:options.developerEmail}, function(e, result){
+      it('should delete an apiproduct', function(done) {
+        edgeOrg.products.del({productName:productName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
           common.logWrite(JSON.stringify(result, null, 2));
           done();
@@ -74,10 +75,19 @@ describe('Developer', function() {
     });
 
     describe('delete-fail', function() {
-      it('should fail to delete a developer', function(done) {
+      it('should fail to delete an apiproduct', function(done) {
         let badOptions = Object.assign({}, options);
-        delete badOptions.developerEmail;
-        edgeOrg.developers.del(badOptions, function(e, result){
+        badOptions.productName = faker.random.alphaNumeric(12);
+        edgeOrg.products.del(badOptions, function(e, result){
+          assert.isNotNull(e, "the expected error did not occur");
+          done();
+        });
+      });
+
+      it('should fail to delete because no name was specified', function(done) {
+        let badOptions = Object.assign({}, options);
+        delete badOptions.productName;
+        edgeOrg.products.del(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });

@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-April-30 17:41:40>
+// last saved: <2017-April-30 19:10:24>
 
 var assert = require('chai').assert;
 var aej = require('../index.js');
@@ -14,7 +14,8 @@ var config = require('../testConfig.json');
 var faker = require('faker');
 
 describe('Connect', function() {
-  describe('#success', function() {
+  this.timeout(15000);
+  describe('connect-success', function() {
     it('should connect to an org', function(done) {
       var options = {
             mgmtServer: config.mgmtServer,

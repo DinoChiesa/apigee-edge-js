@@ -80,6 +80,10 @@ Pull requests are welcomed.
 
 This code is copyright (C) 2017 Google Inc, and is licensed under the Apache 2.0 source license.
 
+## Bugs
+
+* The tests are incomplete
+
 ## Related
 
 See also, [this Powershell module](https://github.com/DinoChiesa/Edge-Powershell-Admin)
