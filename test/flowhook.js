@@ -4,7 +4,7 @@
 // tests for Flowhooks
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-May-03 22:13:11>
+// last saved: <2017-May-03 22:14:36>
 
 var common = require('./common');
 
@@ -14,7 +14,6 @@ describe('Flowhook', function() {
   
   common.connectEdge(function(edgeOrg){
 
-    //utility.logWrite('FLOWHOOKS');
     describe('fails', function() {
       it('should fail to list flowhooks', function(done) {
         edgeOrg.flowhooks.get({}, function(e, result){
@@ -27,8 +26,7 @@ describe('Flowhook', function() {
 
    describe('get/list', function() {
      this.timeout(common.testTimeout);
-     
-     var combinations = []; // = ['test', 'prod'];
+     var combinations = [];
      before(function(done){
        edgeOrg.environments.get(function(e, result) {
          assert.isNull(e, "error listing: " + JSON.stringify(e));
