@@ -70,10 +70,11 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 
 | member               | functions                                                |
 | -------------------- | -------------------------------------------------------- |
-| proxies              | get, deploy, undeploy, del, importFromDir, importFromZip |
+| proxies              | get, del, deploy, undeploy, importFromDir, importFromZip |
 | caches               | get, create, del                                         |
 | kvms                 | get, create, put, del                                    |
-| sharedflows          | deploy, undeploy, importFromDir, importFromZip           |
+| sharedflows          | get, del, deploy, undeploy, importFromDir, importFromZip |
+| flowhooks            | get, put                                                 |
 | products             | get, create, del                                         |
 | developers           | get, create, del                                         |
 | developerapps        | get, create, del                                         |
