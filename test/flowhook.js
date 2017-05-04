@@ -4,14 +4,14 @@
 // tests for Flowhooks
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-May-03 22:14:36>
+// last saved: <2017-May-04 09:40:56>
 
 var common = require('./common');
 
 describe('Flowhook', function() {
-  
+
   this.timeout(common.testTimeout) ;
-  
+
   common.connectEdge(function(edgeOrg){
 
     describe('fails', function() {
@@ -43,10 +43,10 @@ describe('Flowhook', function() {
          });
        });
      });
-     
+
 
      it('should get the list of flowhooks for each environment', function(done) {
-       var numDoneEnv = 0; 
+       var numDoneEnv = 0;
        combinations.forEach(function(combo) {
          var env = combo[0];
          assert.isNotNull(env, "error");
@@ -63,7 +63,7 @@ describe('Flowhook', function() {
      });
 
      it('should get individual flowhooks for each environment', function(done) {
-       var numDoneEnv = 0; 
+       var numDoneEnv = 0;
        combinations.forEach(function(combo) {
          var env = combo[0], hooks = combo[1];
          assert.isNotNull(env, "error");
@@ -84,9 +84,9 @@ describe('Flowhook', function() {
        });
      });
 
-     
+
    });
-    
+
   });
 
 
