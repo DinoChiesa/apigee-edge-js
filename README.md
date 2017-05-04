@@ -40,14 +40,27 @@ apigeeEdge.connect(options, function(e, org){
 
   org.developers.create(options, function(e, result){
     if (e) {
-      console.log(e);
-      console.log(e.stack);
+      utility.logWrite(JSON.stringify(e));
       process.exit(1);
     }
-    common.logWrite(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
+    utility.logWrite(sprintf('ok. developer: %s', JSON.stringify(result, null, 2)));
   });
 });
 ```
+
+You can also tell the library to read credentials from .netrc :
+
+```js
+var edgejs = require('apigee-edge-js'),
+    utility = edgejs.utility,
+    apigeeEdge = edgejs.edge;
+
+var options = { org : config.org, netrc: true };
+apigeeEdge.connect(options, function(e, org){
+ ...
+});
+```
+
 
 ## The Basic Object Model
 
@@ -89,13 +102,23 @@ It should have contents like this:
 }
 ```
 
-Then:
+or: 
+```json
+{
+  "org" : "my-org-name",
+  "netrc": true
+}
+```
+
+The latter example will retrieve credentials from .netrc.
+
+Then, to run tests:
 ```sh
 npm test
 ```
 
 
-## License?
+## License
 
 This code is copyright (C) 2017 Google Inc, and is licensed under the Apache 2.0 source license.
 

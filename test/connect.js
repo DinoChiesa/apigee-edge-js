@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-May-03 19:47:55>
+// last saved: <2017-May-03 20:23:51>
 
 var common = require('./common');
 
@@ -12,12 +12,14 @@ describe('Connect', function() {
   this.timeout(common.testTimeout);
   describe('connect-success', function() {
     it('should connect to an org', function(done) {
-      var options = {
-            mgmtServer: config.mgmtServer,
-            org : config.org,
-            user: config.user,
-            password: config.password
-          };
+      var options = Object.assign({}, config);
+
+      // var options = {
+      //       mgmtServer: config.mgmtServer,
+      //       org : config.org,
+      //       user: config.user,
+      //       password: config.password
+      //     };
 
       apigeeEdge.connect(options, function(e, org){
         assert.isNull(e, JSON.stringify(e));
@@ -30,10 +32,11 @@ describe('Connect', function() {
 
   describe('connect-fail', function() {
     it('should fail to connect to an org - wrong password', function(done) {
+      var options = Object.assign({}, config);
       var options = {
             mgmtServer: config.mgmtServer,
             org : config.org,
-            user: config.user,
+            user: "dchiesa@google.com",
             password: faker.random.alphaNumeric(12),
             no_token : true
           };
@@ -48,7 +51,7 @@ describe('Connect', function() {
       var options = {
             mgmtServer: config.mgmtServer,
             org : faker.random.alphaNumeric(11),
-            user: config.user,
+            user: "dchiesa@google.com",
             password: faker.random.alphaNumeric(16),
             no_token : true
           };
