@@ -4,12 +4,13 @@
 // Description goes here....
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-May-03 20:24:14>
+// last saved: <2017-May-03 20:44:32>
 
 var assert = require('chai').assert;
 var path = require('path');
 var aej = require('../index.js');
 var faker = require('faker');
+var sprintf = require('sprintf-js').sprintf;
 var config = require('../testConfig.json');
 // testConfig.json ought to look something like this:
 //
@@ -35,6 +36,7 @@ global.path = path;
 global.aej = aej;
 global.config = config;
 global.faker = faker;
+global.sprintf = sprintf;
 global.utility = aej.utility;
 global.apigeeEdge = aej.edge;
 

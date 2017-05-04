@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-May-03 20:23:51>
+// last saved: <2017-May-03 20:59:49>
 
 var common = require('./common');
 
@@ -32,7 +32,7 @@ describe('Connect', function() {
 
   describe('connect-fail', function() {
     it('should fail to connect to an org - wrong password', function(done) {
-      var options = Object.assign({}, config);
+      //var options = Object.assign({}, config);
       var options = {
             mgmtServer: config.mgmtServer,
             org : config.org,
