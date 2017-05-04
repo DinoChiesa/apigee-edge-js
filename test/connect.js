@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-April-30 19:45:55>
+// last saved: <2017-May-03 19:47:55>
 
 var common = require('./common');
 
@@ -20,7 +20,7 @@ describe('Connect', function() {
           };
 
       apigeeEdge.connect(options, function(e, org){
-        assert.isNull(e);
+        assert.isNull(e, JSON.stringify(e));
         //utility.logWrite(org.conn);
         assert.equal(org.conn.org, config.org);
         done();

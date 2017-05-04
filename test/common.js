@@ -4,7 +4,7 @@
 // Description goes here....
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-April-30 19:46:08>
+// last saved: <2017-May-03 19:35:07>
 
 var assert = require('chai').assert;
 var path = require('path');
@@ -29,7 +29,7 @@ function connectEdge(cb) {
         verbosity: config.verbosity
       };
   apigeeEdge.connect(options, function(e, org){
-    assert.isNull(e, e);
+    assert.isNull(e, JSON.stringify(e));
     //common.logWrite('Connected...');
     cb(org);
   });
