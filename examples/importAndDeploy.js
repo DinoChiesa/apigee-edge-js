@@ -1,10 +1,10 @@
 #! /usr/local/bin/node
 /*jslint node:true */
-// importAndDeployProxy.js
+// importAndDeploy.js
 // ------------------------------------------------------------------
-// import and deploy an Apigee Edge proxy bundle
+// import and deploy an Apigee Edge proxy bundle or shared flow
 //
-// last saved: <2017-May-27 17:34:00>
+// last saved: <2017-June-08 13:13:27>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,14 +12,13 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170203-1031',
+    version = '20170608-1309',
     defaults = { basepath : '/' },
     getopt = new Getopt(common.commonOptions.concat([
       ['d' , 'srcdir=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
-      ['N' , 'proxyname=ARG', 'name for API proxy or shared flow'],
-      ['e' , 'env=ARG', 'the Edge environment.'],
+      ['N' , 'name=ARG', 'name for API proxy or shared flow'],
+      ['e' , 'env=ARG', 'the Edge environment to which to deploy the asset.'],
       ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
-      ['X' , 'nodeploy', 'do not deploy the API Proxy or sharedflow.'],
       ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
     ])).bindHelp();
 
@@ -58,34 +57,36 @@ var options = {
 
 apigeeEdge.connect(options, function(e, org){
   if (e) {
-    common.logWrite('error: ' + JSON.stringify(e, null, 2));
+    common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);
     process.exit(1);
   }
   common.logWrite('connected');
 
   if (opt.options.sharedflow) {
+    common.logWrite('importing');
     org.sharedflows.importFromDir(opt.options.proxyname, opt.options.srcdir, function(e, result){
       if (e) {
-        common.logWrite('error: ' + JSON.stringify(e, null, 2));
+        common.logWrite(JSON.stringify(e, null, 2));
         if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
         //console.log(e.stack);
         process.exit(1);
       }
-      common.logWrite(sprintf('ok. shared flow name: %s r%d', result.name, result.revision));
-      if (opt.options.env && !opt.options.nodeploy) {
+      common.logWrite(sprintf('import ok. shared flow name: %s r%d', result.name, result.revision));
+      if (opt.options.env) {
         var options = {
               name: result.name,
               revision: result.revision,
               environment: opt.options.env
             };
+        common.logWrite('deploying');
         apigeeEdge.deploySharedFlow(options, function(e, result) {
           if (e) {
             common.logWrite(JSON.stringify(e, null, 2));
             if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
             throw e;
           }
-          common.logWrite('ok.');
+          common.logWrite('deploy ok.');
         });
       }
       else {
@@ -95,28 +96,30 @@ apigeeEdge.connect(options, function(e, org){
     });
   }
   else {
-    org.proxies.importFromDir(opt.options.proxyname, opt.options.srcdir, function(e, result) {
+    common.logWrite('importing');
+    org.proxies.importFromDir(opt.options.proxyname, opt.options.srcdir, function(e, result){
       if (e) {
-        common.logWrite('error: ' + JSON.stringify(e, null, 2));
+        common.logWrite(JSON.stringify(e, null, 2));
         if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
         //console.log(e.stack);
         process.exit(1);
       }
-      common.logWrite(sprintf('ok. proxy name: %s r%d', result.name, result.revision));
-      if (opt.options.env && !opt.options.nodeploy) {
+      common.logWrite(sprintf('import ok. proxy name: %s r%d', result.name, result.revision));
+      if (opt.options.env) {
         var options = {
               name: result.name,
               revision: result.revision,
               environment: opt.options.env,
               basepath: opt.options.basepath || defaults.basepath
             };
+        common.logWrite('deploying');
         org.proxies.deploy(options, function(e, result) {
           if (e) {
             common.logWrite(JSON.stringify(e, null, 2));
             if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
             throw e;
           }
-          common.logWrite('ok.');
+          common.logWrite('deploy ok.');
         });
       }
       else {

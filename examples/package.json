@@ -1,8 +1,8 @@
 {
   "name": "apigee-edge-js-examples",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Examples for using the Apigee Edge nodeJS library",
-  "main": "importAndDeployProxy.js",
+  "main": "importAndDeploy.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
