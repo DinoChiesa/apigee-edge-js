@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow
 //
-// last saved: <2017-June-08 13:13:27>
+// last saved: <2017-June-12 13:33:50>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -39,7 +39,7 @@ if ( !opt.options.srcdir ) {
   process.exit(1);
 }
 
-if ( !opt.options.proxyname ) {
+if ( !opt.options.name ) {
   console.log('You must specify a name for the proxy or sharedflow');
   getopt.showHelp();
   process.exit(1);
@@ -65,7 +65,7 @@ apigeeEdge.connect(options, function(e, org){
 
   if (opt.options.sharedflow) {
     common.logWrite('importing');
-    org.sharedflows.importFromDir(opt.options.proxyname, opt.options.srcdir, function(e, result){
+    org.sharedflows.importFromDir(opt.options.name, opt.options.srcdir, function(e, result){
       if (e) {
         common.logWrite(JSON.stringify(e, null, 2));
         if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
@@ -97,7 +97,7 @@ apigeeEdge.connect(options, function(e, org){
   }
   else {
     common.logWrite('importing');
-    org.proxies.importFromDir(opt.options.proxyname, opt.options.srcdir, function(e, result){
+    org.proxies.importFromDir(opt.options.name, opt.options.srcdir, function(e, result){
       if (e) {
         common.logWrite(JSON.stringify(e, null, 2));
         if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
