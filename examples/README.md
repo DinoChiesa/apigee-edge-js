@@ -1,6 +1,8 @@
-# Command-line Tool examples for Apigee Edge
+# Example Tools for Apigee Edge
 
-These example tools can all retrieve credentials from a .netrc file.
+These are example tools implemented in nodejs/Javascript, that use the apigee-edge-js library. 
+
+They all can retrieve credentials from a .netrc file, or you can pass in user credentials interactively. 
 Also, they use the OAuth authentication mechanism for Apigee Edge. 
 
 
