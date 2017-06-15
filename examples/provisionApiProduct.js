@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision an Apigee Edge API Product
 //
-// last saved: <2017-May-18 09:21:32>
+// last saved: <2017-June-15 12:12:33>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -67,9 +67,8 @@ apigeeEdge.connect(options, function(e, org) {
         proxy: opt.options.proxy,
         environments: opt.options.env,
         approvalType : opt.options.approvalType || "auto", //|| manual
-        attributes: { "key1": "value1", "key2": "XYZ123"}
+        //attributes: { "key1": "value1", "key2": "XYZ123"}
       };
-
 
   org.products.create(options, function(e, result){
     if (e) {
