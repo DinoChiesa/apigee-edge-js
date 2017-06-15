@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "The nodejs library for the administration API for Apigee Edge.",
   "main" : "index.js",
   "scripts": {

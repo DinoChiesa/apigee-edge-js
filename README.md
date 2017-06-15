@@ -64,21 +64,21 @@ apigeeEdge.connect(options, function(e, org){
 
 ## The Basic Object Model
 
-To start, you call apigeeEdge.connect.  This will connect to an Edge organization. If it is a SaaS organization, this method will try to find a stashed OAuth token and if not will get an OAuth token.
-The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is a hash and has child members as functions: 
+To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If it is a SaaS organization, this method will try to find a stashed OAuth token and if not will get an OAuth token.
+The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is itself a hash and has child members as functions: 
 
 
-| member               | functions                                                |
-| -------------------- | -------------------------------------------------------- |
-| proxies              | get, del, deploy, undeploy, importFromDir, importFromZip |
-| caches               | get, create, del                                         |
-| kvms                 | get, create, put, del                                    |
-| sharedflows          | get, del, deploy, undeploy, importFromDir, importFromZip |
-| flowhooks            | get, put                                                 |
-| products             | get, create, del                                         |
-| developers           | get, create, del                                         |
-| developerapps        | get, create, del                                         |
-| appcredentials       | add, del                                                 |
+| member               | functions                                                        |
+| -------------------- | ---------------------------------------------------------------- |
+| proxies              | get, del, deploy, undeploy, importFromDir, importFromZip, export |
+| caches               | get, create, del                                                 |
+| kvms                 | get, create, put, del                                            |
+| sharedflows          | get, del, deploy, undeploy, importFromDir, importFromZip         |
+| flowhooks            | get, put                                                         |
+| products             | get, create, del                                                 |
+| developers           | get, create, del                                                 |
+| developerapps        | get, create, del                                                 |
+| appcredentials       | add, del                                                         |
 
 
 ## What is possible here?
