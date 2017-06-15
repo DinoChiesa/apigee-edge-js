@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow
 //
-// last saved: <2017-June-12 13:33:50>
+// last saved: <2017-June-15 12:06:42>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -80,7 +80,7 @@ apigeeEdge.connect(options, function(e, org){
               environment: opt.options.env
             };
         common.logWrite('deploying');
-        apigeeEdge.deploySharedFlow(options, function(e, result) {
+        org.sharedflows.deploy(options, function(e, result) {
           if (e) {
             common.logWrite(JSON.stringify(e, null, 2));
             if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
