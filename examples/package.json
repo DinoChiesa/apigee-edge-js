@@ -15,6 +15,7 @@
     "node-getopt": "0.2.3",
     "node-rsa": "^0.4.2",
     "readline-sync": "^1.4.1",
-    "sprintf-js": "^1.0.3"
+    "sprintf-js": "^1.0.3",
+    "uuid-v4": "^0.1.0"
   }
 }
