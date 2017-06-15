@@ -85,9 +85,9 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 
 As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
 
-You can examine the lib/edge.js file to see the full list of operations.  Or see the tests directory for example code. 
+You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for example code. 
 
-Pull requests are welcomed.
+Pull requests are welcomed, for the code or for examples.
 
 ## To Run Tests
 
