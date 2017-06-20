@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision an Apigee Edge API Product
 //
-// last saved: <2017-June-15 12:12:33>
+// last saved: <2017-June-20 11:00:25>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,12 +12,13 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170324-1907',
+    version = '20170620-1100',
     getopt = new Getopt(common.commonOptions.concat([
-      ['p' , 'proxy=ARG', 'name of API proxy to include in the API Product.'],
-      ['N' , 'productname=ARG', 'name for API proxy'],
-      ['A' , 'approvalType=ARG', 'either manual or auto. defaults to auto.'],
-      ['e' , 'env=ARG', 'the Edge environment on which to enable the Product (default: all)']
+      ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
+      ['N' , 'productname=ARG', 'Required. name for API product'],
+      ['A' , 'approvalType=ARG', 'Optional. either manual or auto. (default: auto)'],
+      ['S' , 'scopes=ARG', 'Optional. comma-separated list of possible scopes for the API product'],
+      ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)']
     ])).bindHelp();
 
 // ========================================================
@@ -69,6 +70,10 @@ apigeeEdge.connect(options, function(e, org) {
         approvalType : opt.options.approvalType || "auto", //|| manual
         //attributes: { "key1": "value1", "key2": "XYZ123"}
       };
+
+  if (opt.options.scopes) {
+    options.scopes = opt.options.scopes.split(',').trim();
+  }
 
   org.products.create(options, function(e, result){
     if (e) {
