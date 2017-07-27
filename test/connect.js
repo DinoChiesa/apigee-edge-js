@@ -1,10 +1,8 @@
 // connect.js
 // ------------------------------------------------------------------
 //
-// Description goes here....
-//
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-May-03 20:59:49>
+// last saved: <2017-July-24 11:09:30>
 
 var common = require('./common');
 
