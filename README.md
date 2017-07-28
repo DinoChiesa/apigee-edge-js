@@ -70,6 +70,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 
 | member               | functions                                                        |
 | -------------------- | ---------------------------------------------------------------- |
+| environments         | get, getVhosts                                                   |
 | proxies              | get, del, deploy, undeploy, importFromDir, importFromZip, export, getRevisions, getResourcesForRevision, getPoliciesForRevision |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |
