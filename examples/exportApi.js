@@ -2,9 +2,9 @@
 /*jslint node:true */
 // exportApi.js
 // ------------------------------------------------------------------
-// export one or more Apigee Edge proxy bundles (or shared flows)
+// export one or more Apigee Edge proxy bundles
 //
-// last saved: <2017-August-08 15:42:21>
+// last saved: <2017-August-08 15:52:23>
 
 var fs = require('fs'),
     path = require('path'),
@@ -72,11 +72,6 @@ function exportLatestRevisionOfMatchingProxies(org, pattern, cb) {
     }
     var re1 = new RegExp(pattern);
     result = result.filter( a => a.match(re1) );
-    // result = result.filter( function(name) {
-    //   var result = name.match(re1);
-    //   common.logWrite('matching pattern %s against name %s ==> %s', pattern, name, (result)?true:false);
-    //   return result;
-    // });
     async.mapSeries(result, proxyExporter(org), function (e, results) {
       cb(e, results);
     });
@@ -86,7 +81,7 @@ function exportLatestRevisionOfMatchingProxies(org, pattern, cb) {
 // ========================================================
 
 console.log(
-  'Apigee Edge Proxy/Sharedflow Export tool, version: ' + version + '\n' +
+  'Apigee Edge Proxy Export tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
