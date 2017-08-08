@@ -63,10 +63,41 @@ Also, they use the OAuth authentication mechanism for Apigee Edge.
 
 ```
 
+If you  want to just see which proxies would be exported, you can use the -T option.
+
+```
+./exportApi.js -n -v -o ORGNAME -P ^r.\* -T
+
+```
+
+
+# Export all proxies in an org
+
+This just uses a regex pattern that matches all names.
+
+```
+./exportApi.js -n -v -o ORGNAME -P .
+
+```
+
+
 # Export a single named proxy
+
+In lieu of the -P (pattern) option you can use -N (name) for a specific proxy.
+
 
 ```
 ./exportApi.js -n -v -o ORGNAME -N runload
 
 ```
+
+By defaut the script will export the latest revision of the proxy.
+If you know  the revision you'd like to export, you can use the -R option to specify it.
+
+
+```
+./exportApi.js -n -v -o ORGNAME -N runload -R 3
+
+```
+
 
