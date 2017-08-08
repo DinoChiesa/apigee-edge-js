@@ -55,3 +55,18 @@ Also, they use the OAuth authentication mechanism for Apigee Edge.
 
 ```
 
+
+# Export a set of proxies with a name matching a RegExp pattern
+
+```
+./exportApi.js -n -v -o ORGNAME -P ^r.\*
+
+```
+
+# Export a single named proxy
+
+```
+./exportApi.js -n -v -o ORGNAME -N runload
+
+```
+
