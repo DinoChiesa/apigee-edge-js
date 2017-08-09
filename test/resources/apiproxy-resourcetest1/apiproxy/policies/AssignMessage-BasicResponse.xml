@@ -1,0 +1,16 @@
+<AssignMessage name='AssignMessage-BasicResponse'>
+  <DisplayName>AssignMessage</DisplayName>
+  <Description></Description>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <Set>
+    <Payload contentType='application/json'
+             variablePrefix='%' variableSuffix='#'><![CDATA[{
+    "message" : "whatever you like",
+    "time" : "%system.time#",
+    "timestamp" : "%system.timestamp#"
+}
+]]></Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+</AssignMessage>

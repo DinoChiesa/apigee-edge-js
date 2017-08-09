@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="1" name="library">
+    <Basepaths>/v1/library</Basepaths>
+    <ConfigurationVersion majorVersion="4" minorVersion="0"/>
+    <CreatedAt>1389292745369</CreatedAt>
+    <CreatedBy>DChiesa@apigee.com</CreatedBy>
+    <Description></Description>
+    <DisplayName>library</DisplayName>
+    <LastModifiedAt>1389292745369</LastModifiedAt>
+    <LastModifiedBy>DChiesa@apigee.com</LastModifiedBy>
+    <Policies>
+        <Policy>Get-Soap-Body</Policy>
+        <Policy>Set-Soap-Body</Policy>
+        <Policy>Set-Target-URL</Policy>
+        <Policy>Unknown-Resource</Policy>
+        <Policy>Xml-to-Json</Policy>
+        <Policy>addBook-build-soap</Policy>
+        <Policy>addBook-extract-form-param</Policy>
+    </Policies>
+    <ProxyEndpoints>
+        <ProxyEndpoint>default</ProxyEndpoint>
+    </ProxyEndpoints>
+    <Resources/>
+    <Spec></Spec>
+    <TargetServers/>
+    <TargetEndpoints>
+        <TargetEndpoint>default</TargetEndpoint>
+    </TargetEndpoints>
+    <validate>false</validate>
+</APIProxy>

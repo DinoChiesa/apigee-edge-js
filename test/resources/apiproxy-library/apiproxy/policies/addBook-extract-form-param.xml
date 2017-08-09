@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ExtractVariables async="false" continueOnError="true" enabled="true" name="addBook-extract-form-param">
+    <DisplayName>addBook Extract Form Param</DisplayName>
+    <FormParam name="isbn">
+        <Pattern ignoreCase="true">{isbn}</Pattern>
+    </FormParam>
+    <FormParam name="price">
+        <Pattern ignoreCase="true">{price}</Pattern>
+    </FormParam>
+    <FormParam name="title">
+        <Pattern ignoreCase="true">{title}</Pattern>
+    </FormParam>
+    <FormParam name="inception">
+        <Pattern ignoreCase="true">{inception}</Pattern>
+    </FormParam>
+    <FormParam name="name">
+        <Pattern ignoreCase="true">{name}</Pattern>
+    </FormParam>
+    <FormParam name="birth">
+        <Pattern ignoreCase="true">{birth}</Pattern>
+    </FormParam>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>

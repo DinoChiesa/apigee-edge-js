@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="true" enabled="true" name="addBook-build-soap">
+    <DisplayName>addBook Build SOAP</DisplayName>
+    <Add>
+        <Headers>
+            <Header name="SOAPAction"></Header>
+        </Headers>
+    </Add>
+    <Set>
+        <Headers>
+            <Header name="Content-Type">text/xml; charset=utf-8</Header>
+        </Headers>
+        <Payload contentType="text/xml">
+            <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <soap:Body>
+                    <addBook xmlns="urn:sampleproject.amexjavatec.com" xmlns:addBook="urn:sampleproject.amexjavatec.com">
+                        <addBook>
+                            <LibraryBook>
+                                <isbn>{isbn}</isbn>
+                                <price>{price}</price>
+                                <title>{title}</title>
+                                <inception>{inception}</inception>
+                                <authors>
+                                    <author>
+                                        <name>{name}</name>
+                                        <birth>{birth}</birth>
+                                    </author>
+                                </authors>
+                            </LibraryBook>
+                        </addBook>
+                    </addBook>
+                </soap:Body>
+            </soap:Envelope>
+        </Payload>
+        <Verb>POST</Verb>
+    </Set>
+    <AssignVariable>
+        <Name>forward.target.url</Name>
+        <Value>http://stormy-plains-8756.herokuapp.com:80/Library</Value>
+    </AssignVariable>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>

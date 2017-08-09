@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="3" name="resourcetest1">
+    <Basepaths>/resourcetest1</Basepaths>
+    <ConfigurationVersion majorVersion="4" minorVersion="0"/>
+    <CreatedAt>1429032824228</CreatedAt>
+    <CreatedBy>DChiesa@apigee.com</CreatedBy>
+    <Description></Description>
+    <DisplayName>resourcetest1</DisplayName>
+    <LastModifiedAt>1429032824228</LastModifiedAt>
+    <LastModifiedBy>DChiesa@apigee.com</LastModifiedBy>
+    <Policies>
+        <Policy>AssignMessage-BasicResponse</Policy>
+        <Policy>Javascript-InsertResponseHeader</Policy>
+        <Policy>RaiseFault-UnknownRequest</Policy>
+    </Policies>
+    <ProxyEndpoints>
+        <ProxyEndpoint>default</ProxyEndpoint>
+    </ProxyEndpoints>
+    <Resources>
+        <Resource>jsc://insertResponseHeader.js</Resource>
+    </Resources>
+    <Spec></Spec>
+    <TargetServers/>
+    <TargetEndpoints/>
+    <validate>true</validate>
+</APIProxy>

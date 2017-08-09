@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ExtractVariables async="false" continueOnError="false" enabled="true" name="Get-Soap-Body">
+    <DisplayName>Get Soap Body</DisplayName>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <JSONPayload>
+        <Variable name="body">
+            <JSONPath>$.Envelope.Body</JSONPath>
+        </Variable>
+    </JSONPayload>
+    <Source>response</Source>
+    <VariablePrefix>soapresponse</VariablePrefix>
+</ExtractVariables>
