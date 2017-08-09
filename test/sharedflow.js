@@ -4,7 +4,7 @@
 // Tests for Sharedflow operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-May-04 10:27:34>
+// last saved: <2017-August-08 17:14:10>
 
 var common = require('./common');
 var fs = require('fs');
@@ -18,7 +18,7 @@ describe('Sharedflow', function() {
   this.timeout(common.testTimeout);
   common.connectEdge(function(edgeOrg){
 
-    describe('import', function() {
+    describe('import-from-zip', function() {
       var zipFileList;
       var envList;
 
@@ -38,10 +38,26 @@ describe('Sharedflow', function() {
       });
 
       it('should import sharedflow zips into an org', function(done) {
+        this.timeout(15000);
         var numDone = 0;
         zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + faker.random.alphaNumeric(12);
+          var contrivedName = contrivedNamePrefix + '-' + faker.random.alphaNumeric(12);
           edgeOrg.sharedflows.importFromZip({name:contrivedName, zipArchive:zip}, function(e, result){
+            assert.isNull(e, "error importing zip: " + JSON.stringify(e));
+            numDone++;
+            if (numDone == zipFileList.length) {
+              done();
+            }
+          });
+        });
+      });
+
+      it('should import sharedflow zips via the simple method', function(done) {
+        this.timeout(15000);
+        var numDone = 0;
+        zipFileList.forEach(function(zip){
+          var contrivedName = contrivedNamePrefix + '-simple-' + faker.random.alphaNumeric(12);
+          edgeOrg.sharedflows.import({name:contrivedName, source:zip}, function(e, result){
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
             numDone++;
             if (numDone == zipFileList.length) {
@@ -54,30 +70,19 @@ describe('Sharedflow', function() {
       it('should delete test sharedflows previously imported into this org', function(done) {
         var numDone = 0;
         edgeOrg.sharedflows.get({}, function(e, sharedflows){
-          function tick() {
-            numDone++;
-            if (numDone == sharedflows.length) {
-              done();
-            }
-          }
           assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
           assert.isAbove(sharedflows.length, 1, "length of SF list");
           sharedflows.forEach(function(sf) {
             if (sf.startsWith(contrivedNamePrefix)) {
               edgeOrg.sharedflows.del({name:sf}, function(e, proxies){
                 assert.isNull(e, "error deleting sharedflow: " + JSON.stringify(e));
-                tick();
               });
             }
-            else {
-              tick();
-            }
           });
+          done();
         });
       });
-
     });
-
 
     describe('get', function() {
       var sharedFlowList;
@@ -90,7 +95,6 @@ describe('Sharedflow', function() {
         });
       });
 
-
       it('should list all sharedflows for an org', function(done) {
         edgeOrg.sharedflows.get({}, function(e, result){
           assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
@@ -98,7 +102,6 @@ describe('Sharedflow', function() {
           done();
         });
       });
-
 
       it('should get one sharedFlow', function(done) {
         if (sharedFlowList && sharedFlowList.length > 0) {

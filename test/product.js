@@ -4,7 +4,7 @@
 // tests for API Product.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-May-03 20:52:49>
+// last saved: <2017-August-08 16:31:04>
 
 var common = require('./common');
 
@@ -84,6 +84,7 @@ describe('Product', function() {
 
 
     describe('delete', function() {
+      this.timeout(15000);
       it('should delete an apiproduct', function(done) {
         edgeOrg.products.del({productName:productName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
