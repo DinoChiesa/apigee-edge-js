@@ -86,9 +86,57 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 
 As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
 
-You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for example code. 
+You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for some example code. A few examples are shown here. 
 
 Pull requests are welcomed, for the code or for examples.
+
+
+### Export the latest revision of an API Proxy
+
+```js
+edgeOrg.proxies.export({name:'proxyname'}, function(e,result) {
+  if (e) {
+    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
+    return;
+  }
+  fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
+  console.log('ok');
+});
+
+```
+
+
+### Export a specific revision of an API Proxy
+
+```js
+edgeOrg.proxies.export({name:'proxyname', revision:3}, function(e,result) {
+  if (e) {
+    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
+    return;
+  }
+  fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
+  console.log('ok');
+});
+
+```
+
+
+
+### Get the latest revision of an API Proxy
+
+```
+org.proxies.getRevisions({name:'proxyname-here'}, function(e, result){
+  if (e) {
+    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
+    return;
+  }
+  console.log('revisions: ' + JSON.stringify(result)); // eg, [ "1", "2", "3"]
+  var latestRevision = result[result.length-1];
+});
+```
+
+
+
 
 ## To Run Tests
 

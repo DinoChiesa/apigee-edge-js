@@ -4,7 +4,7 @@
 // Tests for Sharedflow operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-August-08 17:14:10>
+// last saved: <2017-August-09 10:05:23>
 
 var common = require('./common');
 var fs = require('fs');
@@ -41,13 +41,11 @@ describe('Sharedflow', function() {
         this.timeout(15000);
         var numDone = 0;
         zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-' + faker.random.alphaNumeric(12);
+          var contrivedName = contrivedNamePrefix + '-fromzip-' + faker.random.alphaNumeric(12);
           edgeOrg.sharedflows.importFromZip({name:contrivedName, zipArchive:zip}, function(e, result){
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
             numDone++;
-            if (numDone == zipFileList.length) {
-              done();
-            }
+            if (numDone == zipFileList.length) { done(); }
           });
         });
       });
@@ -56,30 +54,31 @@ describe('Sharedflow', function() {
         this.timeout(15000);
         var numDone = 0;
         zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-simple-' + faker.random.alphaNumeric(12);
+          var contrivedName = contrivedNamePrefix + '-fromzip-simple-' + faker.random.alphaNumeric(12);
           edgeOrg.sharedflows.import({name:contrivedName, source:zip}, function(e, result){
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
             numDone++;
-            if (numDone == zipFileList.length) {
-              done();
-            }
+            if (numDone == zipFileList.length) { done(); }
           });
         });
       });
 
       it('should delete test sharedflows previously imported into this org', function(done) {
-        var numDone = 0;
+        var numDone = 0, L = 0;
+        var tick = function() { if (++numDone >= L) { done(); } };
         edgeOrg.sharedflows.get({}, function(e, sharedflows){
           assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
           assert.isAbove(sharedflows.length, 1, "length of SF list");
+          L = sharedflows.length;
           sharedflows.forEach(function(sf) {
-            if (sf.startsWith(contrivedNamePrefix)) {
+            if (sf.startsWith(contrivedNamePrefix + '-fromzip-')) {
               edgeOrg.sharedflows.del({name:sf}, function(e, proxies){
                 assert.isNull(e, "error deleting sharedflow: " + JSON.stringify(e));
+                tick();
               });
             }
+            else { tick(); }
           });
-          done();
         });
       });
     });
@@ -104,7 +103,7 @@ describe('Sharedflow', function() {
       });
 
       it('should get one sharedFlow', function(done) {
-        if (sharedFlowList && sharedFlowList.length > 0) {
+        assert(sharedFlowList && sharedFlowList.length > 0);
         var ix = Math.floor(Math.random() * sharedFlowList.length);
         edgeOrg.sharedflows.get({name:sharedFlowList[ix]}, function(e, result){
           assert.isNull(e, "error getting sharedflow: " + JSON.stringify(e));
@@ -112,6 +111,21 @@ describe('Sharedflow', function() {
           assert.equal(sharedFlowList[ix], result.name, "sharedflow name");
           done();
         });
+      });
+
+      it('should export a few sharedflows', function(done) {
+        var numWanted = 4;
+        var numDone = 0;
+        var cb = function(e, result) {
+              assert.isNull(e, "error exporting sharedflow: " + JSON.stringify(e));
+              //utility.logWrite(JSON.stringify(result, null, 2));
+              assert.isTrue(result.filename.startsWith('sharedflow-'), "file name");
+              if (++numDone >= numWanted) { done(); }
+            };
+        assert.isTrue(sharedFlowList && sharedFlowList.length>0);
+        for(var i = 0; i<numWanted; i++) {
+          var ix = Math.floor(Math.random() * sharedFlowList.length);
+          edgeOrg.sharedflows.export({name:sharedFlowList[ix]}, cb);
         }
       });
 

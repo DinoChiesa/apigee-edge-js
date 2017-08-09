@@ -9,7 +9,7 @@
   "author": "dchiesa@google.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "apigee-edge-js": "^0.2.14",
+    "apigee-edge-js": "^0.2.15",
     "async": "^0.9.2",
     "mkdirp": "^0.5.1",
     "netrc": "0.1.3",

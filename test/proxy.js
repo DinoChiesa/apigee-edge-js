@@ -4,7 +4,7 @@
 // Tests for API Proxy operations.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-August-08 17:12:52>
+// last saved: <2017-August-09 10:07:49>
 
 var common = require('./common');
 var fs = require('fs');
@@ -16,6 +16,7 @@ describe('Proxy', function() {
   var contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
 
   this.timeout(common.testTimeout);
+
   common.connectEdge(function(edgeOrg){
 
     describe('import-from-zip', function() {
@@ -33,11 +34,11 @@ describe('Proxy', function() {
         });
       });
 
-      it('should import proxy zips into an org', function(done) {
+      it('should import proxy zips into an org', function(done){
         this.timeout(65000);
         var numDone = 0;
         zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-' + faker.random.alphaNumeric(12);
+          var contrivedName = contrivedNamePrefix + '-fromzip-' + faker.random.alphaNumeric(12);
           edgeOrg.proxies.importFromZip({name:contrivedName, zipArchive:zip}, function(e, result){
             if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
@@ -49,11 +50,11 @@ describe('Proxy', function() {
         });
       });
 
-      it('should import proxy zips via the simple method', function(done) {
+      it('should import proxy zips via the simple method', function(done){
         this.timeout(65000);
         var numDone = 0;
         zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-simple-' + faker.random.alphaNumeric(12);
+          var contrivedName = contrivedNamePrefix + '-fromzip-simple-' + faker.random.alphaNumeric(12);
           edgeOrg.proxies.import({name:contrivedName, source:zip}, function(e, result){
             if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
@@ -65,20 +66,25 @@ describe('Proxy', function() {
         });
       });
 
-      it('should delete test proxies previously imported into this org', function(done) {
+      it('should delete test proxies previously imported into this org', function(done){
         this.timeout(25000);
-        var numDone = 0;
+        var numDone = 0, L = 0;
+        var tick = function() { if (++numDone >= L) { done(); } };
         edgeOrg.proxies.get({}, function(e, proxies){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(proxies.length, 1, "length of proxy list");
+          L = proxies.length;
           proxies.forEach(function(proxy) {
-            if (proxy.startsWith(contrivedNamePrefix)) {
+            if (proxy.startsWith(contrivedNamePrefix +'-fromzip-')) {
               edgeOrg.proxies.del({name:proxy}, function(e, proxies){
                 assert.isNull(e, "error deleting proxy: " + JSON.stringify(e));
+                tick();
               });
             }
+            else {
+              tick();
+            }
           });
-          done();
         });
       });
 
@@ -87,6 +93,7 @@ describe('Proxy', function() {
 
     describe('import-from-dir', function() {
       var apiproxyBundleDirList;
+      this.timeout(65000);
 
       before(function(done){
         var actualPath = path.resolve(resourceDir);
@@ -101,7 +108,7 @@ describe('Proxy', function() {
         });
       });
 
-      it('should import exploded proxy dirs into an org', function(done) {
+      it('should import exploded proxy dirs into an org', function(done){
         this.timeout(65000);
         var numDone = 0;
         apiproxyBundleDirList.forEach(function(dir){
@@ -111,15 +118,12 @@ describe('Proxy', function() {
             if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
             assert.isNull(e, "error importing dir: " + JSON.stringify(e));
             numDone++;
-            if (numDone == apiproxyBundleDirList.length) {
-              done();
-            }
+            if (numDone >= apiproxyBundleDirList.length) { done(); }
           });
         });
       });
 
-      it('should import exploded proxy dirs via the simple method', function(done) {
-        this.timeout(65000);
+      it('should import exploded proxy dirs via the simple method', function(done){
         var numDone = 0;
         apiproxyBundleDirList.forEach(function(dir){
           //console.log('dir: %s', dir);
@@ -128,31 +132,35 @@ describe('Proxy', function() {
             if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
             assert.isNull(e, "error importing dir: " + JSON.stringify(e));
             numDone++;
-            if (numDone == apiproxyBundleDirList.length) {
-              done();
-            }
+            if (numDone == apiproxyBundleDirList.length) { done(); }
           });
         });
       });
 
-      it('should delete test proxies previously imported into this org', function(done) {
-        var numDone = 0;
+      it('should delete test proxies previously imported into this org', function(done){
+        this.timeout(25000);
+        var numDone = 0, L = 0;
+        var tick = function() { if (++numDone >= L) { done(); } };
         edgeOrg.proxies.get({}, function(e, proxies){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(proxies.length, 1, "length of proxy list");
+          L = proxies.length;
           proxies.forEach(function(proxy) {
-            if (proxy.startsWith(contrivedNamePrefix)) {
+            if (proxy.startsWith(contrivedNamePrefix + '-fromdir-')) {
               edgeOrg.proxies.del({name:proxy}, function(e, proxies){
+                if (e) { console.log('error %s', JSON.stringify(proxies, null, 2)); }
                 assert.isNull(e, "error deleting proxy: " + JSON.stringify(e));
+                tick();
               });
             }
+            else {
+              tick();
+            }
           });
-          done();
         });
       });
 
     });
-
 
 
     describe('get', function() {
@@ -167,7 +175,7 @@ describe('Proxy', function() {
       });
 
 
-      it('should list all proxies for an org', function(done) {
+      it('should list all proxies for an org', function(done){
         edgeOrg.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(result.length, 1, "length of proxy list");
@@ -176,19 +184,35 @@ describe('Proxy', function() {
       });
 
 
-      it('should get one proxy', function(done) {
-        if (proxyList && proxyList.length>0) {
+      it('should get one proxy', function(done){
+        assert.isTrue(proxyList && proxyList.length>0);
         var ix = Math.floor(Math.random() * proxyList.length);
         edgeOrg.proxies.get({name:proxyList[ix]}, function(e, result){
+          if (e) { console.log('error %s', JSON.stringify(result, null, 2)); }
           assert.isNull(e, "error getting proxy: " + JSON.stringify(e));
           //utility.logWrite(JSON.stringify(result, null, 2));
           assert.equal(proxyList[ix], result.name, "proxy name");
           done();
         });
+      });
+
+      it('should export a few proxies', function(done){
+        var numWanted = 4;
+        var numDone = 0;
+        var cb = function(e, result) {
+              assert.isNull(e, "error exporting proxy: " + JSON.stringify(e));
+              //utility.logWrite(JSON.stringify(result, null, 2));
+              assert.isTrue(result.filename.startsWith('apiproxy-'), "file name");
+              if (++numDone >= numWanted) { done(); }
+            };
+        assert.isTrue(proxyList && proxyList.length>0);
+        for(var i = 0; i<numWanted; i++) {
+          var ix = Math.floor(Math.random() * proxyList.length);
+          edgeOrg.proxies.export({name:proxyList[ix]}, cb);
         }
       });
 
-      it('should fail to get a non-existent proxy', function(done) {
+      it('should fail to get a non-existent proxy', function(done){
         var fakeName = 'proxy-' + faker.random.alphaNumeric(23);
         edgeOrg.proxies.get({name:fakeName}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");

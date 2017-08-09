@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-July-24 11:09:30>
+// last saved: <2017-August-09 09:49:55>
 
 var common = require('./common');
 
@@ -22,7 +22,7 @@ describe('Connect', function() {
       apigeeEdge.connect(options, function(e, org){
         assert.isNull(e, JSON.stringify(e));
         //utility.logWrite(org.conn);
-        assert.equal(org.conn.org, config.org);
+        assert.equal(org.conn.orgname, config.org);
         done();
       });
     });
