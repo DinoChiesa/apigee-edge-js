@@ -71,10 +71,10 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | member               | functions                                                        |
 | -------------------- | ---------------------------------------------------------------- |
 | environments         | get, getVhosts                                                   |
-| proxies              | get, del, deploy, undeploy, importFromDir, importFromZip, export, getRevisions, getResourcesForRevision, getPoliciesForRevision |
+| proxies              | get, del, deploy, undeploy, import, export, getRevisions, getResourcesForRevision, getPoliciesForRevision |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |
-| sharedflows          | get, del, deploy, undeploy, importFromDir, importFromZip         |
+| sharedflows          | get, del, deploy, undeploy, import, export                       |
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |
 | developers           | get, create, del                                                 |
