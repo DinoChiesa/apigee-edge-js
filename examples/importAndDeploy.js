@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow.
 //
-// last saved: <2017-August-08 16:11:29>
+// last saved: <2017-August-09 13:01:35>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -33,7 +33,7 @@ common.logWrite('start');
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
 
-if ( !opt.options.srcdir ) {
+if ( !opt.options.source ) {
   console.log('You must specify a source directory');
   getopt.showHelp();
   process.exit(1);
