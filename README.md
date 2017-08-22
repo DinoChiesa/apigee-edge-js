@@ -74,7 +74,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | proxies              | get, del, deploy, undeploy, import, export, getRevisions, getResourcesForRevision, getPoliciesForRevision |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |
-| sharedflows          | get, del, deploy, undeploy, import, export                       |
+| sharedflows          | get, del, deploy, undeploy, import, export, getRevisions, getResourcesForRevision, getPoliciesForRevision |
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |
 | developers           | get, create, del                                                 |
