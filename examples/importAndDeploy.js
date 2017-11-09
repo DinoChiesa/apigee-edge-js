@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow.
 //
-// last saved: <2017-August-09 13:01:35>
+// last saved: <2017-November-08 18:21:49>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -16,7 +16,7 @@ var fs = require('fs'),
     defaults = { basepath : '/' },
     getopt = new Getopt(common.commonOptions.concat([
       ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
-      ['N' , 'name=ARG', 'name for API proxy or shared flow'],
+      ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
       ['e' , 'env=ARG', 'the Edge environment to which to deploy the asset.'],
       ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
       ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
@@ -35,12 +35,6 @@ var opt = getopt.parse(process.argv.slice(2));
 
 if ( !opt.options.source ) {
   console.log('You must specify a source directory');
-  getopt.showHelp();
-  process.exit(1);
-}
-
-if ( !opt.options.name ) {
-  console.log('You must specify a name for the proxy or sharedflow');
   getopt.showHelp();
   process.exit(1);
 }
@@ -64,7 +58,6 @@ var options = {
 apigeeEdge.connect(options, function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
     process.exit(1);
   }
   common.logWrite('connected');
@@ -73,9 +66,9 @@ apigeeEdge.connect(options, function(e, org){
   var term = (opt.options.sharedflow) ? 'sharedflow' : 'proxy';
 
   common.logWrite('importing');
-  collection.import({name:opt.options.name, source:opt.options.source}, function(e, result){
+  collection.import({name:opt.options.name, source:opt.options.source}, function(e, result) {
     if (e) {
-      common.logWrite(JSON.stringify(e, null, 2));
+      common.logWrite('error: ' + JSON.stringify(e, null, 2));
       if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
       //console.log(e.stack);
       process.exit(1);
