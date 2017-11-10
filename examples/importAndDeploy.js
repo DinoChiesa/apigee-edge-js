@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow.
 //
-// last saved: <2017-November-08 18:21:49>
+// last saved: <2017-November-10 11:34:21>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,17 +12,34 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170608-1309',
+    version = '20171110-1106',
     defaults = { basepath : '/' },
     getopt = new Getopt(common.commonOptions.concat([
       ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
       ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
-      ['e' , 'env=ARG', 'the Edge environment to which to deploy the asset.'],
+      ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
       ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
       ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
     ])).bindHelp();
 
 // ========================================================
+
+function promisifyDeployment(collection, options) {
+  return function deploy(env) {
+    return new Promise(function(resolve, reject) {
+      options.environment = env;
+      collection.deploy(options, function(e, result) {
+        if (e) {
+          common.logWrite(JSON.stringify(e, null, 2));
+          if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
+          reject(e);
+        }
+        common.logWrite('deploy ok.');
+        resolve();
+      });
+    });
+  };
+}
 
 console.log(
   'Apigee Edge Proxy/Sharedflow Import + Deploy tool, version: ' + version + '\n' +
@@ -75,23 +92,34 @@ apigeeEdge.connect(options, function(e, org){
     }
     common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
     if (opt.options.env) {
+      // env may be a comma-separated list
       var options = {
             name: result.name,
             revision: result.revision,
-            environment: opt.options.env
           };
       if ( ! opt.options.sharedflow) {
         options.basepath = opt.options.basepath || defaults.basepath;
       }
-      common.logWrite('deploying');
-      collection.deploy(options, function(e, result) {
-        if (e) {
-          common.logWrite(JSON.stringify(e, null, 2));
-          if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
-          throw e;
-        }
-        common.logWrite('deploy ok.');
-      });
+
+      // this magic deploys to each environment in series
+      var deployIt = promisifyDeployment(collection, options);
+      var reducer = function (promise, env) {
+            return promise.then(() => {
+              return deployIt(env).then(result => results.push(result));
+            })
+            .catch(console.error);
+          };
+      let results = [];
+      var p = opt.options.env.split(',')
+        .reduce(reducer, Promise.resolve())
+        .then(() => { common.logWrite('all done...'); })
+        .catch(console.error);
+
+      // Promise.all(opt.options.env.split(',').forEach(deployIt))
+      //   .then(() => { common.logWrite('all don...'); })
+      //  .catch((data) => {
+      //    console.log(data);
+      //  });
     }
     else {
       common.logWrite('not deploying...');
