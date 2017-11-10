@@ -8,16 +8,23 @@ Also, they use the OAuth authentication mechanism for Apigee Edge.
 
 # Import a proxy
 
-This imports a proxy, deriving the name from the *.xml in the toplevel directory:
+Import a proxy, using a bundle zip as the source. Derive the name for the proxy from the *.xml in the apiproxy directory:
+
+```
+./importAndDeploy.js -n -v -o ORGNAME  -d ../bundles/oauth2-cc.zip
+```
+
+Import a proxy, using an exploded directory as the source. Derive the name from the *.xml in the apiproxy directory:
 ```
 ./importAndDeploy.js -n -v -o ORGNAME  -d ../bundles/oauth2-cc
 ```
 
-This is the same, but overrides the name specified in the proxy XML file :
+Import, but override the name specified in the proxy XML file in the apiproxy dir:
 
 ```
 ./importAndDeploy.js -n -v -o ORGNAME  -d ../bundles/oauth2-cc  -N demo-oauth2-cc
 ```
+
 
 # Import and Deploy a proxy
 
@@ -36,7 +43,6 @@ Deploy to multiple environments:
 
 ```
 ./importAndDeploy.js -n -v -o ORGNAME  -d ../bundles/sharedflow-1 -e main -S
-
 ```
 
 # Create a product
@@ -50,7 +56,6 @@ Deploy to multiple environments:
 
 ```
  ./createDeveloper.js -n -v -o ORGNAME -E dchiesa+2017@google.com -F Dino -L Chiesa
-
 ```
 
 # Create a developer app
@@ -64,7 +69,6 @@ Deploy to multiple environments:
 
 ```
 ./deleteDeveloperApp.js -n -v -o ORGNAME -N DemoApp3 -E dchiesa+2017@google.com
-
 ```
 
 
@@ -72,14 +76,12 @@ Deploy to multiple environments:
 
 ```
 ./exportApi.js -n -v -o ORGNAME -P ^r.\*
-
 ```
 
 If you  want to just see which proxies would be exported, you can use the -T option.
 
 ```
 ./exportApi.js -n -v -o ORGNAME -P ^r.\* -T
-
 ```
 
 
@@ -89,7 +91,6 @@ This just uses a regex pattern that matches all names.
 
 ```
 ./exportApi.js -n -v -o ORGNAME -P .
-
 ```
 
 
@@ -100,7 +101,6 @@ In lieu of the -P (pattern) option you can use -N (name) for a specific proxy.
 
 ```
 ./exportApi.js -n -v -o ORGNAME -N runload
-
 ```
 
 By defaut the script will export the latest revision of the proxy.
@@ -109,7 +109,4 @@ If you know  the revision you'd like to export, you can use the -R option to spe
 
 ```
 ./exportApi.js -n -v -o ORGNAME -N runload -R 3
-
 ```
-
-
