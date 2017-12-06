@@ -5,7 +5,7 @@
 // In an Apigee Edge organization, find all policies in all proxies that reference a KVM.
 // This uses a brute-force client-side search, so it will take a while to run on an org that has many proxies.
 //
-// last saved: <2017-June-15 16:38:47>
+// last saved: <2017-December-06 12:43:59>
 
 var fs = require('fs'),
     async = require('async'),
@@ -14,10 +14,11 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170615-1537',
+    version = '20171206-1243',
     getopt = new Getopt(common.commonOptions.concat([
       ['M' , 'kvm=ARG', 'Optional. KVM name to find.'],
-      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)']
+      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -101,7 +102,8 @@ var options = {
       org: opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
-      verbosity: 0
+      no_token: opt.options.notoken,
+      verbosity: opt.options.verbose || 0
     };
 
 apigeeEdge.connect(options, function(e, org) {

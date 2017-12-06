@@ -4,18 +4,19 @@
 // ------------------------------------------------------------------
 // list and query developers in Apigee Edge
 //
-// last saved: <2017-May-27 12:53:22>
+// last saved: <2017-December-06 12:42:46>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
-    async = require('async'), 
+    async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170527-1251',
+    version = '20171206-1242',
     getopt = new Getopt(common.commonOptions.concat([
-      ['E' , 'expand', 'expand for each developer']
+      ['E' , 'expand', 'expand for each developer'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -35,6 +36,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 
@@ -61,7 +63,7 @@ apigeeEdge.connect(options, function(e, org) {
               return cb(null, result);
             });
           };
-      
+
       async.map(result, inquireOneDev, function (e, results) {
         if (e) {
           common.logWrite(JSON.stringify(e, null, 2));

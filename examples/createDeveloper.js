@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision a developer in Apigee Edge
 //
-// last saved: <2017-May-27 12:40:30>
+// last saved: <2017-December-06 12:44:45>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,11 +12,12 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170324-1906',
+    version = '20171206-1244',
     getopt = new Getopt(common.commonOptions.concat([
       ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
       ['F' , 'first=ARG', 'first name for the developer'],
-      ['L' , 'last=ARG', 'last name for the developer']
+      ['L' , 'last=ARG', 'last name for the developer'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -53,6 +54,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 

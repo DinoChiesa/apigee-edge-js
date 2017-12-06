@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision an Apigee Edge API Product
 //
-// last saved: <2017-June-20 11:00:25>
+// last saved: <2017-December-06 12:42:29>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,13 +12,14 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170620-1100',
+    version = '20171206-1242',
     getopt = new Getopt(common.commonOptions.concat([
       ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
       ['N' , 'productname=ARG', 'Required. name for API product'],
       ['A' , 'approvalType=ARG', 'Optional. either manual or auto. (default: auto)'],
       ['S' , 'scopes=ARG', 'Optional. comma-separated list of possible scopes for the API product'],
-      ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)']
+      ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -51,6 +52,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 

@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision a developer app for an API Product in Apigee Edge
 //
-// last saved: <2017-June-08 13:19:17>
+// last saved: <2017-December-06 12:45:16>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,12 +12,13 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170324-1905',
+    version = '20171206-1245',
     getopt = new Getopt(common.commonOptions.concat([
       ['p' , 'product=ARG', 'name of the API product to enable on this app'],
       ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
       ['N' , 'name=ARG', 'name for the app'],
-      ['x' , 'expiry=ARG', 'expiry for the credential']
+      ['x' , 'expiry=ARG', 'expiry for the credential'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -56,6 +57,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 

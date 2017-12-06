@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // generate an RSA 256-bit keypair and load into Apigee Edge KVM
 //
-// last saved: <2017-June-15 13:39:15>
+// last saved: <2017-December-06 12:44:23>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -15,13 +15,14 @@ var fs = require('fs'),
     NodeRSA = require('node-rsa'),
     uuidV4 = require('uuid-v4'),
     Getopt = require('node-getopt'),
-    version = '20170615-1153',
+    version = '20171206-1244',
     defaults = { privkeysmap : 'PrivateKeys', pubkeysmap: 'NonSecrets', kidmap: 'NonSecrets' },
     getopt = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
       ['b' , 'keystrength=ARG', 'strength in bits of the RSA keypair. Default: 2048'],
       ['K' , 'privkeysmap=ARG', 'name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.privkeysmap],
-      ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap]
+      ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -119,7 +120,9 @@ var options = {
       mgmtServer: opt.options.mgmtserver,
       org : opt.options.org,
       user: opt.options.username,
-      password: opt.options.password
+      password: opt.options.password,
+      no_token: opt.options.notoken,
+      verbosity: opt.options.verbose || 0
     };
 
 apigeeEdge.connect(options, function(e, org) {

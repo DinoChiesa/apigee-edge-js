@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // delete a developer app
 //
-// last saved: <2017-May-18 09:21:15>
+// last saved: <2017-December-06 12:44:58>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,10 +12,11 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20170324-1905',
+    version = '20171206-1244',
     getopt = new Getopt(common.commonOptions.concat([
       ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
-      ['N' , 'appname=ARG', 'name for the app']
+      ['N' , 'appname=ARG', 'name for the app'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -48,6 +49,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 

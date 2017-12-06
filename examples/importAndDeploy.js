@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow.
 //
-// last saved: <2017-November-10 11:34:21>
+// last saved: <2017-December-06 12:42:38>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -12,14 +12,15 @@ var fs = require('fs'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171110-1106',
+    version = '20171206-1242',
     defaults = { basepath : '/' },
     getopt = new Getopt(common.commonOptions.concat([
       ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
       ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
       ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
       ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
-      ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
+      ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.'],
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
@@ -69,6 +70,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 
