@@ -7,7 +7,7 @@
 //
 // This tool does not examine environment-wide or organization-wide resources.
 //
-// last saved: <2017-December-07 10:30:42>
+// last saved: <2017-December-07 17:55:02>
 
 var fs = require('fs'),
     async = require('async'),
@@ -17,7 +17,7 @@ var fs = require('fs'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20170727-1150',
+    version = '20171207-1754',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
@@ -61,7 +61,7 @@ function getOneRevision (org, proxyName) {
       if (opt.options.regexp && !gRegexp) {
         gRegexp = new RegExp(opt.options.jar);
       }
-      org.proxies.getResourcesForRevision.get(options, function(e, result){
+      org.proxies.getResourcesForRevision(options, function(e, result){
         if (e) {
           return callback(null, null);
         }
