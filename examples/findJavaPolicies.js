@@ -7,10 +7,9 @@
 //
 // This tool does not examine environment-wide or organization-wide resources.
 //
-// last saved: <2017-December-07 17:55:02>
+// last saved: <2017-December-07 18:06:43>
 
-var fs = require('fs'),
-    async = require('async'),
+var async = require('async'),
     edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
