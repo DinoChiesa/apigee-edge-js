@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2017-December-07 18:19:37>
+// last saved: <2017-December-07 18:30:02>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -14,6 +14,16 @@ var edgejs = require('apigee-edge-js'),
       ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
     ])).bindHelp();
 
+function handleError(e) {
+    if (e) {
+      console.log(e);
+      console.log(e.stack);
+      process.exit(1);
+    }
+}
+
+// ========================================================
+
 console.log(
   'Apigee Edge findApiProductForProxy.js tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
@@ -22,15 +32,6 @@ common.logWrite('start');
 
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
-
-function handleError(e) {
-    if (e) {
-      console.log(e);
-      console.log(e.stack);
-      process.exit(1);
-    }
-}
-// ========================================================
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
