@@ -5,6 +5,11 @@ These are example tools implemented in nodejs/Javascript, that use the apigee-ed
 They all can retrieve credentials from a .netrc file, or you can pass in user credentials interactively.
 Also, they use the OAuth authentication mechanism for Apigee Edge.
 
+## Disclaimer
+
+These tools are not an official Google product, nor are they part of an official Google product, nor are they included under any Google support contract.
+Support is available on a best-effort basis via github or community.apigee.com .
+
 
 # Import a proxy
 
@@ -110,3 +115,4 @@ If you know  the revision you'd like to export, you can use the -R option to spe
 ```
 ./exportApi.js -n -v -o ORGNAME -N runload -R 3
 ```
+

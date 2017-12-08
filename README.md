@@ -62,10 +62,16 @@ apigeeEdge.connect(options, function(e, org){
 ```
 
 
+## Disclaimer
+
+This library and the example tools included here are not an official Google product.
+Support is available on a best-effort basis via github or community.apigee.com .
+
+
 ## The Basic Object Model
 
 To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If it is a SaaS organization, this method will try to find a stashed OAuth token and if not will get an OAuth token.
-The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is itself a hash and has child members as functions: 
+The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is itself a hash and has child members as functions:
 
 
 | member               | functions                                                        |
@@ -86,7 +92,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 
 As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
 
-You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for some example code. A few examples are shown here. 
+You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for some example code. A few examples are shown here.
 
 Pull requests are welcomed, for the code or for examples.
 
@@ -152,7 +158,7 @@ It should have contents like this:
 }
 ```
 
-or: 
+or:
 ```json
 {
   "org" : "my-org-name",
