@@ -18,10 +18,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:13:20>
+// last saved: <2017-December-13 16:55:52>
 
-var fs = require('fs'),
-    edgejs = require('apigee-edge-js'),
+var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,

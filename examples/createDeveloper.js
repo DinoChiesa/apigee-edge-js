@@ -18,15 +18,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:13:39>
+// last saved: <2017-December-13 17:03:24>
 
-var fs = require('fs'),
-    edgejs = require('apigee-edge-js'),
+var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171206-1244',
+    version = '20171213-1703',
     getopt = new Getopt(common.commonOptions.concat([
       ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
       ['F' , 'first=ARG', 'first name for the developer'],

@@ -18,10 +18,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:14:13>
+// last saved: <2017-December-13 16:55:39>
 
-var fs = require('fs'),
-    async = require('async'),
+var async = require('async'),
     edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,

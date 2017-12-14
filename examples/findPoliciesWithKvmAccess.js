@@ -19,16 +19,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:13:32>
+// last saved: <2017-December-13 17:03:39>
 
-var fs = require('fs'),
-    async = require('async'),
+var async = require('async'),
     edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171206-1243',
+    version = '20171213-1703',
     getopt = new Getopt(common.commonOptions.concat([
       ['M' , 'kvm=ARG', 'Optional. KVM name to find.'],
       ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)'],
