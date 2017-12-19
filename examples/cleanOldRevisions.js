@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-19 14:41:24>
+// last saved: <2017-December-19 14:51:14>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -31,7 +31,8 @@ var async = require('async'),
     version = '20171219-1413',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
-      ['N' , 'num=ARG', 'Required. Max number of revisions of each proxy to retain.']
+      ['R' , 'regexp=ARG', 'Optional. Limit the culling to proxies with names matching this regexp.'],
+      ['K' , 'numToKeep=ARG', 'Required. Max number of revisions of each proxy to retain.']
     ])).bindHelp();
 
 // ========================================================
@@ -98,16 +99,15 @@ function doneAllProxies(e, results) {
   common.logWrite('result %s', JSON.stringify(flattened));
 }
 
-
 function analyzeOneProxy(org) {
   return function(proxyName, callback) {
     org.proxies.getRevisions({ name: proxyName }, function(e, result) {
       handleError(e);
       common.logWrite('revisions %s: %s', proxyName, JSON.stringify(result));
-      if (result && result.length > opt.options.num) {
+      if (result && result.length > opt.options.numToKeep) {
         result.sort(function(a, b) { return b - a; });
         result.reverse();
-        var revisionsToExamine = result.slice(0, result.length - opt.options.num);
+        var revisionsToExamine = result.slice(0, result.length - opt.options.numToKeep);
         revisionsToExamine.reverse();
         async.mapSeries(revisionsToExamine,
                         checkAndMaybeRemoveRevision(org, proxyName),
@@ -120,10 +120,9 @@ function analyzeOneProxy(org) {
   };
 }
 
-
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-if ( !opt.options.num ) {
+if ( !opt.options.numToKeep ) {
   console.log('You must specify a number of revisions to retain. (-N)');
   getopt.showHelp();
   process.exit(1);
@@ -144,8 +143,17 @@ apigeeEdge.connect(options, function(e, org){
     process.exit(1);
   }
 
-  org.proxies.get({}, function(e, proxies) {
-    async.mapSeries(proxies, analyzeOneProxy(org), doneAllProxies);
+  var readOptions = {};
+  org.proxies.get(readOptions, function(e, proxies) {
+    if (opt.options.regexp) {
+      var re1 = new RegExp(opt.options.regexp);
+      proxies = proxies.filter(function(item) { return re1.test(item); });
+    }
+    if (opt.options.verbose) {
+      common.logWrite('%sproxies: %s', (opt.options.regexp)?"matching ":"", JSON.stringify(proxies));
+    }
+    if (proxies.length > 0) {
+      async.mapSeries(proxies, analyzeOneProxy(org), doneAllProxies);
+    }
   });
-
 });
