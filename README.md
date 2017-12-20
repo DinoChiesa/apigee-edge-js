@@ -62,7 +62,7 @@ apigeeEdge.connect(options, function(e, org){
 ```
 
 
-## Disclaimer
+## This is not an official Google product
 
 This library and the example tools included here are not an official Google product.
 Support is available on a best-effort basis via github or community.apigee.com .
