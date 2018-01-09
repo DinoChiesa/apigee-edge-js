@@ -1,4 +1,4 @@
-// findApiProductForProxy.js
+// findAppForProxy.js
 // ------------------------------------------------------------------
 //
 // Copyright 2017 Google Inc.
@@ -16,15 +16,15 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-January-09 14:32:55>
+// last saved: <2018-January-09 15:26:55>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20171207-1807',
+    version = '20180109-1526',
     getopt = new Getopt(common.commonOptions.concat([
-      ['P' , 'proxy=ARG', 'Required. the proxy to find.'],
+      ['P' , 'proxy=ARG', 'Required. the proxy for which to list apps.'],
       ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
     ])).bindHelp();
 
@@ -39,7 +39,7 @@ function handleError(e) {
 // ========================================================
 
 console.log(
-  'Apigee Edge findApiProductForProxy.js tool, version: ' + version + '\n' +
+  'Apigee Edge findAppForProxy.js tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -71,19 +71,45 @@ apigeeEdge.connect(options, function(e, org) {
     handleError(e);
     var apiproducts = result.apiProduct;
     common.logWrite('total count of API products for that org: %d', apiproducts.length);
-    var filtered = apiproducts.filter(function(product) {
+    var filteredProducts = apiproducts.filter(function(product) {
           return (product.proxies.indexOf(opt.options.proxy) >= 0);
         });
 
-    if (filtered) {
-      common.logWrite('count of API products containing %s: %d', opt.options.proxy, filtered.length);
-      if (filtered.length) {
-        common.logWrite('list: ' + filtered.map( function(item) { return item.name;}).join(', '));
-      }
-      if ( opt.options.verbose ) {
-        common.logWrite(JSON.stringify(filtered, null, 2));
+    if (filteredProducts) {
+      common.logWrite('count of API products containing %s: %d', opt.options.proxy, filteredProducts.length);
+      if (filteredProducts.length) {
+        common.logWrite('list: ' + filteredProducts.map( function(item) { return item.name;}).join(', '));
+        org.apps.get({expand:true}, function(e, result) {
+          handleError(e);
+          var apps = result.app;
+          common.logWrite('total count of apps for that org: %d', apps.length);
+          var filteredProductNames = filteredProducts.map( p => p.name);
+          var filteredApps = apps.filter(function(app) {
+                var creds = app.credentials.filter(function(cred) {
+                      return cred.apiProducts.find(function (prod) {
+                        return (filteredProductNames.indexOf(prod.apiproduct) >= 0);
+                      });
+                    });
+                return creds && (creds.length > 0);
+              });
+
+          if (filteredApps) {
+            common.logWrite('count of Apps containing %s: %d', opt.options.proxy, filteredApps.length);
+            if (filteredApps.length) {
+              filteredApps.forEach( (a, ix) => {
+                common.logWrite(ix + ': /v1/o/' + org.conn.orgname + '/developers/' + a.developerId + '/apps/' + a.name);
+              });
+            }
+            if ( opt.options.verbose ) {
+              common.logWrite(JSON.stringify(filteredApps, null, 2));
+            }
+          }
+          else {
+            common.logWrite("none found");
+          }
+
+        });
       }
     }
-
   });
 });

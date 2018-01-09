@@ -16,13 +16,13 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-January-09 11:47:36>
+// last saved: <2018-January-09 15:26:50>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20180109-1138',
+    version = '20180109-1526',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'apiproduct=ARG', 'Required. the apiproduct for which to list apps.'],
       ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
@@ -68,11 +68,10 @@ apigeeEdge.connect(options, function(e, org) {
   handleError(e);
   common.logWrite('searching...');
   org.apps.get({expand:true}, function(e, result) {
-    //org.products.get({expand:true}, function(e, result)
     handleError(e);
     var apps = result.app;
     common.logWrite('total count of apps for that org: %d', apps.length);
-    var filtered = apps.filter(function(app) {
+    var filteredApps = apps.filter(function(app) {
           var creds = app.credentials.filter(function(cred) {
                 return cred.apiProducts.find( function (prod) {
                   return (prod.apiproduct == opt.options.apiproduct);
@@ -81,13 +80,15 @@ apigeeEdge.connect(options, function(e, org) {
           return creds && (creds.length > 0);
         });
 
-    if (filtered) {
-      common.logWrite('count of Apps containing %s: %d', opt.options.apiproduct, filtered.length);
-      if (filtered.length) {
-        common.logWrite('list: ' + filtered.map( function(item) { return item.name;}).join(', '));
+    if (filteredApps) {
+      common.logWrite('count of Apps containing %s: %d', opt.options.apiproduct, filteredApps.length);
+      if (filteredApps.length) {
+        filteredApps.forEach( (a, ix) => {
+          common.logWrite(ix + ': /v1/o/' + org.conn.orgname + '/developers/' + a.developerId + '/apps/' + a.name);
+        });
       }
       if ( opt.options.verbose ) {
-        common.logWrite(JSON.stringify(filtered, null, 2));
+        common.logWrite(JSON.stringify(filteredApps, null, 2));
       }
     }
     else {
