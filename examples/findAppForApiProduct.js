@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-January-09 15:26:50>
+// last saved: <2018-February-02 14:05:49>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -25,6 +25,7 @@ var edgejs = require('apigee-edge-js'),
     version = '20180109-1526',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'apiproduct=ARG', 'Required. the apiproduct for which to list apps.'],
+      ['D' , 'developers', 'Optional. List the developers that own the apps.'],
       ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
     ])).bindHelp();
 
@@ -34,6 +35,10 @@ function handleError(e) {
       console.log(e.stack);
       process.exit(1);
     }
+}
+
+function uniquify(value, index, self) {
+    return self.indexOf(value) === index;
 }
 
 // ========================================================
@@ -81,14 +86,27 @@ apigeeEdge.connect(options, function(e, org) {
         });
 
     if (filteredApps) {
-      common.logWrite('count of Apps containing %s: %d', opt.options.apiproduct, filteredApps.length);
+      common.logWrite('count of Apps containing %s (%d)', opt.options.apiproduct, filteredApps.length);
+      var developerList = [];
       if (filteredApps.length) {
         filteredApps.forEach( (a, ix) => {
           common.logWrite(ix + ': /v1/o/' + org.conn.orgname + '/developers/' + a.developerId + '/apps/' + a.name);
+          developerList.push(a.developerId);
         });
+
       }
       if ( opt.options.verbose ) {
         common.logWrite(JSON.stringify(filteredApps, null, 2));
+      }
+
+      if (opt.options.developers) {
+        var uniqueDevelopers = developerList.filter( uniquify );
+        common.logWrite('Developers who manage these Apps (%d):', uniqueDevelopers.length);
+        uniqueDevelopers.forEach(function(developer) {
+          org.developers.get({id : developer}, function(e, devRecord) {
+            common.logWrite( "%s", devRecord.email); // devRecord.userName, devRecord.firstName, devRecord.lastName
+          });
+        });
       }
     }
     else {
