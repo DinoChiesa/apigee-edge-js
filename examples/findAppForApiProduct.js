@@ -1,7 +1,7 @@
 // findAppForApiProduct.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017,2018 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-February-02 14:05:49>
+// last saved: <2018-February-02 14:09:28>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20180109-1526',
+    version = '20180202-1409',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'apiproduct=ARG', 'Required. the apiproduct for which to list apps.'],
       ['D' , 'developers', 'Optional. List the developers that own the apps.'],
