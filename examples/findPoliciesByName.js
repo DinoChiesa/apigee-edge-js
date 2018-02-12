@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-13 16:55:39>
+// last saved: <2018-February-12 14:32:26>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -26,9 +26,8 @@ var async = require('async'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    merge = require('merge'),
     regexp1,
-    version = '20170822-0958',
+    version = '20180212-1432',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'proxiesonly', 'Optional. Look for policies only within proxies.'],
       ['S' , 'sharedflowsonly', 'Optional. Look for policies only within sharedflows.'],
