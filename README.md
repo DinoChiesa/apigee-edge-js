@@ -77,7 +77,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | member               | functions                                                        |
 | -------------------- | ---------------------------------------------------------------- |
 | environments         | get, getVhosts                                                   |
-| proxies              | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision |
+| proxies              | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision, getProxyEndpoints |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |
 | sharedflows          | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision |
@@ -126,6 +126,49 @@ edgeOrg.proxies.export({name:'proxyname', revision:3}, function(e,result) {
 
 ```
 
+### Import an API Proxy from a Directory
+
+```js
+var options = {
+      mgmtServer: mgmtserver,
+      org : orgname,
+      user: username,
+      password:password
+    };
+apigeeEdge.connect(options, function(e, org){
+  if (e) {
+    console.log(JSON.stringify(e, null, 2));
+    process.exit(1);
+  }
+
+  org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'}, function(e, result) {
+    if (e) {
+      console.log('error: ' + JSON.stringify(e, null, 2));
+      if (result) { console.log(JSON.stringify(result, null, 2)); }
+      process.exit(1);
+    }
+    console.log('import ok. %s name: %s r%d', term, result.name, result.revision);
+  });
+```
+
+
+### Deploy an API Proxy
+
+```
+var options = {
+  name: 'proxy1',
+  revision: 2,
+  environment : 'test'
+};
+org.proxies.deploy(options, function(e, result) {
+  if (e) {
+    console.log(JSON.stringify(e, null, 2));
+    if (result) { console.log(JSON.stringify(result, null, 2)); }
+    return e;
+  }
+  console.log('deploy ok.');
+});
+```
 
 
 ### Get the latest revision of an API Proxy
@@ -142,6 +185,35 @@ org.proxies.getRevisions({name:'proxyname-here'}, function(e, result){
 ```
 
 
+### Get the latest revision of an API Proxy
+
+```
+var async = require('async');
+analyzeOneProxy(proxyName, callback) {
+  collection.get({ name: proxyName }, function(e, result) {
+    console.log(JSON.stringify(result));
+  });
+}
+
+org.proxies.get({}, function(e, proxies) {
+  if (e) {
+    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
+    return;
+  }
+  async.mapSeries(proxies, analyzeOneProxy, function (e, proxyResults) {
+    if (e) {
+      console.log("ERROR:\n" + JSON.stringify(e, null, 2));
+      return;
+    }
+    var flattened = [].concat.apply([], proxyResults);
+    console.log(JSON.stringify(flattened, null, 2));
+  });
+});
+```
+
+### More Examples
+
+See [the examples directory](./examples) for a set of working example tools.
 
 
 ## To Run Tests
