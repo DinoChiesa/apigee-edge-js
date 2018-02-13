@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-February-12 14:21:14>
+// last saved: <2018-February-12 17:46:29>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -66,7 +66,7 @@ function getOneEndpoint (collection, assetName, revision) {
       var response = merge(options, {vhosts: result.connection.virtualHost});
       if (opt.options.remove && isMatch && result.connection.virtualHost.length>1) {
         // modify the endpoint here
-        result.connection.virtualHost = result.connection.virtualHost.map(item => item !== opt.options.vhost);
+        result.connection.virtualHost = result.connection.virtualHost.filter(item => item !== opt.options.vhost);
         collection.update(options, result, function(e, result) {
           callback(null, isMatch? response : {});
         });
