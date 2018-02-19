@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-February-12 17:46:29>
+// last saved: <2018-February-12 17:58:19>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -60,7 +60,6 @@ function getOneEndpoint (collection, assetName, revision) {
       if (e) {
         return callback(e, []);
       }
-      //common.logWrite(JSON.stringify(result));
       var isMatch = result.connection.connectionType === 'httpConnection' &&
         result.connection.virtualHost.indexOf(opt.options.vhost) >= 0 ;
       var response = merge(options, {vhosts: result.connection.virtualHost});
@@ -91,7 +90,6 @@ function getOneRevision (collection, collectionName, assetName) {
       if (e) {
         return callback(e, []);
       }
-      //common.logWrite(JSON.stringify(result));
       async.mapSeries(result, getOneEndpoint(collection, assetName, revision), doneAllEndpoints(callback));
     });
   };
@@ -149,7 +147,6 @@ var options = {
 apigeeEdge.connect(options, function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
     process.exit(1);
   }
 
