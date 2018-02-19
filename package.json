@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "Dino's nodejs library for the administration API for Apigee Edge.",
   "main" : "index.js",
   "scripts": {
