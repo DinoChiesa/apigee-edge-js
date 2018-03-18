@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js-examples",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Examples for using the Apigee Edge nodeJS library",
   "main": "importAndDeploy.js",
   "scripts": {
