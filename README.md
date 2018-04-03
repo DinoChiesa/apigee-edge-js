@@ -84,6 +84,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |
 | developers           | get, create, del                                                 |
+| keystores            | get, create, del, import key and cert                            |
 | developerapps        | get, create, del                                                 |
 | appcredentials       | add, del                                                         |
 
@@ -209,6 +210,27 @@ org.proxies.get({}, function(e, proxies) {
     console.log(JSON.stringify(flattened, null, 2));
   });
 });
+```
+
+### Create a Keystore and load a Key and Cert
+
+```
+  var options = {
+        environment : 'test',
+        name : 'keystore1'
+      };
+  org.keystores.create(options, function(e, result){
+    if (e) { ... }
+    console.log('ok. created');
+    options.certFile = './mycert.cert';
+    options.keyFile = './mykey.pem';
+    options.alias = 'alias1';
+    options.keyPassword = 'optional password for key file';
+    org.keystores.importCert(options, function(e, result){
+      if (e) { ... }
+      console.log('ok. key and cert stored.');
+    });
+  });
 ```
 
 ### More Examples

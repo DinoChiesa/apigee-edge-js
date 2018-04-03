@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-December-08 13:18:57>
+// last saved: <2018-April-02 15:57:36>
 
 var common = require('./common');
 
@@ -44,7 +44,7 @@ describe('Flowhook', function() {
      before(function(done){
        edgeOrg.environments.get(function(e, result) {
          assert.isNull(e, "error listing: " + JSON.stringify(e));
-         envlist = result;
+         var envlist = result;
          var numDone = 0;
          result.forEach(function(env){
            edgeOrg.flowhooks.get({environment:env}, function(e, result) {
