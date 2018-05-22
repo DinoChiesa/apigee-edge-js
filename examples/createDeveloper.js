@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-13 17:03:24>
+// last saved: <2018-May-22 09:54:48>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -85,7 +85,7 @@ apigeeEdge.connect(options, function(e, org) {
         lastName : opt.options.last,
         firstName : opt.options.first,
         userName : opt.options.first + '.' + opt.options.last,
-        // attributes: { "key1": "value1", "uuid": uuidV4() }
+        // attributes: { "key1": "value1", "key2": "value2" }
       };
 
   org.developers.create(options, function(e, result){
