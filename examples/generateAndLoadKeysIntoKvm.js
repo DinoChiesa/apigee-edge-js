@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-13 16:54:41>
+// last saved: <2018-May-22 09:53:58>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -26,9 +26,9 @@ var edgejs = require('apigee-edge-js'),
     sprintf = require('sprintf-js').sprintf,
     async = require('async'),
     NodeRSA = require('node-rsa'),
-    uuidV4 = require('uuid-v4'),
+    uuidV4 = require('uuid/v4'),
     Getopt = require('node-getopt'),
-    version = '20171206-1244',
+    version = '20180522-0953',
     defaults = { privkeysmap : 'PrivateKeys', pubkeysmap: 'NonSecrets', kidmap: 'NonSecrets' },
     getopt = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
