@@ -1,0 +1,10 @@
+apigee-edge-js-*.zip
+notes--DO-NOT-COMMIT.txt
+testDeveloper.js
+todo.txt
+zipup.sh
+testConfig.json
+
+**/*.*~
+**/#*.*#
+**/node_modules/*
