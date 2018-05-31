@@ -1,7 +1,7 @@
 // findApiProductForProxy.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-January-09 14:32:55>
+// last saved: <2018-May-31 16:38:28>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,

@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // export one or more Apigee Edge proxy bundles
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:13:28>
+// last saved: <2018-May-31 16:38:17>
 
 var fs = require('fs'),
     path = require('path'),

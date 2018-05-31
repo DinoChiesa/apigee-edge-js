@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision a developer app for an API Product in Apigee Edge
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-February-16 10:39:00>
+// last saved: <2018-May-31 16:41:17>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,

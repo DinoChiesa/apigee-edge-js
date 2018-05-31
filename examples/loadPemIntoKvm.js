@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // load a PEM into Apigee Edge KVM
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-13 17:01:22>
+// last saved: <2018-May-31 16:38:26>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -64,7 +64,7 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 
 function loadKeyIntoMap(org, cb) {
   var re = new RegExp('(?:\r\n|\r|\n)', 'g');
-  var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\\n');  
+  var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\\n');
   var options = {
         env: opt.options.env,
         kvm: opt.options.mapname,
@@ -72,7 +72,7 @@ function loadKeyIntoMap(org, cb) {
         value: pemcontent
       };
   common.logWrite('storing new key');
-  org.kvms.put(options, cb); 
+  org.kvms.put(options, cb);
 }
 
 

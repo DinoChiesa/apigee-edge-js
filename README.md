@@ -275,7 +275,7 @@ node_modules/mocha/bin/mocha
 
 ## License
 
-This code is Copyright (C) 2017-2018 Google Inc, and is licensed under the Apache 2.0 source license.
+This code is Copyright (C) 2017-2018 Google LLC, and is licensed under the Apache 2.0 source license.
 
 ## Bugs
 

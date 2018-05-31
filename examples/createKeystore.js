@@ -6,7 +6,7 @@
 // ex:
 // node ./createKeystore.js -v -n -o amer-demo4 -s ks1 -e test -k ./dchiesa.net.key  -c ./dchiesa.net.cert -a alias1
 //
-// Copyright 2017-2018 Google Inc.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-April-02 17:16:46>
+// last saved: <2018-May-31 16:41:19>
 
 const edgejs = require('apigee-edge-js'),
       fs = require('fs'),

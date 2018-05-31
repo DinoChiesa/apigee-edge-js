@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // generate an RSA 256-bit keypair and load into Apigee Edge KVM
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-22 09:53:58>
+// last saved: <2018-May-31 16:41:22>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,

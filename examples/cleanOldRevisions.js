@@ -5,7 +5,7 @@
 // In Apigee Edge, for all proxies in an org, remove all but the latest N revisions.
 // (Never remove a deployed revision).
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-19 14:51:14>
+// last saved: <2018-May-31 16:41:20>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -123,7 +123,7 @@ function analyzeOneProxy(org) {
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
 if ( !opt.options.numToKeep ) {
-  console.log('You must specify a number of revisions to retain. (-N)');
+  console.log('You must specify a number of revisions to retain. (-K)');
   getopt.showHelp();
   process.exit(1);
 }

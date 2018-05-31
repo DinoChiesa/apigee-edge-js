@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // In Apigee Edge, find policies in all proxies and/or sharedflows that have a matching name.
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-February-12 14:32:26>
+// last saved: <2018-May-31 16:41:13>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
