@@ -18,23 +18,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:23>
+// last saved: <2018-May-31 17:21:26>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20171206-1242',
-    defaults = { basepath : '/' },
-    getopt = new Getopt(common.commonOptions.concat([
-      ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
-      ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
-      ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
-      ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
-      ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      version    = '20180531-1645',
+      defaults   = { basepath : '/' },
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
+        ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
+        ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
+        ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
+        ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.'],
+        ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ])).bindHelp();
 
 // ========================================================
 
@@ -106,7 +106,8 @@ apigeeEdge.connect(options, function(e, org){
       process.exit(1);
     }
     common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
-    if (opt.options.env) {
+    var env = opt.options.env || process.env.ENV;
+    if (env) {
       // env may be a comma-separated list
       var options = {
             name: result.name,
