@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 17:21:26>
+// last saved: <2018-May-31 17:33:56>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -126,7 +126,7 @@ apigeeEdge.connect(options, function(e, org){
             .catch(console.error);
           };
       let results = [];
-      var p = opt.options.env.split(',')
+      var p = env.split(',')
         .reduce(reducer, Promise.resolve())
         .then(() => { common.logWrite('all done...'); })
         .catch(console.error);
