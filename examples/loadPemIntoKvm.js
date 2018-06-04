@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:26>
+// last saved: <2018-June-04 15:22:18>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -64,7 +64,7 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 
 function loadKeyIntoMap(org, cb) {
   var re = new RegExp('(?:\r\n|\r|\n)', 'g');
-  var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\\n');
+  var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\n');
   var options = {
         env: opt.options.env,
         kvm: opt.options.mapname,
@@ -75,7 +75,6 @@ function loadKeyIntoMap(org, cb) {
   org.kvms.put(options, cb);
 }
 
-
 function keysLoadedCb(e, result){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
@@ -84,7 +83,6 @@ function keysLoadedCb(e, result){
   }
   common.logWrite('ok. the key was loaded successfully.');
 }
-
 
 var options = {
       mgmtServer: opt.options.mgmtserver,
