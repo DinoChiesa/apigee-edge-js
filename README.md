@@ -87,6 +87,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | keystores            | get, create, del, import key and cert                            |
 | developerapps        | get, create, del                                                 |
 | appcredentials       | add, del                                                         |
+| audits               | get                                                              |
 
 
 ## What is possible here?
