@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:19>
+// last saved: <2018-June-07 11:19:44>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -30,11 +30,12 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20171207-1754',
+    version = '20180607-1119',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
-      ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.']
+      ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.'],
+      ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
     ])).bindHelp();
 
 // ========================================================
@@ -146,6 +147,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 
