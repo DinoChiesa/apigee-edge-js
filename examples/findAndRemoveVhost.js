@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:41:15>
+// last saved: <2018-June-19 08:35:22>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -141,6 +141,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 

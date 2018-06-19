@@ -5,7 +5,7 @@
 // In Apigee Edge, for all proxies in an org, remove all but the latest N revisions.
 // (Never remove a deployed revision).
 //
-// Copyright 2017 Google LLC.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-18 18:48:25>
+// last saved: <2018-June-19 08:36:30>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -133,6 +133,7 @@ var options = {
       org : opt.options.org,
       user: opt.options.username,
       password: opt.options.password,
+      no_token: opt.options.notoken,
       verbosity: opt.options.verbose || 0
     };
 
