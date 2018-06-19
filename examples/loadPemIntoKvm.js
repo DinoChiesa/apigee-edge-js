@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-05 15:51:33>
+// last saved: <2018-June-19 08:17:33>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -27,15 +27,14 @@ var fs = require('fs'),
     sprintf = require('sprintf-js').sprintf,
     async = require('async'),
     Getopt = require('node-getopt'),
-    version = '20180605-1551',
+    version = '20180619-0825',
     defaults = { mapname : 'PrivateKeys' },
     getopt = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'required. the Edge environment for which to store the KVM data'],
       ['m' , 'mapname=ARG', 'optional. name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.mapname],
       ['E' , 'encrypted', 'optional. if creating a KVM, set it as encrypted. Default: not.'],
       ['F' , 'pemfile=ARG', 'required. name of the file containing the pem-encoded key.'],
-      ['N' , 'entryname=ARG', 'required. name of the entry in KVM to store the PEM.'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['N' , 'entryname=ARG', 'required. name of the entry in KVM to store the PEM.']
     ])).bindHelp();
 
 // ========================================================

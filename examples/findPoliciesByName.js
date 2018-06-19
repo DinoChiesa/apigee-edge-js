@@ -27,7 +27,7 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     regexp1,
-    version = '20180212-1432',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'proxiesonly', 'Optional. Look for policies only within proxies.'],
       ['S' , 'sharedflowsonly', 'Optional. Look for policies only within sharedflows.'],

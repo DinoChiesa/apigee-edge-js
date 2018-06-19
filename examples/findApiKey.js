@@ -18,16 +18,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:20>
+// last saved: <2018-June-19 08:18:44>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20171207-1827',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
-      ['k' , 'key=ARG', 'the key to find.'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['k' , 'key=ARG', 'required. the key to find.']
     ])).bindHelp();
 
 function handleError(e) {

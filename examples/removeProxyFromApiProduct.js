@@ -16,17 +16,16 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-May-31 16:41:18>
+// last saved: <2018-June-19 08:17:19>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20180317-1653',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'proxy=ARG', 'Required. the proxy to remove.'],
-      ['D' , 'product=ARG', 'Required. the product from which to remove the proxy.'],
-      ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
+      ['D' , 'product=ARG', 'Required. the product from which to remove the proxy.']
     ])).bindHelp();
 
 function handleError(e) {

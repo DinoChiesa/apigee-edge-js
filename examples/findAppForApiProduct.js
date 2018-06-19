@@ -16,17 +16,16 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-May-31 16:41:23>
+// last saved: <2018-June-19 08:15:56>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20180202-1409',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['P' , 'apiproduct=ARG', 'Required. the apiproduct for which to list apps.'],
-      ['D' , 'developers', 'Optional. List the developers that own the apps.'],
-      ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
+      ['D' , 'developers', 'Optional. List the developers that own the apps.']
     ])).bindHelp();
 
 function handleError(e) {

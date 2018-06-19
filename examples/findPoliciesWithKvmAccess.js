@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:27>
+// last saved: <2018-June-19 08:16:08>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -27,11 +27,10 @@ var async = require('async'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171213-1703',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['M' , 'kvm=ARG', 'Optional. KVM name to find.'],
-      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)']
     ])).bindHelp();
 
 // ========================================================

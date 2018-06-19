@@ -22,7 +22,7 @@ const request = require('request'),
       apigeeEdge = edgejs.edge,
       sprintf = require('sprintf-js').sprintf,
       eightHoursInMillis = 8 * 60 * 60 * 1000,
-      version = '20180605-1119',
+      version = '20180619-0825',
       Getopt = require('node-getopt'),
       getopt = new Getopt(common.commonOptions.concat([
         ['P' , 'proxy=ARG+', 'the proxy to find. You can pecify this option multiple times.']
@@ -135,7 +135,6 @@ function getOneBatch(org, startTime, endTime, proxyData, cb) {
                      cb(null, proxyData);
                    }
                  });
-
 }
 
 

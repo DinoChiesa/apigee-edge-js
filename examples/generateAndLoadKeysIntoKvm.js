@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:41:22>
+// last saved: <2018-June-19 08:17:01>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -28,14 +28,13 @@ var edgejs = require('apigee-edge-js'),
     NodeRSA = require('node-rsa'),
     uuidV4 = require('uuid/v4'),
     Getopt = require('node-getopt'),
-    version = '20180522-0953',
+    version = '20180619-0825',
     defaults = { privkeysmap : 'PrivateKeys', pubkeysmap: 'NonSecrets', kidmap: 'NonSecrets' },
     getopt = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
       ['b' , 'keystrength=ARG', 'strength in bits of the RSA keypair. Default: 2048'],
       ['K' , 'privkeysmap=ARG', 'name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.privkeysmap],
-      ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap]
     ])).bindHelp();
 
 // ========================================================

@@ -16,18 +16,17 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-June-07 13:40:59>
+// last saved: <2018-June-19 08:16:54>
 
 const edgejs = require('apigee-edge-js'),
       common = edgejs.utility,
       apigeeEdge = edgejs.edge,
       async = require('async'),
       Getopt = require('node-getopt'),
-      version = '20180607-1103',
+      version = '20180619-0825',
       getopt = new Getopt(common.commonOptions.concat([
       ['B' , 'basepath=ARG', 'Required. the basepath to find.'],
-      ['R' , 'regexp', 'Optional. Treat the -B option as a regexp. Default: perform string match.'],
-      ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
+      ['R' , 'regexp', 'Optional. Treat the -B option as a regexp. Default: perform string match.']
     ])).bindHelp();
 
 function handleError(e) {

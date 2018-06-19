@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:17>
+// last saved: <2018-June-19 08:15:33>
 
 var fs = require('fs'),
     path = require('path'),
@@ -29,15 +29,14 @@ var fs = require('fs'),
     sprintf = require('sprintf-js').sprintf,
     async = require('async'),
     Getopt = require('node-getopt'),
-    version = '20171206-1242',
+    version = '20180619-0825',
     defaults = { destination : 'exported' },
     getopt = new Getopt(common.commonOptions.concat([
       ['N' , 'name=ARG', 'name of existing API proxy or shared flow'],
       ['P' , 'pattern=ARG', 'regex pattern for name of existing API proxy or shared flow; this always exports the latest revision.'],
       ['D' , 'destination=ARG', 'directory for export. Default: exported'],
       ['t' , 'trial', 'trial only. Do not actually export'],
-      ['R' , 'revision=ARG', 'revision of the asset to export. Default: latest'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['R' , 'revision=ARG', 'revision of the asset to export. Default: latest']
     ])).bindHelp();
 
 function exportOneProxyRevision(org, name, revision, cb) {

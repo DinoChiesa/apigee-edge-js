@@ -18,21 +18,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:24>
+// last saved: <2018-June-19 08:17:40>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171206-1242',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
       ['N' , 'productname=ARG', 'Required. name for API product'],
       ['A' , 'approvalType=ARG', 'Optional. either manual or auto. (default: auto)'],
       ['S' , 'scopes=ARG', 'Optional. comma-separated list of possible scopes for the API product'],
-      ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)']
     ])).bindHelp();
 
 // ========================================================

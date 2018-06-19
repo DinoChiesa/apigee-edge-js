@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 17:33:56>
+// last saved: <2018-June-19 08:17:49>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -32,8 +32,7 @@ const edgejs     = require('apigee-edge-js'),
         ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
         ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
         ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
-        ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.'],
-        ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+        ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
       ])).bindHelp();
 
 // ========================================================

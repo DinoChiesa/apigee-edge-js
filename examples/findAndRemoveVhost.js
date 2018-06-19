@@ -28,7 +28,7 @@ var async = require('async'),
     Getopt = require('node-getopt'),
     merge = require('merge'),
     regexp1,
-    version = '20180212-1333',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['V' , 'vhost=ARG', 'Required. The vhost to look for.'],
       ['R' , 'remove', 'Optional. Remove vhost from such proxies.']

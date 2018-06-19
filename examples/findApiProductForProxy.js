@@ -16,16 +16,15 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-May-31 16:38:28>
+// last saved: <2018-June-19 08:15:46>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20171207-1807',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
-      ['P' , 'proxy=ARG', 'Required. the proxy to find.'],
-      ['T' , 'notoken', 'Optional. do not try to obtain a login token.']
+      ['P' , 'proxy=ARG', 'Required. the proxy to find.']
     ])).bindHelp();
 
 function handleError(e) {

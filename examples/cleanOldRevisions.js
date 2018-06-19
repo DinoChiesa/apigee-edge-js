@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:41:20>
+// last saved: <2018-June-18 18:48:25>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -28,7 +28,7 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20171219-1413',
+    version = '20180619-0825',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['R' , 'regexp=ARG', 'Optional. Limit the culling to proxies with names matching this regexp.'],

@@ -18,18 +18,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:38:22>
+// last saved: <2018-June-19 08:14:49>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20171206-1244',
+    version = '20180619-0825',
     getopt = new Getopt(common.commonOptions.concat([
       ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
-      ['N' , 'appname=ARG', 'name for the app'],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['N' , 'appname=ARG', 'name for the app']
     ])).bindHelp();
 
 // ========================================================
