@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-April-02 16:53:09>
+// last saved: <2018-July-13 08:42:53>
 
 var common = require('./common');
 var fs = require('fs');
@@ -173,7 +173,7 @@ describe('Keystore', function() {
               };
           edgeOrg.keystores.create(options, function(e, result){
             assert.isNull(e, "error creating keystore: " + JSON.stringify(e));
-            options.certFile = certFileList[0];
+            options.certificateFile = certFileList[0];
             options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
             edgeOrg.keystores.importCert(options, function(e, result){
