@@ -2,8 +2,8 @@
 /*jslint node:true, esversion:6 */
 // cleanOldRevisions.js
 // ------------------------------------------------------------------
-// In Apigee Edge, for all proxies in an org, remove all but the latest N revisions.
-// (Never remove a deployed revision).
+// In Apigee Edge, for all proxies or sharedflows in an org, remove all
+// but the latest N revisions. (Never remove a deployed revision).
 //
 // Copyright 2017-2018 Google LLC.
 //
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:36:30>
+// last saved: <2018-July-16 08:58:18>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -28,17 +28,18 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20180619-0825',
+    version = '20180716-0845',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
-      ['R' , 'regexp=ARG', 'Optional. Limit the culling to proxies with names matching this regexp.'],
-      ['K' , 'numToKeep=ARG', 'Required. Max number of revisions of each proxy to retain.']
+      ['R' , 'regexp=ARG', 'Optional. Cull only proxies with names matching this regexp.'],
+      ['K' , 'numToKeep=ARG', 'Required. Max number of revisions of each proxy to retain.'],
+      ['S' , 'sharedflows', 'Optional. Cull only sharedflows, not apiproxies.']
     ])).bindHelp();
 
 // ========================================================
 
 console.log(
-  'Apigee Edge Proxy revision cleaner tool, version: ' + version + '\n' +
+  'Apigee Edge Proxy / Sharedflow revision cleaner tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -54,15 +55,15 @@ function handleError(e) {
     }
 }
 
-function checkAndMaybeRemoveRevision (org, proxyName) {
+function checkAndMaybeRemoveRevision (org, collectionName, itemName) {
   return function (revision, callback) {
-    var options = { name:proxyName, revision:revision };
-    org.proxies.getDeployments(options, function(e, deployments) {
+    var options = { name:itemName, revision:revision };
+    org[collectionName].getDeployments(options, function(e, deployments) {
       if (opt.options.verbose) {
-        common.logWrite('deployments (%s r%s): %s', proxyName, revision, JSON.stringify(deployments));
+        common.logWrite('deployments (%s r%s): %s', itemName, revision, JSON.stringify(deployments));
       }
       if (! deployments.environment || deployments.environment.length === 0) {
-        org.proxies.del(options, function(e, result) {
+        org[collectionName].del(options, function(e, result) {
           callback(e, options);
         });
       }
@@ -73,45 +74,35 @@ function checkAndMaybeRemoveRevision (org, proxyName) {
   };
 }
 
-function doneAllRevisions(proxyName, callback) {
+function doneAllRevisions(collectionName, itemName, callback) {
   return function(e, results) {
     handleError(e);
-    if (opt.options.jar) {
-      results = results.filter(function(r) {return r;});
-      if (results && results.length > 0) {
-        //results = results.map(function(r) {return parseInt(r, 10);});
-        common.logWrite('proxy: '+ proxyName + ' ' + JSON.stringify(results));
-      }
-      callback(null, results);
-    }
-    else {
-      // results is an array of arrays
-      var flattened = [].concat.apply([], results);
-      common.logWrite('proxy: '+ proxyName + ' ' + JSON.stringify(flattened));
-      callback(null, flattened);
-    }
+    // results is an array of arrays
+    var flattened = [].concat.apply([], results);
+    common.logWrite(collectionName + ': '+ itemName + ' ' + JSON.stringify(flattened));
+    callback(null, flattened);
   };
 }
 
-function doneAllProxies(e, results) {
+function doneAllItems(e, results) {
   handleError(e);
   var flattened = [].concat.apply([], results);
   common.logWrite('result %s', JSON.stringify(flattened));
 }
 
-function analyzeOneProxy(org) {
-  return function(proxyName, callback) {
-    org.proxies.getRevisions({ name: proxyName }, function(e, result) {
+function analyzeOneItem(org, collectionName) {
+  return function(itemName, callback) {
+    org[collectionName].getRevisions({ name: itemName }, function(e, result) {
       handleError(e);
-      common.logWrite('revisions %s: %s', proxyName, JSON.stringify(result));
+      common.logWrite('revisions %s: %s', itemName, JSON.stringify(result));
       if (result && result.length > opt.options.numToKeep) {
         result.sort(function(a, b) { return b - a; });
         result.reverse();
         var revisionsToExamine = result.slice(0, result.length - opt.options.numToKeep);
         revisionsToExamine.reverse();
         async.mapSeries(revisionsToExamine,
-                        checkAndMaybeRemoveRevision(org, proxyName),
-                        doneAllRevisions(proxyName, callback));
+                        checkAndMaybeRemoveRevision(org, collectionName, itemName),
+                        doneAllRevisions(collectionName, itemName, callback));
       }
       else {
         return callback(null, []);
@@ -145,16 +136,17 @@ apigeeEdge.connect(options, function(e, org){
   }
 
   var readOptions = {};
-  org.proxies.get(readOptions, function(e, proxies) {
+  var collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";
+  org[collectionName].get(readOptions, function(e, results) {
     if (opt.options.regexp) {
       var re1 = new RegExp(opt.options.regexp);
-      proxies = proxies.filter(function(item) { return re1.test(item); });
+      results = results.filter(function(item) { return re1.test(item); });
     }
     if (opt.options.verbose) {
-      common.logWrite('%sproxies: %s', (opt.options.regexp)?"matching ":"", JSON.stringify(proxies));
+      common.logWrite('%s%s: %s', (opt.options.regexp)?"matching ":"", collectionName, JSON.stringify(results));
     }
-    if (proxies.length > 0) {
-      async.mapSeries(proxies, analyzeOneProxy(org), doneAllProxies);
+    if (results.length > 0) {
+      async.mapSeries(results, analyzeOneItem(org, collectionName), doneAllItems);
     }
   });
 });
