@@ -18,13 +18,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:18:44>
+// last saved: <2018-August-20 15:41:19>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt = require('node-getopt'),
-    version = '20180619-0825',
+    version = '20180820-1541',
     getopt = new Getopt(common.commonOptions.concat([
       ['k' , 'key=ARG', 'required. the key to find.']
     ])).bindHelp();
@@ -67,25 +67,16 @@ var options = {
 
 apigeeEdge.connect(options, function(e, org) {
   handleError(e);
-  org.apps.get({expand:true}, function(e, result) {
-    var found = null;
+  org.appcredentials.find({key:opt.options.key}, function(e, found) {
     handleError(e);
-    result.app.forEach(function(app) {
-      if ( !found && app.credentials) app.credentials.forEach(function(cred){
-        if ( !found && cred.consumerKey == opt.options.key) { found = {app:app, cred:cred}; }
-      });
-    });
-
     if (found) {
-      org.developers.get({id:found.app.developerId}, function(e, result) {
-        common.logWrite('key: ' + opt.options.key);
-        common.logWrite('app: ' + found.app.name + ' ' + found.app.appId);
-        common.logWrite('dev: ' + found.app.developerId + ' ' +
-                    result.firstName + ' ' +
-                    result.lastName + ' ' +
-                    result.userName + ' ' +
-                    result.email);
-      });
+      common.logWrite('key: ' + found.key);
+      common.logWrite('app: ' + found.appName + ' ' + found.appId);
+      common.logWrite('dev: ' + found.developerId + ' ' +
+                      found.developer.firstName + ' ' +
+                      found.developer.lastName + ' ' +
+                      found.developer.userName + ' ' +
+                      found.developer.email);
     }
   });
 });
