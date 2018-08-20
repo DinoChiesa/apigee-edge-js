@@ -18,16 +18,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-20 15:41:19>
+// last saved: <2018-August-20 15:55:03>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    Getopt = require('node-getopt'),
-    version = '20180820-1541',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['k' , 'key=ARG', 'required. the key to find.']
-    ])).bindHelp();
+const edgejs        = require('apigee-edge-js'),
+      common        = edgejs.utility,
+      apigeeEdge    = edgejs.edge,
+      Getopt        = require('node-getopt'),
+      version       = '20180820-1541',
+      getopt        = new Getopt(common.commonOptions.concat([
+        ['k' , 'key=ARG', 'required. the key to find.']
+      ])).bindHelp();
 
 function handleError(e) {
     if (e) {
