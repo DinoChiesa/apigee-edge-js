@@ -83,10 +83,10 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | sharedflows          | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision |
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |
-| developers           | get, create, del                                                 |
+| developers           | get, create, del,revoke, approve                                 |
 | keystores            | get, create, del, import key and cert                            |
-| developerapps        | get, create, del                                                 |
-| appcredentials       | add, del                                                         |
+| developerapps        | get, create, del, revoke, approve                                |
+| appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
 
 
