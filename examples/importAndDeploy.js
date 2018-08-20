@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:17:49>
+// last saved: <2018-August-02 13:29:17>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -96,7 +96,7 @@ apigeeEdge.connect(options, function(e, org){
   var collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
   var term = (opt.options.sharedflow) ? 'sharedflow' : 'proxy';
 
-  common.logWrite('importing');
+  common.logWrite('importing a %s', term);
   collection.import({name:opt.options.name, source:opt.options.source}, function(e, result) {
     if (e) {
       common.logWrite('error: ' + JSON.stringify(e, null, 2));

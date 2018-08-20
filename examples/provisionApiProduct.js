@@ -18,17 +18,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:17:40>
+// last saved: <2018-August-20 10:45:35>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20180619-0825',
+    version = '20180820-1042',
     getopt = new Getopt(common.commonOptions.concat([
       ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
+      ['a' , 'access=ARG', 'Optional. tag the API Product for {public,internal,private} access.'],
       ['N' , 'productname=ARG', 'Required. name for API product'],
+      ['D' , 'description=ARG', 'Optional. description for the API product'],
       ['A' , 'approvalType=ARG', 'Optional. either manual or auto. (default: auto)'],
       ['S' , 'scopes=ARG', 'Optional. comma-separated list of possible scopes for the API product'],
       ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)']
@@ -79,14 +81,17 @@ apigeeEdge.connect(options, function(e, org) {
 
   var options = {
         productName: opt.options.productname,
-        proxy: opt.options.proxy,
+        proxies: [opt.options.proxy],
         environments: opt.options.env,
+        description: opt.options.description,
         approvalType : opt.options.approvalType || "auto", //|| manual
-        //attributes: { "key1": "value1", "key2": "XYZ123"}
       };
 
   if (opt.options.scopes) {
     options.scopes = opt.options.scopes.split(',').trim();
+  }
+  if (opt.options.access) {
+    options.attributes = { "access": opt.options.access };
   }
 
   org.products.create(options, function(e, result){
