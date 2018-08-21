@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-20 15:55:03>
+// last saved: <2018-August-21 09:48:32>
 
 const edgejs        = require('apigee-edge-js'),
       common        = edgejs.utility,
@@ -70,13 +70,17 @@ apigeeEdge.connect(options, function(e, org) {
   org.appcredentials.find({key:opt.options.key}, function(e, found) {
     handleError(e);
     if (found) {
-      common.logWrite('key: ' + found.key);
-      common.logWrite('app: ' + found.appName + ' ' + found.appId);
-      common.logWrite('dev: ' + found.developerId + ' ' +
-                      found.developer.firstName + ' ' +
-                      found.developer.lastName + ' ' +
-                      found.developer.userName + ' ' +
-                      found.developer.email);
+      common.logWrite(JSON.stringify(found, null, 2));
+      // common.logWrite('key: ' + found.key);
+      // common.logWrite('app: ' + found.appName + ' ' + found.appId);
+      // common.logWrite('dev: ' + found.developerId + ' ' +
+      //                 found.developer.firstName + ' ' +
+      //                 found.developer.lastName + ' ' +
+      //                 found.developer.userName + ' ' +
+      //                 found.developer.email);
+    }
+    else {
+      common.logWrite('that key was not found.');
     }
   });
 });
