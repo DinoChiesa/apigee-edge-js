@@ -20,7 +20,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "adm-zip": "^0.4.7",
+    "adm-zip": "^0.4.11",
     "archiver": "^2.1.1",
     "merge": "^1.2.0",
     "netrc": "0.1.3",
