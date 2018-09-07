@@ -19,5 +19,8 @@
     "readline-sync": "^1.4.9",
     "sprintf-js": "^1.1.1",
     "uuid": "^3.2.1"
+  },
+  "engines": {
+    "node": ">6.2.0"
   }
 }

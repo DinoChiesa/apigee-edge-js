@@ -66,12 +66,16 @@ apigeeEdge.connect(options, function(e, org){
 
 This library and the example tools included here are not an official Google product.
 Support is available on a best-effort basis via github or community.apigee.com .
+Pull requests are welcomed.
 
 
 ## The Basic Object Model
 
-To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If it is a SaaS organization, this method will try to find a stashed OAuth token and if not will get an OAuth token.
-The callback will return (e, org), where e is an error, possibly null, and org is an Organization object with these members. Each is itself a hash and has child members as functions:
+To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If
+it is a SaaS organization, this method will try to find a stashed OAuth token and if not
+will get an OAuth token.  The callback will return (e, org), where e is an error,
+possibly null, and org is an Organization object with these members. Each is itself a
+hash and has child members as functions:
 
 
 | member               | functions                                                        |
@@ -84,7 +88,7 @@ The callback will return (e, org), where e is an error, possibly null, and org i
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |
 | developers           | get, create, del,revoke, approve                                 |
-| keystores            | get, create, del, import key and cert                            |
+| keystores            | get, create, del, import key and cert, create references         |
 | developerapps        | get, create, del, revoke, approve                                |
 | appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
@@ -272,6 +276,33 @@ or
 ```
 node_modules/mocha/bin/mocha
 ```
+
+
+## Frequently Asked Questions
+
+1. Is this an official Google product?  Is it supported?
+
+   No, This library and the example tools included here are not an official Google product.
+   Support is available on a best-effort basis via github or community.apigee.com .
+
+2. What is this thing good for?
+
+   If your team builds nodejs scripts to perform administrative operations on your
+   Apigee Edge organization, you may want to use this library.  It provides a wrapper of
+   basic operations to allow you to import and deploy proxies, create products or
+   developers or applications, populate KVMs, create caches, and so on.
+
+2. Does it have a wrapper for creating a virtualhost?
+
+   No, that's one thing it does not help with, at this time. Let me know if you think that's important.
+
+2. How does the library authenticate to Apigee Edge?
+
+   The library obtains an oauth token using the standard client_id and secret for
+   administrative operations.  The library caches the token into a filesystem file, for
+   future use. The library runtime automatically refreshes the token as necessary, even
+   during a single long-running script.
+
 
 
 ## License
