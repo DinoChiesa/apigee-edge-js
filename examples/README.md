@@ -116,3 +116,24 @@ If you know  the revision you'd like to export, you can use the -R option to spe
 ./exportApi.js -n -v -o ORGNAME -N runload -R 3
 ```
 
+# Find all proxies that have a vhost with name matching "default"
+
+```
+node ./findVhostsForDeployedProxies.js -n -v -o ORGNAME  -R default
+
+```
+
+
+# Revoke a developer app by key
+
+```
+node ./revokeOrApprove.js -n -v -o ORGNAME  -k dc79ee0e4b95b74adef42d63a5c6 -R
+
+```
+
+# Revoke a developer app by developer email and app name
+
+```
+node ./revokeOrApprove.js -n -v -o ORGNAME  -d developer@example.com -a appnamehere -R
+
+```
