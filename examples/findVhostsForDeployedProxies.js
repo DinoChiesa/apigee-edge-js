@@ -5,7 +5,7 @@
 // In Apigee Edge, for all proxies, find the latest deployed revision and
 // identify the vhosts used within. Optionally filter the list for proxies that
 // have endpoints with names that match a specific regexp. Example, to find
-// proies that listen on the default vhost:
+// proxies that listen on the default vhost:
 //
 //  node ./examples/findVhostsForDeployedProxies.js -n -v -o myorgname -R default
 //
@@ -24,7 +24,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-September-11 11:47:01>
+// last saved: <2018-September-11 11:49:30>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
