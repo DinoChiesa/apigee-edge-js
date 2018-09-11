@@ -2,8 +2,13 @@
 /*jslint node:true, esversion:6 */
 // findVhostsForDeployedProxies.js
 // ------------------------------------------------------------------
-// In Apigee Edge, for all deployed proxies, find the latest deployed revision and
-// identify the vhosts used within.
+// In Apigee Edge, for all proxies, find the latest deployed revision and
+// identify the vhosts used within. Optionally filter the list for proxies that
+// have endpoints with names that match a specific regexp. Example, to find
+// proies that listen on the default vhost:
+//
+//  node ./examples/findVhostsForDeployedProxies.js -n -v -o myorgname -R default
+//
 //
 // Copyright 2018 Google LLC.
 //
@@ -19,7 +24,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-September-11 10:31:18>
+// last saved: <2018-September-11 11:47:01>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
