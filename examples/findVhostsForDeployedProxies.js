@@ -24,7 +24,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-September-11 11:49:30>
+// last saved: <2018-September-11 15:41:08>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -72,23 +72,14 @@ function checkDeployedRevisionOfProxy(org, proxyName){
     org.proxies.getProxyEndpoints({apiproxy:proxyName, revision: revEnvironment.revision}, function(e, result){
       handleError(e);
       async.mapSeries(result, getVhostForProxyEndpoint(org, proxyName, revEnvironment.revision), function(e, result){
+        var endpoints = result;
         if (opt.options.regexp) {
-          var re1 = new RegExp(opt.options.regexp);
-          var endpoints = result.filter( endpt => {
-                var matchingVhosts = endpt.virtualHosts.filter( item => re1.test(item) );
-                return matchingVhosts.length>0;
-              });
-
-          if (endpoints.length>0){
-            return cb(e, {name: revEnvironment.revision, environments: revEnvironment.environments, endpoints:result});
-          }
-          else {
-            return cb(e, null);
-          }
+          endpoints = result.filter( endpt => {
+            var matchingVhosts = endpt.virtualHosts.filter( item => gRegexp.test(item) );
+            return matchingVhosts.length>0;
+          });
         }
-        else {
-          return cb(e, {name: revEnvironment.revision, environments: revEnvironment.environments, endpoints:result});
-        }
+        return cb(e, (endpoints.length>0)? {name: revEnvironment.revision, environments: revEnvironment.environments, endpoints:result} : null);
       });
     });
   };
@@ -128,6 +119,10 @@ function findLatestDeployments(org) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
+
+if (opt.options.regexp) {
+  gRegexp = new RegExp(opt.options.regexp);
+}
 
 var options = {
       mgmtServer: opt.options.mgmtserver,
