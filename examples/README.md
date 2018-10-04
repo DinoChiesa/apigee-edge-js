@@ -137,3 +137,15 @@ node ./revokeOrApprove.js -n -v -o ORGNAME  -k dc79ee0e4b95b74adef42d63a5c6 -R
 node ./revokeOrApprove.js -n -v -o ORGNAME  -d developer@example.com -a appnamehere -R
 
 ```
+
+# Add (import) a credential to an existing developer app
+
+```
+./addAppCredential.js -v -n -o ORGNAME -A AppName-20180803 -E developerEmail@apigee.com -p ProductName -C Unique_Credential_Here_1983983XYZ123ABCDE
+```
+
+# Load a PEM as a value into a KVM (maybe encrypted)
+
+```
+./loadPemIntoKvm.js -n -v -o ORGNAME -e ENVNAME -m KVM_MAP_NAME -F ./public.pem -N NAME_OF_VALUE
+```
