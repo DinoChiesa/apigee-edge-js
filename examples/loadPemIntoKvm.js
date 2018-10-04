@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:17:33>
+// last saved: <2018-October-02 15:19:30>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -32,7 +32,7 @@ var fs = require('fs'),
     getopt = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'required. the Edge environment for which to store the KVM data'],
       ['m' , 'mapname=ARG', 'optional. name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.mapname],
-      ['E' , 'encrypted', 'optional. if creating a KVM, set it as encrypted. Default: not.'],
+      ['E' , 'encrypted', 'optional. use an encrypted KVM. Applies only if creating a new KVM. Default: not.'],
       ['F' , 'pemfile=ARG', 'required. name of the file containing the pem-encoded key.'],
       ['N' , 'entryname=ARG', 'required. name of the entry in KVM to store the PEM.']
     ])).bindHelp();
