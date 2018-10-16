@@ -1,9 +1,10 @@
-#! /usr/local/bin/node
-/*jslint node:true */
 // createDeveloper.js
 // ------------------------------------------------------------------
 // provision a developer in Apigee Edge
 //
+/* jshint esversion: 6, node: true */
+/* global process, console, Buffer */
+
 // Copyright 2017-2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,19 +19,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:20:14>
+// last saved: <2018-October-15 17:19:07>
+'use strict';
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
-      ['F' , 'first=ARG', 'first name for the developer'],
-      ['L' , 'last=ARG', 'last name for the developer']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      version    = '20181015-1420',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
+        ['F' , 'first=ARG', 'first name for the developer'],
+        ['a' , 'attr=ARG+' , 'attributes for the developer, in N:V form. Can provide multiple.'],
+        ['L' , 'last=ARG', 'last name for the developer']
+      ])).bindHelp();
 
 // ========================================================
 
@@ -73,7 +76,6 @@ var options = {
 apigeeEdge.connect(options, function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
-    common.logWrite(JSON.stringify(result, null, 2));
     //console.log(e.stack);
     process.exit(1);
   }
@@ -84,8 +86,20 @@ apigeeEdge.connect(options, function(e, org) {
         lastName : opt.options.last,
         firstName : opt.options.first,
         userName : opt.options.first + '.' + opt.options.last,
-        // attributes: { "key1": "value1", "key2": "value2" }
+        attributes : {}
       };
+
+  if (opt.options.attr) {
+    opt.options.attr.forEach( (attr) => {
+      var parts = attr.split(':');
+      if (parts.length == 2) {
+        options.attributes[parts[0]] = parts[1];
+      }
+      else {
+        common.logWrite("mis-formatted attribute: " + attr);
+      }
+    });
+  }
 
   org.developers.create(options, function(e, result){
     if (e) {

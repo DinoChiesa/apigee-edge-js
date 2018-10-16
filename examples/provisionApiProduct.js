@@ -18,20 +18,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-20 10:45:35>
+// last saved: <2018-October-15 14:25:11>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
+const edgejs   = require('apigee-edge-js'),
+    common     = edgejs.utility,
     apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20180820-1042',
-    getopt = new Getopt(common.commonOptions.concat([
+    sprintf    = require('sprintf-js').sprintf,
+    Getopt     = require('node-getopt'),
+    version    = '20181015-1422',
+    getopt     = new Getopt(common.commonOptions.concat([
       ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
-      ['a' , 'access=ARG', 'Optional. tag the API Product for {public,internal,private} access.'],
+      ['x' , 'access=ARG', 'Optional. tag the API Product for {public,internal,private} access.'],
       ['N' , 'productname=ARG', 'Required. name for API product'],
       ['D' , 'description=ARG', 'Optional. description for the API product'],
       ['A' , 'approvalType=ARG', 'Optional. either manual or auto. (default: auto)'],
+      ['a' , 'attr=ARG+' , 'attributes for the app, in N:V form. Can provide multiple.'],
       ['S' , 'scopes=ARG', 'Optional. comma-separated list of possible scopes for the API product'],
       ['e' , 'env=ARG', 'Optional. the Edge environment on which to enable the Product (default: all)']
     ])).bindHelp();
@@ -90,8 +91,22 @@ apigeeEdge.connect(options, function(e, org) {
   if (opt.options.scopes) {
     options.scopes = opt.options.scopes.split(',').trim();
   }
+  options.attributes = { };
+
   if (opt.options.access) {
-    options.attributes = { "access": opt.options.access };
+    options.attributes.access = opt.options.access;
+  }
+
+  if (opt.options.attr) {
+    opt.options.attr.forEach( (attr) => {
+      var parts = attr.split(':');
+      if (parts.length == 2) {
+        options.attributes[parts[0]] = parts[1];
+      }
+      else {
+        common.logWrite("mis-formatted attribute: " + attr);
+      }
+    });
   }
 
   org.products.create(options, function(e, result){

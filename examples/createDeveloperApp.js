@@ -18,20 +18,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:36:37>
+// last saved: <2018-October-15 14:26:01>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['p' , 'product=ARG', 'name of the API product to enable on this app'],
-      ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
-      ['A' , 'appname=ARG', 'name for the app'],
-      ['x' , 'expiry=ARG', 'expiry for the credential']
-    ])).bindHelp();
+const edgejs            = require('apigee-edge-js'),
+      common            = edgejs.utility,
+      apigeeEdge        = edgejs.edge,
+      sprintf           = require('sprintf-js').sprintf,
+      Getopt            = require('node-getopt'),
+      version           = '20181015-0949',
+      defaults          = { expiry : '180d' },
+      getopt            = new Getopt(common.commonOptions.concat([
+        ['p' , 'product=ARG', 'name of the API product to enable on this app'],
+        ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
+        ['A' , 'appname=ARG', 'name for the app'],
+        ['a' , 'attr=ARG+' , 'attributes for the app, in N:V form. Can provide multiple.'],
+        ['x' , 'expiry=ARG', 'expiry for the credential. default: ' + defaults.expiry ]
+      ])).bindHelp();
 
 // ========================================================
 
@@ -86,9 +88,21 @@ apigeeEdge.connect(options, function(e, org) {
         developerEmail : opt.options.email,
         appName : opt.options.appname,
         apiProduct : opt.options.product,
-        expiry : opt.options.expiry || '180d',
-        attributes: { "key1": "value1", "tenant_id": "1234567"}
+        attributes : {},
+        expiry : opt.options.expiry || defaults.expiry
       };
+
+  if (opt.options.attr) {
+    opt.options.attr.forEach( (attr) => {
+      var parts = attr.split(':');
+      if (parts.length == 2) {
+        options.attributes[parts[0]] = parts[1];
+      }
+      else {
+        common.logWrite("mis-formatted attribute: " + attr);
+      }
+    });
+  }
 
   org.developerapps.create(options, function(e, result){
     if (e) {
@@ -101,4 +115,5 @@ apigeeEdge.connect(options, function(e, org) {
     common.logWrite(sprintf('apikey %s', result.credentials[0].consumerKey));
     common.logWrite(sprintf('secret %s', result.credentials[0].consumerSecret));
   });
+
 });
