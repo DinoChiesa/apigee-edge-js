@@ -69,13 +69,13 @@ Support is available on a best-effort basis via github or community.apigee.com .
 Pull requests are welcomed.
 
 
-## The Basic Object Model
+## The Object Model
 
 To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If
 it is a SaaS organization, this method will try to find a stashed OAuth token and if not
-will get an OAuth token.  The callback will return (e, org), where e is an error,
-possibly null, and org is an Organization object with these members. Each is itself a
-hash and has child members as functions:
+will get an OAuth token. The callback will receive (e, org), where e is an error,
+possibly null, and org is an Organization object with the following members, each a
+hash with various child members as functions:
 
 
 | member               | functions                                                        |
@@ -92,7 +92,8 @@ hash and has child members as functions:
 | developerapps        | get, create, del, revoke, approve                                |
 | appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
-
+| stats                | get                                                              |
+| maskconfigs          | get, set, add/update, remove                                     |
 
 ## What is possible here?
 
@@ -237,6 +238,36 @@ org.proxies.get({}, function(e, proxies) {
     });
   });
 ```
+
+### Read and Update Mask Configs for an Organization
+
+```
+const edgejs = require('apigee-edge-js');
+const apigeeEdge = edgejs.edge;
+var options = {org : 'ORGNAME', netrc: true, verbosity : 1 };
+apigeeEdge.connect(options, function(e, org) {
+  console.log('org: ' + org.conn.orgname);
+  org.maskconfigs.get({name: 'default'}, function(e, body) {
+    console.log(JSON.stringify(body));
+    org.maskconfigs.set({ json : '$.store.book[*].author' }, function(e, body) {
+      console.log(JSON.stringify(body));
+      org.maskconfigs.add({ xml : '/apigee:Store/Employee' }, function(e, body) {
+        console.log(JSON.stringify(body));
+        org.maskconfigs.remove({ remove : ['xPathsFault','jSONPathsFault'] }, function(e, body) {
+          console.log(JSON.stringify(body));
+          org.maskconfigs.add({ variables : 'dino_var' }, function(e, body) {
+            console.log(JSON.stringify(body));
+            org.maskconfigs.add({ namespaces : { prefix:'apigee', value:'urn://apigee' } }, function(e, body) {
+              console.log(JSON.stringify(body));
+            });
+          });
+        });
+      });
+    });
+  });
+});
+```
+
 
 ### More Examples
 
