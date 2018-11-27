@@ -2,8 +2,10 @@
 /*jslint node:true */
 // findPoliciesWithKvmAccess.js
 // ------------------------------------------------------------------
-// In an Apigee Edge organization, find all policies in all proxies that reference a KVM.
-// This uses a brute-force client-side search, so it will take a while to run on an org that has many proxies.
+// In an Apigee Edge organization, find all policies in all proxies that
+// reference a KVM, and maybe a particular KVM.  This uses a brute-force
+// client-side search, so it will take a while to run on an org that has many
+// proxy revisions.
 //
 // Copyright 2017-2018 Google LLC.
 //
@@ -19,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:16:08>
+// last saved: <2018-November-26 16:12:48>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -27,10 +29,12 @@ var async = require('async'),
     apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20180619-0825',
+    version = '20181126-1550',
     getopt = new Getopt(common.commonOptions.concat([
       ['M' , 'kvm=ARG', 'Optional. KVM name to find.'],
-      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)']
+      ['S' , 'scope=ARG', 'Optional. Scope to match. Should be one of: (organization, environment, apiproxy)'],
+      ['L' , 'list', 'Optional. don\'t find. list the available KVMs for the org/environment.'],
+      ['R' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
     ])).bindHelp();
 
 // ========================================================
@@ -66,7 +70,7 @@ function examineOnePolicy(org, proxyName, revision) {
       var boolResult = (result.policyType == 'KeyValueMapOperations') &&
         ( ! opt.options.kvm || (opt.options.kvm == result.mapIdentifier)) &&
         ( ! opt.options.scope || (opt.options.scope == result.scope));
-      callback(boolResult);
+      callback(null, boolResult);
     });
   };
 }
@@ -74,7 +78,7 @@ function examineOnePolicy(org, proxyName, revision) {
 function getOneRevision (org, proxyName) {
   return function (revision, cb) {
     org.proxies.get({ name: proxyName, revision: revision }, function(e, result) {
-      async.filterSeries(result.policies, examineOnePolicy(org, proxyName, revision), function(results) {
+      async.filterSeries(result.policies, examineOnePolicy(org, proxyName, revision), function(e, results) {
         // results now equals an array of the KVM policies in this revision
         cb(null, results.map(function(policyName){ return policyUrl(proxyName, revision, policyName);}));
       });
@@ -102,6 +106,10 @@ function analyzeOneProxy(org) {
   return function(proxyName, callback) {
     org.proxies.get({ name: proxyName }, function(e, result) {
       handleError(e);
+      if (opt.options.latestrevisionnumber) {
+        result.revision.sort();
+        result.revision = [result.revision.pop()];
+      }
       async.mapSeries(result.revision, getOneRevision(org, proxyName), doneAllRevisions(proxyName, callback));
     });
   };
@@ -121,9 +129,16 @@ var options = {
 apigeeEdge.connect(options, function(e, org) {
   handleError(e);
   common.logWrite('connected');
-  org.proxies.get({}, function(e, result){
-    handleError(e);
-    common.logWrite('found %d proxies', result.length);
-    async.mapSeries(result, analyzeOneProxy(org), doneAllProxies);
-  });
+  if (opt.options.list) {
+    org.kvms.get({}, function(e, result){
+
+    });
+  }
+  else {
+    org.proxies.get({}, function(e, result){
+      handleError(e);
+      common.logWrite('found %d proxies', result.length);
+      async.mapSeries(result, analyzeOneProxy(org), doneAllProxies);
+    });
+  }
 });
