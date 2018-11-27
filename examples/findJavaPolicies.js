@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:16:23>
+// last saved: <2018-November-26 16:16:58>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -60,8 +60,7 @@ function examineOnePolicy(org, options) {
   return function(policyName, callback) {
     org.proxies.getPoliciesForRevision(merge(options, {policy:policyName}), function(e, result) {
       handleError(e);
-      var boolResult = (result.policyType == 'JavaCallout');
-      callback(boolResult);
+      callback(null, (result.policyType == 'JavaCallout'));
     });
   };
 }
@@ -93,7 +92,7 @@ function getOneRevision (org, proxyName) {
         if (e) {
           return callback(e, []);
         }
-        async.filterSeries(allPolicies, examineOnePolicy(org, options), function(results) {
+        async.filterSeries(allPolicies, examineOnePolicy(org, options), function(e, results) {
           var javaPolicies = results.map(function(elt){ return sprintf('apis/%s/revisions/%s/policies/%s', proxyName, revision, elt); });
           callback(null, javaPolicies);
         });
