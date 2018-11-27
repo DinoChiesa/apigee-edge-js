@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-November-26 16:16:58>
+// last saved: <2018-November-26 16:22:46>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -30,11 +30,12 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20180619-0825',
+    version = '20181126-1621',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
-      ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.']
+      ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.'],
+      ['L' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
     ])).bindHelp();
 
 // ========================================================
@@ -132,6 +133,10 @@ function analyzeOneProxy(org) {
   return function(proxyName, callback) {
     org.proxies.get({ name: proxyName }, function(e, result) {
       handleError(e);
+      if (opt.options.latestrevisionnumber) {
+        result.revision.sort();
+        result.revision = [result.revision.pop()];
+      }
       async.mapSeries(result.revision, getOneRevision(org, proxyName), doneAllRevisions(proxyName, callback));
     });
   };
