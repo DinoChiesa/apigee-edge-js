@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-November-26 16:12:44>
+// last saved: <2018-November-26 16:22:25>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -65,9 +65,8 @@ function examineOnePolicy(org, proxyName, revision) {
     org.proxies.get({ name: proxyName, revision: revision, policy: policyName }, function(e, result) {
       handleError(e);
       // return true if FlowCallout and maybe if the particular sharedflow is referenced.
-      var boolResult = (result.policyType === 'FlowCalloutBean') &&
-          ( ! opt.options.sharedflow || (opt.options.sharedflow == result.sharedFlowBundle));
-      callback(null, boolResult);
+      callback(null, (result.policyType === 'FlowCalloutBean') &&
+          ( ! opt.options.sharedflow || (opt.options.sharedflow == result.sharedFlowBundle)));
     });
   };
 }
