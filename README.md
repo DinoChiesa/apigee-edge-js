@@ -258,7 +258,9 @@ org.proxies.getRevisions({name:'proxyname-here'})
 
 ### Get the latest revision of every API Proxy in an org
 
-```
+This uses an Array.reduce() with a series of promises, each of which appends an item to an array of results.
+
+```js
 apigeeEdge.connect(options)
   .then( (org) => {
     common.logWrite('connected');
@@ -285,7 +287,7 @@ apigeeEdge.connect(options)
 
 ### Create a Keystore and load a Key and Cert
 
-```
+```js
   var options = {
         environment : 'test',
         name : 'keystore1'
