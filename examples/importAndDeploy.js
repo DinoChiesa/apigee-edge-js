@@ -18,14 +18,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-02 13:29:17>
+// last saved: <2018-December-03 13:28:13>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20180531-1645',
+      version    = '20181203-1315',
       defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
         ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
@@ -36,23 +36,6 @@ const edgejs     = require('apigee-edge-js'),
       ])).bindHelp();
 
 // ========================================================
-
-function promisifyDeployment(collection, options) {
-  return function deploy(env) {
-    return new Promise(function(resolve, reject) {
-      options.environment = env;
-      collection.deploy(options, function(e, result) {
-        if (e) {
-          common.logWrite(JSON.stringify(e, null, 2));
-          if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
-          reject(e);
-        }
-        common.logWrite('deploy ok.');
-        resolve();
-      });
-    });
-  };
-}
 
 console.log(
   'Apigee Edge Proxy/Sharedflow Import + Deploy tool, version: ' + version + '\n' +
@@ -86,59 +69,42 @@ var options = {
       verbosity: opt.options.verbose || 0
     };
 
-apigeeEdge.connect(options, function(e, org){
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    process.exit(1);
-  }
-  common.logWrite('connected');
+apigeeEdge.connect(options)
+  .then( (org) => {
+    common.logWrite('connected');
 
-  var collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
-  var term = (opt.options.sharedflow) ? 'sharedflow' : 'proxy';
+    const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
+    const term = (opt.options.sharedflow) ? 'sharedflow' : 'proxy';
 
-  common.logWrite('importing a %s', term);
-  collection.import({name:opt.options.name, source:opt.options.source}, function(e, result) {
-    if (e) {
-      common.logWrite('error: ' + JSON.stringify(e, null, 2));
-      if (result) { common.logWrite(JSON.stringify(result, null, 2)); }
-      //console.log(e.stack);
-      process.exit(1);
-    }
-    common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
-    var env = opt.options.env || process.env.ENV;
-    if (env) {
-      // env may be a comma-separated list
-      var options = {
-            name: result.name,
-            revision: result.revision,
-          };
-      if ( ! opt.options.sharedflow) {
-        options.basepath = opt.options.basepath || defaults.basepath;
-      }
+    common.logWrite('importing a %s', term);
+    collection.import({name:opt.options.name, source:opt.options.source})
+      .then( (result) => {
+        common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
+        let envs = opt.options.env || process.env.ENV;
+        if (envs) {
+          // env may be a comma-separated list
+          var options = { name: result.name, revision: result.revision };
+          if ( ! opt.options.sharedflow) {
+            options.basepath = opt.options.basepath || defaults.basepath;
+          }
 
-      // this magic deploys to each environment in series
-      var deployIt = promisifyDeployment(collection, options);
-      var reducer = function (promise, env) {
-            return promise.then(() => {
-              return deployIt(env).then(result => results.push(result));
-            })
-            .catch(console.error);
-          };
-      let results = [];
-      var p = env.split(',')
-        .reduce(reducer, Promise.resolve())
-        .then(() => { common.logWrite('all done...'); })
-        .catch(console.error);
+          // this magic deploys to each environment in series
+          var reducer = (promise, env) =>
+            promise .then( () =>
+                           collection
+                             .deploy(Object.assign(options, { environment:env }))
+                             .then( (result) => common.logWrite('deployment ' + ((result.error) ? 'failed: ' + JSON.stringify(result) : 'ok.') ))
+                         );
 
-      // Promise.all(opt.options.env.split(',').forEach(deployIt))
-      //   .then(() => { common.logWrite('all don...'); })
-      //  .catch((data) => {
-      //    console.log(data);
-      //  });
-    }
-    else {
-      common.logWrite('not deploying...');
-      common.logWrite('finish');
-    }
-  });
-});
+          envs.split(',')
+            .reduce(reducer, Promise.resolve())
+            .then( () => common.logWrite('all done...') )
+            .catch( (e) => console.error('error: ' + e.stack) );
+        }
+        else {
+          common.logWrite('not deploying...');
+          common.logWrite('finish');
+        }
+      });
+  })
+  .catch( (e) => console.error('error: ' + e.stack) );
