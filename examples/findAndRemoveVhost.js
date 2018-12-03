@@ -2,7 +2,10 @@
 /*jslint node:true, esversion:6 */
 // findAndRemoveVhost.js
 // ------------------------------------------------------------------
-// In Apigee Edge, find all proxies with a reference vhost. Optionally remove the vhost if it is not the only vhost.
+//
+// In Apigee Edge, find all proxies with a reference vhost. Optionally remove
+// the vhost from the proxy if it is not the only vhost. Can be helpful in
+// removing the 'default' (insecure) vhost from all proxies.
 //
 // Copyright 2017 Google LLC.
 //
@@ -18,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:35:22>
+// last saved: <2018-December-03 13:56:06>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
