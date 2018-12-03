@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-03 11:15:52>
+// last saved: <2018-December-03 14:52:01>
 
 /* global describe, faker, it */
 
@@ -56,6 +56,30 @@ describe('Developer', function() {
         });
       });
     });
+
+    describe('get', function() {
+
+      it('should get a list of developers', () =>
+         edgeOrg.developers.get({})
+         .then ( (result) => {
+           assert.notExists(result.error);
+           assert.exists(result.length);
+           assert.isAtLeast(result.length, 1);
+         })
+      );
+
+      it('should fail to get a non-existent developer', () => {
+        const developerEmail = faker.random.alphaNumeric(22);
+        return edgeOrg.developers.get({developerEmail})
+         .then ( (result) => {
+           assert.isNotNull(result.error, "the expected error did not occur");
+           assert.exists(result.message);
+           assert.isTrue(result.message.startsWith(`DeveloperId ${developerEmail} does not exist`));
+         });
+      });
+
+    });
+
 
     describe('delete', function() {
       it('should delete a developer', function(done) {

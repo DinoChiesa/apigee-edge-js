@@ -47,7 +47,62 @@ describe('Promise', function() {
 
   describe('get', function() {
 
-    it('should connect and get a few things via promises', function(done) {
+    it('should connect and get the environments', () =>
+      common.connectEdge()
+       .then ( (org) => org.environments.get({}) )
+       .then ( (result) => assert.isAtLeast(result.length, 1) )
+      );
+
+    it('should connect and get one environment', () =>
+      common.connectEdge()
+       .then ( (org) => org.environments.get({ env: environments[0] }) ) );
+
+    it('should connect and get developers', () =>
+      common.connectEdge()
+       .then ( (org) => org.developers.get() )
+       .then ( (result) => assert.isAtLeast(result.length, 1) )
+      );
+
+    it('should connect and get proxies', () =>
+      common.connectEdge()
+       .then ( (org) => org.proxies.get() )
+       .then ( (result) => assert.isAtLeast(result.length, 1) )
+      );
+
+    it('should connect and get kvms', () =>
+      common.connectEdge()
+       .then ( (org) => org.kvms.get() )
+       .then ( (result) => assert(Array.isArray(result) ) )
+      );
+
+    it('should connect and get kvms in an environment', () =>
+      common.connectEdge()
+       .then ( (org) => org.kvms.get({ env: environments[0]}) )
+       .then ( (result) => assert(Array.isArray(result) ) )
+      );
+
+    it('should connect and get sharedflows', () =>
+      common.connectEdge()
+       .then ( (org) => org.sharedflows.get() )
+       .then ( (result) => assert(Array.isArray(result) ) )
+      );
+
+    it('should connect and get flowhooks in an environment', () =>
+      common.connectEdge()
+       .then ( (org) => org.flowhooks.get({ env: environments[0]}) )
+       .then ( (result) => assert(Array.isArray(result) ) )
+      );
+
+    it('should connect and fail to get flowhooks (no environment)', () =>
+      common.connectEdge()
+       .then ( (org) => org.flowhooks.get() )
+       .then ( (result) => {
+         assert.isFalse(Array.isArray(result) ) ;
+         assert.exists(result.error) ;
+       })
+      );
+
+    it('should connect and get a few things successfully via promises', function(done) {
       common.connectEdge()
         .then ( (org) => {
           org.environments.get()
@@ -79,49 +134,87 @@ describe('Promise', function() {
 
 
   describe('create', function() {
-    it('should create a few things in an env via promises', function(done) {
-      common.connectEdge()
-        .then ( (org) => {
 
-          org.caches.create({cacheName, environment:environments[0]})
-            .then( (result) => assert.equal(result.name, cacheName) )
-            .then( () => {
-              var options = {
-                    developerEmail,
-                    lastName,
-                    firstName,
-                    userName : entityName + '-developer',
-                    attributes: { uuid: faker.random.uuid() }
-                  };
-              return org.developers.create(options);
-            })
-            .then ( (result) => done() );
+    it('should create a cache in an env via promises', () =>
+       common.connectEdge()
+        .then ( (org) =>
+                org.caches.create({cacheName, environment:environments[0]})
+                .then( (result) => assert.equal(result.name, cacheName) )
+              )
+      );
 
-        })
-        .catch( (e) => {
-          console.log('error: ' + e.stack);
-          assert.isTrue(false, "unexpected error");
-        });
-    });
+    it('should create a developer in an env via promises', () =>
+       common.connectEdge()
+       .then ( (org) => org.developers.create({
+                 developerEmail,
+                 lastName,
+                 firstName,
+                 userName : entityName + '-developer',
+                 attributes: { uuid: faker.random.uuid() }
+               })
+             )
+      );
+
+  });
+
+  describe('create-failure', function() {
+    it('should return proper errors via promises on failure to create a few things', () =>
+       common.connectEdge()
+       .then( (org) =>
+              org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)})
+              .then( (result) => assert.equal(result.error, "bad status") )
+              .then( () => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
+              .then( (result) => assert.isTrue(result.error.startsWith("missing required inputs,")) )
+            )
+      );
   });
 
 
-  describe('delete', function() {
-    it('should delete a few things in an env via promises', function(done) {
+  describe('delete', () => {
+    it('should delete a cache in an env via promises', () =>
       common.connectEdge()
-        .then ( (org) => {
+        .then ( (org) =>
+                org.caches.del({cacheName:entityName + '-cache', environment:environments[0]})
+                  .then( () => org.developers.del({developerEmail}) )
+              )
+      );
 
-          const cacheName = entityName + '-cache';
-          org.caches.del({cacheName, environment:environments[0]})
-            .then( () => org.developers.del({developerEmail}) )
-            .then ( (result) => done() );
-        })
+    it('should delete a developer via promises', () =>
+      common.connectEdge()
+        .then ( (org) => org.developers.del({developerEmail}) )
+      );
 
-        .catch( (e) => {
-          console.log('error: ' + e.stack);
-          assert.isTrue(false, "unexpected error");
-        });
-    });
+  });
+
+
+  describe('delete-failure', () => {
+
+    it('should return proper errors when failing to delete non-existent cache', () =>
+      common.connectEdge()
+        .then ( (org) =>
+          org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
+        )
+       .then( (result) => assert.equal(result.error, "bad status") )
+      );
+
+    it('should return proper errors when failing to delete from non-existent env', () =>
+      common.connectEdge()
+        .then ( (org) =>
+          org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
+        )
+       .then( (result) => assert.equal(result.error, "bad status") )
+      );
+
+
+    it('should return proper errors when failing to delete because of unspecified name', () =>
+      common.connectEdge()
+        .then ( (org) =>
+          org.caches.del({environment:faker.random.alphaNumeric(22)})
+        )
+       .then( (result) => assert.equal(result.error, "missing name for cache") )
+      );
+
+
   });
 
 
