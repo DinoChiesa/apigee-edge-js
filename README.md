@@ -228,7 +228,7 @@ apigeeEdge.connect(options)
 
 ### Deploy an API Proxy
 
-```
+```js
 var options = {
   name: 'proxy1',
   revision: 2,
@@ -247,43 +247,41 @@ org.proxies.deploy(options, function(e, result) {
 
 ### Get the latest revision of an API Proxy
 
-```
-org.proxies.getRevisions({name:'proxyname-here'}, function(e, result){
-  if (e) {
-    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
-    return;
-  }
-  console.log('revisions: ' + JSON.stringify(result)); // eg, [ "1", "2", "3"]
-  var latestRevision = result[result.length-1];
-});
-```
-
-
-### Get the latest revision of an API Proxy
-
-```
-var async = require('async');
-analyzeOneProxy(proxyName, callback) {
-  collection.get({ name: proxyName }, function(e, result) {
-    console.log(JSON.stringify(result));
+```js
+org.proxies.getRevisions({name:'proxyname-here'})
+  then( (result) => {
+    console.log('revisions: ' + JSON.stringify(result)); // eg, [ "1", "2", "3"]
+    var latestRevision = result[result.length-1];
   });
-}
-
-org.proxies.get({}, function(e, proxies) {
-  if (e) {
-    console.log("ERROR:\n" + JSON.stringify(e, null, 2));
-    return;
-  }
-  async.mapSeries(proxies, analyzeOneProxy, function (e, proxyResults) {
-    if (e) {
-      console.log("ERROR:\n" + JSON.stringify(e, null, 2));
-      return;
-    }
-    var flattened = [].concat.apply([], proxyResults);
-    console.log(JSON.stringify(flattened, null, 2));
-  });
-});
 ```
+
+
+### Get the latest revision of every API Proxy in an org
+
+```
+apigeeEdge.connect(options)
+  .then( (org) => {
+    common.logWrite('connected');
+    org.proxies.get({})
+      .then( (items) => {
+        var reducer = (promise, proxyname) =>
+          promise .then( (results) =>
+                         org.proxies
+                           .get({ name: proxyname })
+                           .then( ({revision}) => [ ...results, {proxyname, revision:revision[revision.length-1]} ] )
+
+                       );
+
+        items
+            .reduce(reducer, Promise.resolve([]))
+            .then( (arrayOfResults) => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) )
+            .catch( (e) => console.error('error: ' + e.stack) );
+
+      });
+  })
+  .catch( (e) => console.error('error: ' + e.stack) );
+```
+
 
 ### Create a Keystore and load a Key and Cert
 
