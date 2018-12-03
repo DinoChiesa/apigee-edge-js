@@ -34,8 +34,7 @@ apigeeEdge.connect(options, function(e, org){
         developerEmail : "JDimaggio@example.org",
         lastName : "Dimaggio",
         firstName : "Josephine",
-        userName : "JD1",
-        attributes: { "uuid": uuidV4() }
+        userName : "JD1"
       };
 
   org.developers.create(options, function(e, result){
@@ -61,6 +60,33 @@ apigeeEdge.connect(options, function(e, org){
 });
 ```
 
+The methods on the various objects accept callbacks, and return promises. You
+should choose one or the other. Here's an example using ES6 promises instead of
+traditional JS callbacks:
+
+```js
+var edgejs = require('apigee-edge-js'),
+    apigeeEdge = edgejs.edge;
+
+var options = { org : config.org, netrc: true };
+
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    var options = {
+          developerEmail : "JDimaggio@example.org",
+          lastName : "Dimaggio",
+          firstName : "Josephine",
+          userName : "JD1"
+        };
+
+    org.developers.create(options)
+      .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
+  })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
+  });
+});
+```
 
 ## This is not an official Google product
 
@@ -106,6 +132,8 @@ Pull requests are welcomed, for the code or for examples.
 
 ### Export the latest revision of an API Proxy
 
+
+using callbacks:
 ```js
 edgeOrg.proxies.export({name:'proxyname'}, function(e,result) {
   if (e) {
@@ -115,12 +143,21 @@ edgeOrg.proxies.export({name:'proxyname'}, function(e,result) {
   fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
   console.log('ok');
 });
+```
 
+using promises:
+```js
+edgeOrg.proxies.export({name:'proxyname'})
+  .then ( (result) => {
+    fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
+    console.log('ok');
+  });
 ```
 
 
 ### Export a specific revision of an API Proxy
 
+callbacks:
 ```js
 edgeOrg.proxies.export({name:'proxyname', revision:3}, function(e,result) {
   if (e) {
@@ -130,11 +167,22 @@ edgeOrg.proxies.export({name:'proxyname', revision:3}, function(e,result) {
   fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
   console.log('ok');
 });
-
 ```
+
+promises:
+
+```js
+edgeOrg.proxies.export({name:'proxyname', revision:3})
+  .then ( (result) => {
+    fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
+    console.log('ok');
+  });
+```
+
 
 ### Import an API Proxy from a Directory
 
+callbacks: 
 ```js
 var options = {
       mgmtServer: mgmtserver,
@@ -155,6 +203,25 @@ apigeeEdge.connect(options, function(e, org){
       process.exit(1);
     }
     console.log('import ok. %s name: %s r%d', term, result.name, result.revision);
+  });
+```
+
+promises:
+```js
+var options = {
+      mgmtServer: mgmtserver,
+      org : orgname,
+      user: username,
+      password:password
+    };
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'})
+      .then ( (result) =>
+        console.log('import ok. %s name: %s r%d', term, result.name, result.revision) );
+  })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
   });
 ```
 
@@ -241,7 +308,8 @@ org.proxies.get({}, function(e, proxies) {
 
 ### Read and Update Mask Configs for an Organization
 
-```
+callbacks:
+```js
 const edgejs = require('apigee-edge-js');
 const apigeeEdge = edgejs.edge;
 var options = {org : 'ORGNAME', netrc: true, verbosity : 1 };
@@ -268,13 +336,40 @@ apigeeEdge.connect(options, function(e, org) {
 });
 ```
 
+ES6 promises:
 
-### More Examples
+```js
+const edgejs = require('apigee-edge-js');
+const apigeeEdge = edgejs.edge;
+var options = {org : 'ORGNAME', netrc: true, verbosity : 1 };
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    console.log('org: ' + org.conn.orgname);
+    org.maskconfigs.get({name: 'default'})
+      .then( (result) => console.log(JSON.stringify(result)) )
+      .then( () => org.maskconfigs.set({ json : '$.store.book[*].author' }) )
+      .then( (result) => console.log(JSON.stringify(result)) )
+      .then( () => org.maskconfigs.add({ xml : '/apigee:Store/Employee' }) )
+      .then( (result) => console.log(JSON.stringify(result)) )
+      .then( () => org.maskconfigs.remove({ remove : ['xPathsFault','jSONPathsFault'] }) )
+      .then( (result) => console.log(JSON.stringify(result)) )
+      .then( () => org.maskconfigs.add({ variables : 'dino_var' }) )
+      .then( (result) => console.log(JSON.stringify(result)) )
+      .then( () => org.maskconfigs.add({ namespaces : { prefix:'apigee', value:'urn://apigee' } })
+      .then( (result) => console.log(JSON.stringify(result)) )
+    })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
+  });
+```
+
+
+### Lots More Examples
 
 See [the examples directory](./examples) for a set of working example tools.
 
 
-## To Run Tests
+## To Run the Tests
 
 To run tests you should create a file called testConfig.json and put it in the toplevel dir of the repo.
 It should have contents like this:
@@ -304,8 +399,13 @@ npm test
 ```
 
 or
-```
+```sh
 node_modules/mocha/bin/mocha
+```
+
+To run a specific subset of tests, specify a regex to the grep option:
+```sh
+node_modules/mocha/bin/mocha  --grep "^Cache.*"
 ```
 
 
@@ -325,12 +425,13 @@ node_modules/mocha/bin/mocha
 
 2. Does it have a wrapper for creating a virtualhost?
 
-   No, that's one thing it does not help with, at this time. Let me know if you think that's important.
+   No, that's one thing it does not help with, at this time. Let me know if you
+   think that's important.
 
 2. How does the library authenticate to Apigee Edge?
 
    The library obtains an oauth token using the standard client_id and secret for
-   administrative operations.  The library caches the token into a filesystem file, for
+   administrative operations. The library caches the token into a filesystem file, for
    future use. The library runtime automatically refreshes the token as necessary, even
    during a single long-running script.
 
