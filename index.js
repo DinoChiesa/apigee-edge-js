@@ -18,12 +18,11 @@
 // limitations under the License.
 //
 // created: Thu Mar 23 14:34:12 2017
-// last saved: <2017-December-08 13:12:55>
+// last saved: <2018-December-03 08:52:25>
 
-var edge = require('./lib/edge.js'),
-    utility = require('./lib/utility.js');
+const Edge = require('./lib/edge.js');
 
 module.exports = {
-  edge : edge,
-  utility : utility
+  edge : new Edge(),
+  utility : require('./lib/utility.js')
 };

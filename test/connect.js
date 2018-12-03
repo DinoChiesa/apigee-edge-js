@@ -1,7 +1,7 @@
 // connect.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2017-December-08 13:19:05>
+// last saved: <2018-December-03 09:24:24>
 
 var common = require('./common');
 

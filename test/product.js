@@ -3,7 +3,7 @@
 //
 // tests for API Product.
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2017-December-08 13:19:02>
+// last saved: <2018-December-03 09:24:58>
+
+/* global describe, faker, it, path, process */
 
 var common = require('./common');
 

@@ -1,9 +1,7 @@
 // common.js
 // ------------------------------------------------------------------
 //
-// Description goes here....
-//
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +16,13 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2017-December-08 13:19:00>
+// last saved: <2018-December-03 10:44:58>
+
+/* global global */
 
 var assert = require('chai').assert;
 var path = require('path');
-var aej = require('../index.js');
+var apigee = require('../index.js');
 var faker = require('faker');
 var sprintf = require('sprintf-js').sprintf;
 var config = require('../testConfig.json');
@@ -47,20 +47,25 @@ var config = require('../testConfig.json');
 
 global.assert = assert;
 global.path = path;
-global.aej = aej;
+global.aej = apigee;
 global.config = config;
 global.faker = faker;
 global.sprintf = sprintf;
-global.utility = aej.utility;
-global.apigeeEdge = aej.edge;
+global.utility = apigee.utility;
+global.apigeeEdge = apigee.edge;
 
 function connectEdge(cb) {
   var options = Object.assign({}, config);
   //options.verbosity = 1;
-  apigeeEdge.connect(options, function(e, org){
-    assert.isNull(e, JSON.stringify(e));
-    cb(org);
-  });
+  if ( cb) {
+    return apigeeEdge.connect(options, function(e, org){
+      assert.isNull(e, JSON.stringify(e));
+      cb(org);
+    });
+  }
+  else {
+    return apigeeEdge.connect(options);
+  }
 }
 
 exports.connectEdge = connectEdge;
