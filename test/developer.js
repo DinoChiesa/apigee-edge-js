@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-03 16:36:30>
+// last saved: <2018-December-04 12:51:25>
 
 /* global describe, faker, it */
 
@@ -26,6 +26,7 @@ var common = require('./common');
 
 describe('Developer', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
 
     var firstName = faker.name.firstName(); // Rowan

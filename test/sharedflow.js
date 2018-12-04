@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 11:26:03>
+// last saved: <2018-December-04 12:51:15>
 
 /* global describe, faker, it, path, before */
 
@@ -31,6 +31,7 @@ describe('Sharedflow', function() {
         contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
 
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
 
     describe('sf-import-from-zip-and-get', function() {

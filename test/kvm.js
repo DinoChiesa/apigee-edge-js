@@ -24,6 +24,7 @@ var common = require('./common');
 
 describe('KVM', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg) {
     const num = faker.random.number(),
           word = faker.lorem.word(),

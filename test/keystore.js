@@ -18,7 +18,9 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-03 09:24:41>
+// last saved: <2018-December-04 12:53:03>
+
+/* global path, faker, describe, it, before, after */
 
 var common = require('./common');
 var fs = require('fs');
@@ -30,6 +32,7 @@ describe('Keystore', function() {
   var contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
 
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
 
   common.connectEdge(function(edgeOrg){
 

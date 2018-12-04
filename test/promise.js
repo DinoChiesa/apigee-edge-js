@@ -24,6 +24,7 @@ var common = require('./common');
 
 describe('Promise', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
 
   const num = faker.random.number(),
         word = faker.lorem.word(),

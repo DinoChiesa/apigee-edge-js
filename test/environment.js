@@ -24,6 +24,7 @@ var common = require('./common');
 
 describe('Environment', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
       var environments = [];
 

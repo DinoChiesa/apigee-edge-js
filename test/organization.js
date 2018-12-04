@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:45:39>
+// last saved: <2018-December-04 12:49:59>
 
 /* global describe, faker, it */
 
@@ -26,6 +26,7 @@ var common = require('./common');
 
 describe('Organization', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
     const contrivedPropertyName1 = faker.random.alphaNumeric(22),
           contrivedPropertyName2 = faker.random.alphaNumeric(22);

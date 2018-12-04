@@ -24,6 +24,7 @@ var common = require('./common');
 
 describe('DeveloperApp', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
 
     const entityName = "apigee-edge-js-test-" + faker.lorem.word() + faker.random.number(),

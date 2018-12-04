@@ -16,12 +16,15 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2018-December-03 09:24:24>
+// last saved: <2018-December-04 12:53:36>
+
+/* global describe, it, before, after, faker, path, config, apigeeEdge */
 
 var common = require('./common');
 
 describe('Connect', function() {
   this.timeout(common.testTimeout);
+  this.slow(common.slowThreshold);
   describe('connect-success', function() {
     it('should connect to an org', function(done) {
       var options = Object.assign({}, config);

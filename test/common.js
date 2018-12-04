@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2018-December-03 10:44:58>
+// last saved: <2018-December-04 12:50:59>
 
 /* global global */
 
@@ -70,3 +70,4 @@ function connectEdge(cb) {
 
 exports.connectEdge = connectEdge;
 exports.testTimeout = config.timeout || 35000;
+exports.slowThreshold = config.slowThreshold || 3500;
