@@ -27,7 +27,7 @@ describe('Cache', function() {
   common.connectEdge(function(edgeOrg){
     const num = faker.random.number(),
           word = faker.lorem.word(),
-          cacheName = "apigee-edge-js-test-" + word + '-' + num;
+          cacheName = `apigee-edge-js-test-${word}-${num}`;
       var environments = [];
 
       before(function(done) {

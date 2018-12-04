@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-03 14:52:01>
+// last saved: <2018-December-03 16:36:30>
 
 /* global describe, faker, it */
 
@@ -74,7 +74,7 @@ describe('Developer', function() {
          .then ( (result) => {
            assert.isNotNull(result.error, "the expected error did not occur");
            assert.exists(result.message);
-           assert.isTrue(result.message.startsWith(`DeveloperId ${developerEmail} does not exist`));
+           assert.equal(result.message,`DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
          });
       });
 
@@ -98,6 +98,7 @@ describe('Developer', function() {
           done();
         });
       });
+
       it('should fail to delete a non-existent developer', function(done) {
         let badOptions = Object.assign({}, options);
         badOptions.developerEmail = faker.random.alphaNumeric(22) + "@apigee-edge-js-test.org";
