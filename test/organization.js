@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:37:51>
+// last saved: <2018-December-04 12:45:39>
 
 /* global describe, faker, it */
 
@@ -60,7 +60,7 @@ describe('Organization', function() {
           });
       });
 
-      it('should not modify an existing property on the org', () => {
+      it('should silently not modify an existing property on the org', () => {
         var propertyHash = {};
         propertyHash[contrivedPropertyName1] = 928;
 
@@ -128,13 +128,32 @@ describe('Organization', function() {
           });
       });
 
-
       it('should set the consumer secret length for the org', () => {
         return edgeOrg.setConsumerSecretLength(48)
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.secret.length']);
             assert.equal(result['keymanagement.consumer.secret.length'], "48");
+          });
+      });
+
+      it('should fail to set the consumer key length for the org', () => {
+        return edgeOrg.setConsumerKeyLength(101010)
+          .then( (result) => {
+            assert.equal(typeof result, "object");
+            assert.exists(result.error);
+            assert.exists(result.error.stack);
+            assert.equal(result.error.message, "invalid argument");
+          });
+      });
+
+      it('should fail to set the consumer secret length for the org', () => {
+        return edgeOrg.setConsumerSecretLength(179238)
+          .then( (result) => {
+            assert.equal(typeof result, "object");
+            assert.exists(result.error);
+            assert.exists(result.error.stack);
+            assert.equal(result.error.message, "invalid argument");
           });
       });
 
