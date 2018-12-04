@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-03 09:25:35>
+// last saved: <2018-December-04 11:26:03>
 
 /* global describe, faker, it, path, before */
 
@@ -89,7 +89,7 @@ describe('Sharedflow', function() {
         });
       });
 
-      it('should get one sharedFlow', function(done) {
+      it('should get one randomly-selected sharedFlow', function(done) {
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
         var ix = Math.floor(Math.random() * sharedFlowList.length);
         edgeOrg.sharedflows.get({name:sharedFlowList[ix]}, function(e, result){
@@ -111,6 +111,7 @@ describe('Sharedflow', function() {
             };
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
         for(var i = 0; i<numWanted; i++) {
+          // the selected item may be repeated
           var ix = Math.floor(Math.random() * sharedFlowList.length);
           edgeOrg.sharedflows.export({name:sharedFlowList[ix]}, cb);
         }
