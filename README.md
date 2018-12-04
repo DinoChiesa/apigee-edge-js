@@ -1,9 +1,8 @@
 # apigee-edge-js
 
-The missing library of functions for administering Apigee Edge from nodejs.
+A library of functions for administering Apigee Edge from nodejs.
 
-## Do you want to automate the administration of Apigee Edge from Nodejs?
-
+Do you want to automate the administration or management of Apigee Edge from Nodejs?
 This library helps you do that.
 
 Example:
@@ -12,7 +11,49 @@ To create a new developer account:
 
 ```js
 var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
+    apigeeEdge = edgejs.edge;
+
+var options = {
+    org : config.org,
+    user: config.username,
+    password: config.password
+    };
+
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    var options = {
+          developerEmail : "JDimaggio@example.org",
+          lastName : "Dimaggio",
+          firstName : "Josephine",
+          userName : "JD1"
+        };
+
+    org.developers.create(options)
+      .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
+  })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
+  });
+```
+
+You can also tell the library to read credentials from [.netrc](https://www.google.com/search?q=man+.netrc):
+
+```js
+var edgejs = require('apigee-edge-js'),
+    utility = edgejs.utility,
+    apigeeEdge = edgejs.edge;
+
+var options = { org : config.org, netrc: true };
+apigeeEdge.connect(options).then(...);
+
+```
+
+The methods on the various objects accept callbacks, and return promises. In
+code you write that uses this library, it's probably best if you choose one or the
+other. Here's an example using old-school callbacks instead of ES6 promises:
+
+```js
+var edgejs = require('apigee-edge-js'),
     apigeeEdge = edgejs.edge;
 
 var options = {
@@ -28,7 +69,6 @@ apigeeEdge.connect(options, function(e, org){
     console.log(e.stack);
     process.exit(1);
   }
-  common.logWrite('connected');
 
   var options = {
         developerEmail : "JDimaggio@example.org",
@@ -47,47 +87,6 @@ apigeeEdge.connect(options, function(e, org){
 });
 ```
 
-You can also tell the library to read credentials from .netrc :
-
-```js
-var edgejs = require('apigee-edge-js'),
-    utility = edgejs.utility,
-    apigeeEdge = edgejs.edge;
-
-var options = { org : config.org, netrc: true };
-apigeeEdge.connect(options, function(e, org){
- ...
-});
-```
-
-The methods on the various objects accept callbacks, and return promises. You
-should choose one or the other. Here's an example using ES6 promises instead of
-traditional JS callbacks:
-
-```js
-var edgejs = require('apigee-edge-js'),
-    apigeeEdge = edgejs.edge;
-
-var options = { org : config.org, netrc: true };
-
-apigeeEdge.connect(options)
-  .then ( (org) => {
-    var options = {
-          developerEmail : "JDimaggio@example.org",
-          lastName : "Dimaggio",
-          firstName : "Josephine",
-          userName : "JD1"
-        };
-
-    org.developers.create(options)
-      .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
-  })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
-  });
-});
-```
-
 ## This is not an official Google product
 
 This library and the example tools included here are not an official Google product.
@@ -99,8 +98,14 @@ Pull requests are welcomed.
 
 To start, you call apigeeEdge.connect(). This will connect to an Edge organization. If
 it is a SaaS organization, this method will try to find a stashed OAuth token and if not
-will get an OAuth token. The callback will receive (e, org), where e is an error,
-possibly null, and org is an Organization object with the following members, each a
+will get an OAuth token.
+
+* *If you use callbacks,* the callback will receive (e, org), where e is an error,
+possibly null, and org is an Organization object
+
+* *If you use promises,* the promise will resolve with the value of an Organization object
+
+The organization object has the following members, each a
 hash with various child members as functions:
 
 
@@ -121,6 +126,7 @@ hash with various child members as functions:
 | stats                | get                                                              |
 | maskconfigs          | get, set, add/update, remove                                     |
 
+
 ## What is possible here?
 
 As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
@@ -132,6 +138,16 @@ Pull requests are welcomed, for the code or for examples.
 
 ### Export the latest revision of an API Proxy
 
+using promises:
+```js
+edgeOrg.proxies.export({name:'proxyname'})
+  .then ( (result) => {
+    fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
+    console.log('ok');
+  });
+```
+
+In the case of an error, the result object will contain an error member. Check it! 
 
 using callbacks:
 ```js
@@ -145,17 +161,17 @@ edgeOrg.proxies.export({name:'proxyname'}, function(e,result) {
 });
 ```
 
-using promises:
+
+### Export a specific revision of an API Proxy
+
+promises:
 ```js
-edgeOrg.proxies.export({name:'proxyname'})
+edgeOrg.proxies.export({name:'proxyname', revision:3})
   .then ( (result) => {
     fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
     console.log('ok');
   });
 ```
-
-
-### Export a specific revision of an API Proxy
 
 callbacks:
 ```js
@@ -169,20 +185,30 @@ edgeOrg.proxies.export({name:'proxyname', revision:3}, function(e,result) {
 });
 ```
 
-promises:
-
-```js
-edgeOrg.proxies.export({name:'proxyname', revision:3})
-  .then ( (result) => {
-    fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
-    console.log('ok');
-  });
-```
 
 
 ### Import an API Proxy from a Directory
 
-callbacks: 
+promises:
+```js
+var options = {
+      mgmtServer: mgmtserver,
+      org : orgname,
+      user: username,
+      password:password
+    };
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'})
+      .then ( (result) =>
+        console.log('import ok. %s name: %s r%d', term, result.name, result.revision) );
+  })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
+  });
+```
+
+callbacks:
 ```js
 var options = {
       mgmtServer: mgmtserver,
@@ -206,24 +232,6 @@ apigeeEdge.connect(options, function(e, org){
   });
 ```
 
-promises:
-```js
-var options = {
-      mgmtServer: mgmtserver,
-      org : orgname,
-      user: username,
-      password:password
-    };
-apigeeEdge.connect(options)
-  .then ( (org) => {
-    org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'})
-      .then ( (result) =>
-        console.log('import ok. %s name: %s r%d', term, result.name, result.revision) );
-  })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
-  });
-```
 
 
 ### Deploy an API Proxy
@@ -234,14 +242,16 @@ var options = {
   revision: 2,
   environment : 'test'
 };
-org.proxies.deploy(options, function(e, result) {
-  if (e) {
-    console.log(JSON.stringify(e, null, 2));
-    if (result) { console.log(JSON.stringify(result, null, 2)); }
-    return e;
-  }
-  console.log('deploy ok.');
-});
+
+org.proxies.deploy(options)
+  .then( (result) => {
+    if (result.error) {
+      console.log('deployment failed.');
+    }
+    else {
+      console.log('deployment succeeded.');
+    }
+  });
 ```
 
 
@@ -287,6 +297,7 @@ apigeeEdge.connect(options)
 
 ### Create a Keystore and load a Key and Cert
 
+using callbacks:
 ```js
   var options = {
         environment : 'test',
@@ -336,8 +347,7 @@ apigeeEdge.connect(options, function(e, org) {
 });
 ```
 
-ES6 promises:
-
+with ES6 promises:
 ```js
 const edgejs = require('apigee-edge-js');
 const apigeeEdge = edgejs.edge;
@@ -419,7 +429,7 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 2. What is this thing good for?
 
    If your team builds nodejs scripts to perform administrative operations on your
-   Apigee Edge organization, you may want to use this library.  It provides a wrapper of
+   Apigee Edge organization, you may want to use this library. It provides a wrapper of
    basic operations to allow you to import and deploy proxies, create products or
    developers or applications, populate KVMs, create caches, and so on.
 
@@ -430,10 +440,10 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 
 2. How does the library authenticate to Apigee Edge?
 
-   The library obtains an oauth token using the standard client_id and secret for
-   administrative operations. The library caches the token into a filesystem file, for
-   future use. The library runtime automatically refreshes the token as necessary, even
-   during a single long-running script.
+   The library obtains an oauth token using the standard client_id and secret
+   for administrative operations. The library caches the token into a filesystem
+   file, for future use. The library runtime automatically caches the token, and
+   refreshes the token as necessary, even during a single long-running script.
 
 
 
