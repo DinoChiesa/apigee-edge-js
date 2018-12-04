@@ -100,7 +100,7 @@ To start, you call apigeeEdge.connect(). This will connect to an Edge organizati
 it is a SaaS organization, this method will try to find a stashed OAuth token and if not
 will get an OAuth token.
 
-* *If you use callbacks,* the callback will receive (e, org), where e is an error,
+* *If you use callbacks,* the callback will receive `(e, org)`, where e is an error,
 possibly null, and org is an Organization object
 
 * *If you use promises,* the promise will resolve with the value of an Organization object
@@ -125,6 +125,8 @@ hash with various child members as functions:
 | audits               | get                                                              |
 | stats                | get                                                              |
 | maskconfigs          | get, set, add/update, remove                                     |
+
+Each child function gets invoked as a function returning a promise: `fn(options)`, or in old-school callback style: `fn(options, callback)` .
 
 
 ## What is possible here?
