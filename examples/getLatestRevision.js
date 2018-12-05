@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2018-December-03 13:47:18>
+// last saved: <2018-December-05 14:59:25>
 
 /* jshint esversion: 6, node: true */
 /* global process, console, Buffer */
@@ -12,12 +12,11 @@
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
-      sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
       version    = '20181203-1332',
-      defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
-        ['S' , 'sharedflow', 'query sharedflows. Default: query proxies.']
+        ['P' , 'prefix=ARG', 'optional. name prefix. query revision of proxies with names starting with this prefix.' ],
+        ['S' , 'sharedflow', 'optional. query sharedflows. Default: query proxies.']
       ])).bindHelp();
 
 // ========================================================
@@ -54,10 +53,10 @@ apigeeEdge.connect(options)
                          collection
                            .get({ name: proxyname })
                            .then( ({revision}) => [ ...results, {proxyname, revision:revision[revision.length-1]} ] )
-
                        );
 
         items
+            .filter( name => (! opt.options.prefix) || name.startsWith(opt.options.prefix ))
             .reduce(reducer, Promise.resolve([]))
             .then( (arrayOfResults) => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) )
             .catch( (e) => console.error('error: ' + e.stack) );
