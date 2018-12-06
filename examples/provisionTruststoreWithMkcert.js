@@ -206,9 +206,11 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
       let certs = certList.Certificates;
       if (opt.options.filter) {
         let desiredLabels = opt.options.filter.split(',').map( x => x.trim().toLowerCase());
-        certs = certs.filter( (certName) =>
-                              desiredLabels.reduce( (acc, desiredLabel) => acc || certName.toLowerCase().startsWith(desiredLabel), false));
+        certs = certs
+          .filter( (certName) =>
+                   desiredLabels.reduce( (acc, desiredLabel) => acc || certName.toLowerCase().startsWith(desiredLabel), false));
       }
+      certs = certs.sort();
 
       if (opt.options.list) {
         console.log('\n' + JSON.stringify(certs, null, 2));
