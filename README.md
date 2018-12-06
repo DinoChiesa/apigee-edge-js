@@ -134,7 +134,7 @@ Each child function gets invoked as a function returning a promise: `fn(options)
 
 As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
 
-You can examine the lib/edge.js file to see the full list of operations.  Or see [the examples directory](./examples) for some example code. A few examples are shown here.
+You can examine [the examples directory](./examples) for some example code illustrating some practical possibilities. A few specific code examples are shown here.
 
 Pull requests are welcomed, for the code or for examples.
 
