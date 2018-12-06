@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:51:44>
+// last saved: <2018-December-05 16:27:01>
 
 /* global describe, faker, it, path, process */
 
@@ -43,7 +43,6 @@ describe('Product', function() {
       it('should create an apiproduct', function(done) {
         edgeOrg.products.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
@@ -63,7 +62,6 @@ describe('Product', function() {
         edgeOrg.products.get({}, function(e, result){
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           assert.isNotNull(result, "result is empty");
-          //utility.logWrite(JSON.stringify(result, null, 2));
           assert.isAtLeast(result.length, 1, "zero results.");
           done();
         });
@@ -92,7 +90,6 @@ describe('Product', function() {
 
       it('should fail to get a non-existent apiproduct', function(done) {
         edgeOrg.products.get({name:faker.random.alphaNumeric(12)}, function(e, result){
-          //utility.logWrite('result: ' + JSON.stringify(result));
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -105,7 +102,6 @@ describe('Product', function() {
       it('should delete an apiproduct', function(done) {
         edgeOrg.products.del({productName:productName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });

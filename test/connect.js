@@ -16,9 +16,9 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2018-December-04 12:53:36>
+// last saved: <2018-December-05 16:34:18>
 
-/* global describe, it, before, after, faker, path, config, apigeeEdge */
+/* global describe, it, before, after, faker, path, config, apigee */
 
 var common = require('./common');
 
@@ -36,9 +36,8 @@ describe('Connect', function() {
       //       password: config.password
       //     };
 
-      apigeeEdge.connect(options, function(e, org){
+      apigee.edge.connect(options, function(e, org) {
         assert.isNull(e, JSON.stringify(e));
-        //utility.logWrite(org.conn);
         assert.equal(org.conn.orgname, config.org);
         done();
       });
@@ -56,7 +55,7 @@ describe('Connect', function() {
             no_token : true
           };
 
-      apigeeEdge.connect(options, function(e, conn){
+      apigee.edge.connect(options, function(e, conn) {
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });
@@ -71,7 +70,7 @@ describe('Connect', function() {
             no_token : true
           };
 
-      apigeeEdge.connect(options, function(e, conn){
+      apigee.edge.connect(options, function(e, conn){
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });
@@ -85,7 +84,7 @@ describe('Connect', function() {
             password: faker.random.alphaNumeric(16)
           };
 
-      apigeeEdge.connect(options, function(e, conn){
+      apigee.edge.connect(options, function(e, conn){
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });

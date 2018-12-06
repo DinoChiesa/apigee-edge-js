@@ -1,7 +1,7 @@
 // common.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google LLC
+// Copyright 2017-2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2018-December-04 12:50:59>
+// last saved: <2018-December-05 16:35:35>
 
-/* global global */
+/* global exports, global */
 
-var assert = require('chai').assert;
-var path = require('path');
-var apigee = require('../index.js');
-var faker = require('faker');
-var sprintf = require('sprintf-js').sprintf;
+const assert = require('chai').assert;
+const path   = require('path');
+const apigee = require('../index.js');
+const faker  = require('faker');
+//var sprintf = require('sprintf-js').sprintf;
+
 var config = require('../testConfig.json');
 // testConfig.json ought to look something like this:
 //
@@ -45,29 +46,29 @@ var config = require('../testConfig.json');
 // It can also have a verbosity flag. (truthy/falsy)
 //
 
+// export some global vars for all tests
 global.assert = assert;
 global.path = path;
 global.aej = apigee;
 global.config = config;
 global.faker = faker;
-global.sprintf = sprintf;
-global.utility = apigee.utility;
-global.apigeeEdge = apigee.edge;
+//global.sprintf = sprintf;
+global.apigee = apigee;
 
 function connectEdge(cb) {
-  var options = Object.assign({}, config);
+  let options = Object.assign({}, config);
   //options.verbosity = 1;
-  if ( cb) {
-    return apigeeEdge.connect(options, function(e, org){
+  if (cb) {
+    return apigee.edge.connect(options, function(e, org){
       assert.isNull(e, JSON.stringify(e));
       cb(org);
     });
   }
   else {
-    return apigeeEdge.connect(options);
+    return apigee.edge.connect(options);
   }
 }
 
 exports.connectEdge = connectEdge;
 exports.testTimeout = config.timeout || 35000;
-exports.slowThreshold = config.slowThreshold || 3500;
+exports.slowThreshold = config.slowThreshold || 5000;

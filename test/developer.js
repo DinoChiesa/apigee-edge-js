@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:51:25>
+// last saved: <2018-December-05 16:26:47>
 
 /* global describe, faker, it */
 
@@ -43,7 +43,6 @@ describe('Developer', function() {
       it('should create a developer', function(done) {
         edgeOrg.developers.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });
@@ -86,7 +85,6 @@ describe('Developer', function() {
       it('should delete a developer', function(done) {
         edgeOrg.developers.del({developerEmail:options.developerEmail}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
           done();
         });
       });

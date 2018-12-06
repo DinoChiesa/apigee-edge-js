@@ -18,18 +18,18 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:52:21>
+// last saved: <2018-December-05 17:22:24>
 
 /* global describe, faker, it, path, before */
 
-var common = require('./common');
-var fs = require('fs');
 //var path = require('path');
 
 describe('Proxy', function() {
-  var resourceDir = "./test/resources";
-  var dateVal = new Date().valueOf();
-  var contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
+  const common = require('./common'),
+        fs = require('fs'),
+        resourceDir = "./test/resources",
+        dateVal = new Date().valueOf(),
+        contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
@@ -43,7 +43,7 @@ describe('Proxy', function() {
         var actualPath = path.resolve(resourceDir);
         fs.readdir(actualPath, function(e, items) {
           assert.isNull(e, "error getting zips: " + JSON.stringify(e));
-          var re1 = new RegExp('^apiproxy-.+\.zip$');
+          let re1 = new RegExp('^apiproxy-.+\.zip$');
           zipFileList = items
             .filter(item => item.match(re1) )
             .map(item => path.resolve( path.join(resourceDir, item)) );
@@ -180,6 +180,15 @@ describe('Proxy', function() {
     });
 
 
+    function selectNRandom(list, N, promiseFn, done) {
+      function reducer(promise, num) {
+        let ix = Math.floor(Math.random() * list.length);
+        return promise.then( () => promiseFn(list[ix], ix, list))
+          .then( () => (1+num >= N) ? done(): {});
+      }
+      Array.from(Array(N).keys()).reduce(reducer, Promise.resolve());
+    }
+
     describe('get', function() {
       var proxyList;
       before(function(done){
@@ -191,7 +200,6 @@ describe('Proxy', function() {
         });
       });
 
-
       it('should list all proxies for an org', function(done){
         edgeOrg.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
@@ -200,33 +208,21 @@ describe('Proxy', function() {
         });
       });
 
-
-      it('should get one proxy', function(done){
+      it('should get a few proxies', function(done){
         assert.isTrue(proxyList && proxyList.length>0);
-        var ix = Math.floor(Math.random() * proxyList.length);
-        edgeOrg.proxies.get({name:proxyList[ix]}, function(e, result){
-          if (e) { console.log('error %s', JSON.stringify(result, null, 2)); }
-          assert.isNull(e, "error getting proxy: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
-          assert.equal(proxyList[ix], result.name, "proxy name");
-          done();
-        });
+        let fn = (item, ix, list) =>
+          edgeOrg.proxies.get({name:item}) /* = proxyList[ix] */
+          .then( (result) => assert.equal(result.name, item));
+        selectNRandom(proxyList, 6, fn, done);
       });
 
       it('should export a few proxies', function(done){
-        var numWanted = 4;
-        var numDone = 0;
-        var cb = function(e, result) {
-              assert.isNull(e, "error exporting proxy: " + JSON.stringify(e));
-              //utility.logWrite(JSON.stringify(result, null, 2));
-              assert.isTrue(result.filename.startsWith('apiproxy-'), "file name");
-              if (++numDone >= numWanted) { done(); }
-            };
         assert.isTrue(proxyList && proxyList.length>0);
-        for(var i = 0; i<numWanted; i++) {
-          var ix = Math.floor(Math.random() * proxyList.length);
-          edgeOrg.proxies.export({name:proxyList[ix]}, cb);
-        }
+        let fn = (item, ix, list) =>
+          edgeOrg.proxies.export({name:item}) /* proxyList[ix] */
+            .then( (result) => assert.isTrue(result.filename.startsWith('apiproxy-'), "file name") );
+
+        selectNRandom(proxyList, 4, fn, done);
       });
 
       it('should fail to get a non-existent proxy', function(done){
@@ -237,7 +233,47 @@ describe('Proxy', function() {
         });
       });
 
+      it('should get the revisions for a few proxies', function(done) {
+        assert.isTrue(proxyList && proxyList.length>0);
+        function fn(item, ix, list){
+          return edgeOrg.proxies.getRevisions({name:item})
+            .then( (result) => {
+              assert.isTrue(Array.isArray(result), "revisions");
+              assert.isAbove(result.length, 0, "revisions");
+            });
+        }
+        selectNRandom(proxyList, 7, fn, done);
+      });
+
+      it('should get the policies for revisions of a few proxies', function(done) {
+        assert.isTrue(proxyList && proxyList.length>0);
+        function fn(item) {
+          return edgeOrg.proxies.getRevisions({name:item})
+              .then( (revisions) => {
+                let revision = revisions[Math.floor(Math.random() * revisions.length)];
+                return edgeOrg.proxies.getPoliciesForRevision({name:item, revision})
+                  .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
+              });
+        }
+        selectNRandom(proxyList, 7, fn, done);
+      });
+
+      it('should get the proxy endpoints for revisions of a few proxies', function(done) {
+        assert.isTrue(proxyList && proxyList.length>0);
+        function fn(item) {
+          return edgeOrg.proxies.getRevisions({name:item})
+            .then( (revisions) => {
+              let revision = revisions[Math.floor(Math.random() * revisions.length)];
+              return edgeOrg.proxies.getProxyEndpoints({name:item, revision})
+                .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
+            });
+        }
+        selectNRandom(proxyList, 7, fn, done);
+      });
+
     });
+
+
 
   });
 

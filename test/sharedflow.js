@@ -18,21 +18,20 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:51:15>
+// last saved: <2018-December-05 16:40:29>
 
 /* global describe, faker, it, path, before */
 
-const common = require('./common'),
-      fs = require('fs');
-
 describe('Sharedflow', function() {
-  const resourceDir = "./test/resources",
+  const common = require('./common'),
+        fs = require('fs'),
+        resourceDir = "./test/resources",
         dateVal = new Date().valueOf(),
         contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
+  common.connectEdge(function(edgeOrg) {
 
     describe('sf-import-from-zip-and-get', function() {
       var sharedFlowList;
@@ -40,7 +39,7 @@ describe('Sharedflow', function() {
       var envList;
 
       before(function(done){
-        var actualPath = path.resolve(resourceDir);
+        const actualPath = path.resolve(resourceDir);
         fs.readdir(actualPath, function(e, items) {
           assert.isNull(e, "error getting zips: " + JSON.stringify(e));
           var re = new RegExp('^sharedflow-.+\.zip$');
@@ -57,7 +56,7 @@ describe('Sharedflow', function() {
       it('should import sharedflow zips into an org', function(done) {
         this.timeout(15000);
         var numDone = 0;
-        zipFileList.forEach(function(zip){
+        zipFileList.forEach(function(zip) {
           var contrivedName = contrivedNamePrefix + '-fromzip-' + faker.random.alphaNumeric(12);
           edgeOrg.sharedflows.importFromZip({name:contrivedName, zipArchive:zip}, function(e, result){
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
@@ -70,7 +69,7 @@ describe('Sharedflow', function() {
       it('should import sharedflow zips via the simple method', function(done) {
         this.timeout(15000);
         var numDone = 0;
-        zipFileList.forEach(function(zip){
+        zipFileList.forEach(function(zip) {
           var contrivedName = contrivedNamePrefix + '-fromzip-simple-' + faker.random.alphaNumeric(12);
           edgeOrg.sharedflows.import({name:contrivedName, source:zip}, function(e, result){
             assert.isNull(e, "error importing zip: " + JSON.stringify(e));
@@ -90,30 +89,36 @@ describe('Sharedflow', function() {
         });
       });
 
-      it('should get one randomly-selected sharedFlow', function(done) {
+      it('should get a few randomly-selected sharedFlows', function(done) {
+        var numWanted = 4;
+        var numDone = 0;
+        let cb = function(ix) {
+              return function(e, result) {
+                assert.isNull(e, "error getting sharedflow: " + JSON.stringify(e));
+                assert.equal(sharedFlowList[ix], result.name, "sharedflow name");
+                if (++numDone >= numWanted) { done(); }
+              };
+            };
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
-        var ix = Math.floor(Math.random() * sharedFlowList.length);
-        edgeOrg.sharedflows.get({name:sharedFlowList[ix]}, function(e, result){
-          assert.isNull(e, "error getting sharedflow: " + JSON.stringify(e));
-          //utility.logWrite(JSON.stringify(result, null, 2));
-          assert.equal(sharedFlowList[ix], result.name, "sharedflow name");
-          done();
-        });
+        for(let i = 0; i<numWanted; i++) {
+          // the selected item may be repeated
+          let ix = Math.floor(Math.random() * sharedFlowList.length);
+          edgeOrg.sharedflows.get({name:sharedFlowList[ix]}, cb(ix));
+        }
       });
 
       it('should export a few sharedflows', function(done) {
         var numWanted = 4;
         var numDone = 0;
-        var cb = function(e, result) {
+        let cb = function(e, result) {
               assert.isNull(e, "error exporting sharedflow: " + JSON.stringify(e));
-              //utility.logWrite(JSON.stringify(result, null, 2));
               assert.isTrue(result.filename.startsWith('sharedflow-'), "file name");
               if (++numDone >= numWanted) { done(); }
             };
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
-        for(var i = 0; i<numWanted; i++) {
+        for(let i = 0; i<numWanted; i++) {
           // the selected item may be repeated
-          var ix = Math.floor(Math.random() * sharedFlowList.length);
+          let ix = Math.floor(Math.random() * sharedFlowList.length);
           edgeOrg.sharedflows.export({name:sharedFlowList[ix]}, cb);
         }
       });
@@ -127,15 +132,16 @@ describe('Sharedflow', function() {
       });
 
       it('should delete test sharedflows previously imported into this org', function(done) {
-        var numDone = 0, L = 0;
-        var tick = function() { if (++numDone >= L) { done(); } };
-        edgeOrg.sharedflows.get({}, function(e, sharedflows){
+        edgeOrg.sharedflows.get({}, function(e, sharedflows) {
+          var numDone = 0, L = 0;
+          let tick = function() { if (++numDone >= L) { done(); } };
+
           assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
           assert.isAbove(sharedflows.length, 1, "length of SF list");
           L = sharedflows.length;
           sharedflows.forEach(function(sf) {
             if (sf.startsWith(contrivedNamePrefix + '-fromzip-')) {
-              edgeOrg.sharedflows.del({name:sf}, function(e, proxies){
+              edgeOrg.sharedflows.del({name:sf}, function(e, proxies) {
                 assert.isNull(e, "error deleting sharedflow: " + JSON.stringify(e));
                 tick();
               });
