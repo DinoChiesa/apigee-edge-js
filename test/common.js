@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2018-December-05 16:35:35>
+// last saved: <2018-December-05 17:35:30>
 
 /* global exports, global */
 
@@ -69,6 +69,17 @@ function connectEdge(cb) {
   }
 }
 
+function selectNRandom(list, N, promiseFn, done) {
+  function reducer(promise, num) {
+    let ix = Math.floor(Math.random() * list.length);
+    return promise.then( () => promiseFn(list[ix], ix, list))
+      .then( () => (1+num >= N) ? done(): {});
+  }
+  Array.from(Array(N).keys()).reduce(reducer, Promise.resolve());
+}
+
+
+exports.selectNRandom = selectNRandom;
 exports.connectEdge = connectEdge;
 exports.testTimeout = config.timeout || 35000;
 exports.slowThreshold = config.slowThreshold || 5000;

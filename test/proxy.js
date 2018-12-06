@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-05 17:33:29>
+// last saved: <2018-December-05 18:08:24>
 
 /* global describe, faker, it, path, before */
 
@@ -29,7 +29,7 @@ describe('Proxy', function() {
         fs = require('fs'),
         resourceDir = "./test/resources",
         dateVal = new Date().valueOf(),
-        contrivedNamePrefix = 'apigee-edge-js-test-' + dateVal;
+        namePrefix = 'apigee-edge-js-test-' + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
@@ -51,36 +51,21 @@ describe('Proxy', function() {
         });
       });
 
-      it('should import proxy zips into an org', function(done){
+      it('should import proxy zips into an org', () => {
         this.timeout(65000);
         var numDone = 0;
-        zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-fromzip-' + faker.random.alphaNumeric(12);
-          edgeOrg.proxies.importFromZip({name:contrivedName, zipArchive:zip}, function(e, result){
-            if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
-            assert.isNull(e, "error importing zip: " + JSON.stringify(e));
-            numDone++;
-            if (numDone == zipFileList.length) {
-              done();
-            }
-          });
-        });
+        let fn = (p, zip) =>
+          p.then( () => edgeOrg.proxies.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip}) );
+        return zipFileList
+          .reduce(fn, Promise.resolve());
       });
 
-      it('should import proxy zips via the simple method', function(done){
+      it('should import proxy zips via the simple method', () => {
         this.timeout(65000);
-        var numDone = 0;
-        zipFileList.forEach(function(zip){
-          var contrivedName = contrivedNamePrefix + '-fromzip-simple-' + faker.random.alphaNumeric(12);
-          edgeOrg.proxies.import({name:contrivedName, source:zip}, function(e, result){
-            if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
-            assert.isNull(e, "error importing zip: " + JSON.stringify(e));
-            numDone++;
-            if (numDone == zipFileList.length) {
-              done();
-            }
-          });
-        });
+        let fn = (p, zip) =>
+          p.then( () => edgeOrg.proxies.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}));
+
+        return zipFileList.reduce(fn, Promise.resolve());
       });
 
       it('should delete test proxies previously imported into this org', function(done){
@@ -92,8 +77,9 @@ describe('Proxy', function() {
           assert.isAbove(proxies.length, 1, "length of proxy list");
           L = proxies.length;
           proxies.forEach(function(proxy) {
-            if (proxy.startsWith(contrivedNamePrefix +'-fromzip-')) {
+            if (proxy.startsWith(namePrefix +'-fromzip-')) {
               edgeOrg.proxies.del({name:proxy}, function(e, proxies){
+                if (e) { console.log('error %s', JSON.stringify(proxies, null, 2)); }
                 assert.isNull(e, "error deleting proxy: " + JSON.stringify(e));
                 tick();
               });
@@ -125,33 +111,21 @@ describe('Proxy', function() {
         });
       });
 
-      it('should import exploded proxy dirs into an org', function(done){
+      it('should import exploded proxy dirs into an org', () => {
         this.timeout(65000);
-        var numDone = 0;
-        apiproxyBundleDirList.forEach(function(dir){
-          //console.log('dir: %s', dir);
-          var contrivedName = contrivedNamePrefix + '-fromdir-' + faker.random.alphaNumeric(12);
-          edgeOrg.proxies.importFromDir({name:contrivedName, source:dir}, function(e, result){
-            if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
-            assert.isNull(e, "error importing dir: " + JSON.stringify(e));
-            numDone++;
-            if (numDone >= apiproxyBundleDirList.length) { done(); }
-          });
-        });
+        let fn = (p, dir) =>
+          p.then( () =>
+                  edgeOrg.proxies.importFromDir({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
+
+        return apiproxyBundleDirList.reduce(fn, Promise.resolve());
       });
 
-      it('should import exploded proxy dirs via the simple method', function(done){
-        var numDone = 0;
-        apiproxyBundleDirList.forEach(function(dir){
-          //console.log('dir: %s', dir);
-          var contrivedName = contrivedNamePrefix + '-fromdir-simple-' + faker.random.alphaNumeric(12);
-          edgeOrg.proxies.import({name:contrivedName, source:dir}, function(e, result){
-            if (e) { console.log(JSON.stringify(result, null, 2) + '\n'); }
-            assert.isNull(e, "error importing dir: " + JSON.stringify(e));
-            numDone++;
-            if (numDone == apiproxyBundleDirList.length) { done(); }
-          });
-        });
+      it('should import exploded proxy dirs via the simple method', () => {
+        let fn = (p, dir) =>
+          p.then( () =>
+                  edgeOrg.proxies.import({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
+
+        return apiproxyBundleDirList.reduce(fn, Promise.resolve());
       });
 
       it('should delete test proxies previously imported into this org', function(done){
@@ -163,7 +137,7 @@ describe('Proxy', function() {
           assert.isAbove(proxies.length, 1, "length of proxy list");
           L = proxies.length;
           proxies.forEach(function(proxy) {
-            if (proxy.startsWith(contrivedNamePrefix + '-fromdir-')) {
+            if (proxy.startsWith(namePrefix + '-fromdir-')) {
               edgeOrg.proxies.del({name:proxy}, function(e, proxies){
                 if (e) { console.log('error %s', JSON.stringify(proxies, null, 2)); }
                 assert.isNull(e, "error deleting proxy: " + JSON.stringify(e));
@@ -178,16 +152,6 @@ describe('Proxy', function() {
       });
 
     });
-
-
-    function selectNRandom(list, N, promiseFn, done) {
-      function reducer(promise, num) {
-        let ix = Math.floor(Math.random() * list.length);
-        return promise.then( () => promiseFn(list[ix], ix, list))
-          .then( () => (1+num >= N) ? done(): {});
-      }
-      Array.from(Array(N).keys()).reduce(reducer, Promise.resolve());
-    }
 
     describe('get', function() {
       var proxyList;
@@ -213,7 +177,7 @@ describe('Proxy', function() {
         let fn = (item, ix, list) =>
           edgeOrg.proxies.get({name:item}) /* = proxyList[ix] */
           .then( (result) => assert.equal(result.name, item));
-        selectNRandom(proxyList, 6, fn, done);
+        common.selectNRandom(proxyList, 6, fn, done);
       });
 
       it('should export a few proxies', function(done){
@@ -222,7 +186,7 @@ describe('Proxy', function() {
           edgeOrg.proxies.export({name:item}) /* proxyList[ix] */
             .then( (result) => assert.isTrue(result.filename.startsWith('apiproxy-'), "file name") );
 
-        selectNRandom(proxyList, 4, fn, done);
+        common.selectNRandom(proxyList, 4, fn, done);
       });
 
       it('should fail to get a non-existent proxy', function(done){
@@ -242,7 +206,7 @@ describe('Proxy', function() {
               assert.isAbove(result.length, 0, "revisions");
             });
         }
-        selectNRandom(proxyList, 7, fn, done);
+        common.selectNRandom(proxyList, 7, fn, done);
       });
 
       it('should get the policies for revisions of a few proxies', function(done) {
@@ -255,7 +219,7 @@ describe('Proxy', function() {
                   .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
               });
         }
-        selectNRandom(proxyList, 7, fn, done);
+        common.selectNRandom(proxyList, 7, fn, done);
       });
 
       it('should get the proxy endpoints for revisions of a few proxies', function(done) {
@@ -268,7 +232,7 @@ describe('Proxy', function() {
                 .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
             });
         }
-        selectNRandom(proxyList, 7, fn, done);
+        common.selectNRandom(proxyList, 7, fn, done);
       });
 
       it('should get the deployments for a few proxies', function(done) {
@@ -283,7 +247,7 @@ describe('Proxy', function() {
             assert.isTrue(Array.isArray($.environment), "environments");
             assert.equal(item, $.name, "proxy name");
           });
-        selectNRandom(proxyList, 8, fn, done);
+        common.selectNRandom(proxyList, 8, fn, done);
       });
 
       it('should get the deployments for specific revisions of a few proxies', function(done) {
@@ -304,7 +268,7 @@ describe('Proxy', function() {
                 });
             });
         }
-        selectNRandom(proxyList, 7, fn, done);
+        common.selectNRandom(proxyList, 7, fn, done);
       });
 
     });
