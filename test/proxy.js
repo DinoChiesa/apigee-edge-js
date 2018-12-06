@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-05 17:22:24>
+// last saved: <2018-December-05 17:33:29>
 
 /* global describe, faker, it, path, before */
 
@@ -266,6 +266,42 @@ describe('Proxy', function() {
               let revision = revisions[Math.floor(Math.random() * revisions.length)];
               return edgeOrg.proxies.getProxyEndpoints({name:item, revision})
                 .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
+            });
+        }
+        selectNRandom(proxyList, 7, fn, done);
+      });
+
+      it('should get the deployments for a few proxies', function(done) {
+        assert.isTrue(proxyList && proxyList.length>0);
+        let fn = (item, ix, list) =>
+          edgeOrg.proxies.getDeployments({name:item})
+          // .then( (result) => {
+          //   console.log(JSON.stringify(result));
+          //   return result;
+          // })
+          .then( ($) => {
+            assert.isTrue(Array.isArray($.environment), "environments");
+            assert.equal(item, $.name, "proxy name");
+          });
+        selectNRandom(proxyList, 8, fn, done);
+      });
+
+      it('should get the deployments for specific revisions of a few proxies', function(done) {
+        assert.isTrue(proxyList && proxyList.length>0);
+        function fn(item) {
+          return edgeOrg.proxies.getRevisions({name:item})
+            .then( (revisions) => {
+              let revision = revisions[Math.floor(Math.random() * revisions.length)];
+              return edgeOrg.proxies.getDeployments({name:item, revision})
+                // .then( (result) => {
+                //   console.log(JSON.stringify(result));
+                //   return result;
+                // })
+                .then( ($) => {
+                  assert.isTrue(Array.isArray($.environment), "deployments");
+                  assert.equal(item, $.aPIProxy, "proxy name");
+                  assert.equal(revision, $.name, "revision");
+                });
             });
         }
         selectNRandom(proxyList, 7, fn, done);
