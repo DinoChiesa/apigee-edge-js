@@ -199,7 +199,6 @@ if ( ! opt.options.list) {
 common.logWrite('inquiring mozilla certs...');
 request({method:'get', url: 'https://mkcert.org/labels/'})
   .then( ({response, body}) => {
-    //console.log('body: ' + body);
     let certList = JSON.parse(body);
     if (certList.Certificates && certList.Certificates.length) {
 
