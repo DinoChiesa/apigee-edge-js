@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-December-03 13:28:13>
+// last saved: <2018-December-10 11:54:16>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -79,6 +79,11 @@ apigeeEdge.connect(options)
     common.logWrite('importing a %s', term);
     collection.import({name:opt.options.name, source:opt.options.source})
       .then( (result) => {
+        if (result.error){
+          common.logWrite('error');
+          console.log(result.error.stack);
+          return ;
+        }
         common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
         let envs = opt.options.env || process.env.ENV;
         if (envs) {
