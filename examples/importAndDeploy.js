@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-December-10 11:54:16>
+// last saved: <2018-December-21 07:20:50>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -82,6 +82,7 @@ apigeeEdge.connect(options)
         if (result.error){
           common.logWrite('error');
           console.log(result.error.stack);
+          console.log(result.result);
           return ;
         }
         common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
@@ -112,4 +113,4 @@ apigeeEdge.connect(options)
         }
       });
   })
-  .catch( (e) => console.error('error: ' + e.stack) );
+  .catch( (e) => { console.error('error: ' + e.error);} );
