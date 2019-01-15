@@ -7,7 +7,7 @@ This library helps you do that.
 
 Example:
 
-To create a new developer account:
+To create a new developer in Apigee Edge:
 
 ```js
 var edgejs = require('apigee-edge-js'),
@@ -121,6 +121,7 @@ hash with various child members as functions:
 | products             | get, create, del                                                 |
 | developers           | get, create, del,revoke, approve                                 |
 | keystores            | get, create, del, import key and cert, create references         |
+| targetservers        | get, create, del, disable, enable, update                        |
 | developerapps        | get, create, del, revoke, approve                                |
 | appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
@@ -376,11 +377,36 @@ apigeeEdge.connect(options)
   });
 ```
 
+### Create a Target Server
+
+ES6 promises:
+```js
+const edgejs = require('apigee-edge-js');
+const apigeeEdge = edgejs.edge;
+var options = {org : 'ORGNAME', netrc: true, verbosity : 1 };
+apigeeEdge.connect(options)
+  .then ( (org) => {
+    console.log('org: ' + org.conn.orgname);
+    return org.targetservers.create({
+      environment : 'test',
+      target : {
+        name : 'targetserver1',
+        host: "api.example.com",
+        port: 8080,
+        sSLInfo : { enabled : false }
+      }
+    });
+  })
+  .catch ( (e) => {
+    console.log('error: ' + e.stack);
+  });
+```
+
 
 ### Lots More Examples
 
 See [the examples directory](./examples) for a set of working example tools.
-
+Or you can examine [the test directory](./test) for code that exercises the library.
 
 ## To Run the Tests
 
@@ -404,7 +430,7 @@ or:
 }
 ```
 
-The latter example will retrieve credentials from .netrc.
+The latter example will retrieve administrative credentials for Apigee Edge from your .netrc file.
 
 Then, to run tests:
 ```sh
@@ -452,7 +478,7 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 
 ## License
 
-This code is Copyright (C) 2017-2018 Google LLC, and is licensed under the Apache 2.0 source license.
+This code is Copyright (C) 2017-2019 Google LLC, and is licensed under the Apache 2.0 source license.
 
 ## Bugs
 
