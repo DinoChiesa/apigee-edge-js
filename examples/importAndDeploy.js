@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-December-21 07:20:50>
+// last saved: <2019-January-29 18:52:03>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -89,23 +89,23 @@ apigeeEdge.connect(options)
         let envs = opt.options.env || process.env.ENV;
         if (envs) {
           // env may be a comma-separated list
-          var options = { name: result.name, revision: result.revision };
+          let options = { name: result.name, revision: result.revision };
           if ( ! opt.options.sharedflow) {
             options.basepath = opt.options.basepath || defaults.basepath;
           }
 
           // this magic deploys to each environment in series
-          var reducer = (promise, env) =>
+          const reducer = (promise, env) =>
             promise .then( () =>
                            collection
                              .deploy(Object.assign(options, { environment:env }))
                              .then( (result) => common.logWrite('deployment ' + ((result.error) ? 'failed: ' + JSON.stringify(result) : 'ok.') ))
                          );
 
-          envs.split(',')
+          return envs.split(',')
             .reduce(reducer, Promise.resolve())
-            .then( () => common.logWrite('all done...') )
-            .catch( (e) => console.error('error: ' + e.stack) );
+            .then( () => common.logWrite('all done...') );
+            //.catch( (e) => console.error('error: ' + e.stack) );
         }
         else {
           common.logWrite('not deploying...');
