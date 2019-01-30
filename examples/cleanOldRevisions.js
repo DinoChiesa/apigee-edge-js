@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-July-16 08:58:18>
+// last saved: <2019-January-29 18:58:30>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -79,7 +79,7 @@ function doneAllRevisions(collectionName, itemName, callback) {
     handleError(e);
     // results is an array of arrays
     var flattened = [].concat.apply([], results);
-    common.logWrite(collectionName + ': '+ itemName + ' ' + JSON.stringify(flattened));
+    common.logWrite('removed revisions of ' + collectionName + ': '+ itemName + ': ' + JSON.stringify(flattened.map( x => x.revision )));
     callback(null, flattened);
   };
 }
@@ -128,22 +128,17 @@ var options = {
       verbosity: opt.options.verbose || 0
     };
 
-apigeeEdge.connect(options, function(e, org){
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
-    process.exit(1);
-  }
-
-  var readOptions = {};
-  var collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";
-  org[collectionName].get(readOptions, function(e, results) {
+apigeeEdge.connect(options)
+  .then ( org => {
+    let readOptions = {};
+    const collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";
+    org[collectionName].get(readOptions, function(e, results) {
     if (opt.options.regexp) {
       var re1 = new RegExp(opt.options.regexp);
       results = results.filter(function(item) { return re1.test(item); });
     }
     if (opt.options.verbose) {
-      common.logWrite('%s%s: %s', (opt.options.regexp)?"matching ":"", collectionName, JSON.stringify(results));
+      common.logWrite('found %s%s: %s', (opt.options.regexp)?"matching ":"", collectionName, JSON.stringify(results));
     }
     if (results.length > 0) {
       async.mapSeries(results, analyzeOneItem(org, collectionName), doneAllItems);
