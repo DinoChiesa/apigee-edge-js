@@ -138,7 +138,7 @@ if ( ! opt.options.vhost) {
   getopt.showHelp();
   process.exit(1);
 }
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
+apigeeEdge.connect(common.optToOptions(opt), function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     process.exit(1);

@@ -56,7 +56,7 @@ if ( !opt.options.key ) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   handleError(e);
   org.appcredentials.find({key:opt.options.key}, function(e, found) {
     handleError(e);

@@ -138,7 +138,7 @@ if ( !opt.options.proxy ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);

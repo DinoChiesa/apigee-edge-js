@@ -51,7 +51,7 @@ if ( !opt.options.developer ) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   handleError(e);
   common.logWrite('searching...');
   org.developerapps.get({name:opt.options.app, email:opt.options.developer}, function(e, app) {

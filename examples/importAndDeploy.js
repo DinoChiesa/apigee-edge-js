@@ -60,7 +60,7 @@ if (opt.options.basepath && opt.options.sharedflow) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-apigeeEdge.connect(common.getOptToOptions(opt))
+apigeeEdge.connect(common.optToOptions(opt))
   .then( (org) => {
     common.logWrite('connected');
 

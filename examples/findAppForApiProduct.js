@@ -59,7 +59,7 @@ if ( !opt.options.apiproduct ) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   handleError(e);
   common.logWrite('searching...');
   org.apps.get({expand:true}, function(e, result) {

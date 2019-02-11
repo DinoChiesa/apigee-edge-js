@@ -124,7 +124,7 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 if (opt.options.regexp) {
   gRegexp = new RegExp(opt.options.regexp);
 }
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
+apigeeEdge.connect(common.optToOptions(opt), function(e, org){
   handleError(e);
 
   var readOptions = {};

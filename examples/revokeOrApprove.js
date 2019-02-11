@@ -86,7 +86,7 @@ if ( ! action) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   handleError(e);
 
   if ( opt.options.key ) {

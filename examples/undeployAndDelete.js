@@ -117,7 +117,7 @@ if ( ! opt.options.prefix ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
+apigeeEdge.connect(common.optToOptions(opt), function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     process.exit(1);

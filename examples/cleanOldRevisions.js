@@ -119,7 +119,7 @@ if ( !opt.options.numToKeep ) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt))
+apigeeEdge.connect(common.optToOptions(opt))
   .then ( org => {
     let readOptions = {};
     const collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";

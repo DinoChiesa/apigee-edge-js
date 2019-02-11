@@ -43,7 +43,7 @@ common.logWrite('start');
 var opt = getopt.parse(process.argv.slice(2));
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     if (result) {

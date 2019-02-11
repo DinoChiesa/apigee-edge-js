@@ -218,7 +218,7 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
 
       if (certs.length) {
         let trustStoreOptions = {environment:opt.options.env, name: opt.options.name};
-        apigeeEdge.connect(common.getOptToOptions(opt))
+        apigeeEdge.connect(common.optToOptions(opt))
           .then( (org) => {
             org.keystores.get(trustStoreOptions)
               .then( (result) =>

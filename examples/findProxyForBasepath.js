@@ -130,7 +130,7 @@ if (opt.options.regexp) {
   opt.options.regexp = new RegExp(opt.options.basepath);
 }
 
-apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
+apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
   handleError(e);
   //common.logWrite('searching...');
   org.proxies.get(function(e, apiproxies) {

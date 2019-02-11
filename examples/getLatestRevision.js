@@ -30,7 +30,7 @@ common.logWrite('start');
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.getOptToOptions(opt))
+apigeeEdge.connect(common.optToOptions(opt))
   .then( (org) => {
     common.logWrite('connected');
 

@@ -78,7 +78,7 @@ if ( ! opt.options.prefix ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-apigeeEdge.connect(common.getOptToOptions(opt))
+apigeeEdge.connect(common.optToOptions(opt))
   .then( (org) => {
     org.proxies.get()
       .then( (proxies) =>
