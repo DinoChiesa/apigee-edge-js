@@ -7,7 +7,7 @@
 //
 // This tool does not examine environment-wide or organization-wide resources.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-November-26 16:22:46>
+// last saved: <2019-February-11 12:53:16>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -30,7 +30,7 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20181126-1621',
+    version = '20190211-1253',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
@@ -144,17 +144,7 @@ function analyzeOneProxy(org) {
 
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org){
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);

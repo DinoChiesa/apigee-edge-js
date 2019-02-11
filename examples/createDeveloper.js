@@ -5,7 +5,7 @@
 /* jshint esversion: 6, node: true */
 /* global process, console, Buffer */
 
-// Copyright 2017-2018 Google LLC
+// Copyright 2017-2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-October-15 17:19:07>
+// last saved: <2019-February-11 12:55:48>
 'use strict';
 
 const edgejs     = require('apigee-edge-js'),
@@ -27,7 +27,7 @@ const edgejs     = require('apigee-edge-js'),
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20181015-1420',
+      version    = '20190211-1255',
       getopt     = new Getopt(common.commonOptions.concat([
         ['E' , 'email=ARG', 'email address of the developer for which to create the app'],
         ['F' , 'first=ARG', 'first name for the developer'],
@@ -63,17 +63,7 @@ if ( !opt.options.last ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);

@@ -11,6 +11,41 @@ These tools are not an official Google product, nor are they part of an official
 Support is available on a best-effort basis via github or community.apigee.com .
 
 
+# Common options
+
+All of the scripts in this directory support some common options, where appropriate. These are:
+
+```
+Options:
+  -M, --mgmtserver=ARG the base path, including optional port, of the Edge mgmt server. Defaults to https://api.enterprise.apigee.com .
+  -u, --username=ARG   org user with permissions to read Edge configuration.
+  -p, --password=ARG   password for the org user.
+  -n, --netrc          retrieve the username + password from the .netrc file. In lieu of -u/-p
+  -o, --org=ARG        the Edge organization.
+  -Z, --ssoZone=ARG    specify the SSO zone to use when authenticating.
+  -C, --passcode=ARG   specify the passcode to use when authenticating.
+  -T, --notoken        do not try to obtain an oauth token.
+  -v, --verbose
+  -h, --help
+```
+
+For example, to list developers for an organization, if you have a passcode, then you can do this:
+
+```
+ node ./listAndQueryDevelopers.js -v -o orgname -Z zonename  -C passcodehere
+```
+
+You do not need to pass a username if using a passcode to obtain a token.
+
+Also: the underlying apigee-edge-js library caches access tokens, so ... you will not need a passcode for each script invocation. Subsequent script invocations will use the cached token. Just pass the zonename and user:
+
+```
+ node ./listAndQueryDevelopers.js -v -u dchiesa@google.com -o orgname -Z zonename
+```
+
+Be aware that when the refresh token expires, you will need a new passcode to get a new token.
+
+
 # Import a proxy
 
 Import a proxy, using a bundle zip as the source. Derive the name for the proxy from the *.xml in the apiproxy directory:

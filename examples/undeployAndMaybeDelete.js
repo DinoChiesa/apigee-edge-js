@@ -18,13 +18,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-December-05 14:59:40>
+// last saved: <2019-February-11 12:51:33>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20181205-0952',
+      version    = '20190211-1251',
       getopt     = new Getopt(common.commonOptions.concat([
         ['P' , 'prefix=ARG', 'required. name prefix. Undeploy and maybe delete all API Proxies with names starting with this prefix.' ],
         ['D' , 'delete', 'optional. Delete the proxies too. By default, just undeploy.' ]
@@ -78,16 +78,7 @@ if ( ! opt.options.prefix ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options)
+apigeeEdge.connect(common.getOptToOptions(opt))
   .then( (org) => {
     org.proxies.get()
       .then( (proxies) =>

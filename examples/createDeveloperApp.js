@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision a developer app for an API Product in Apigee Edge
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-October-15 14:26:01>
+// last saved: <2019-February-11 12:56:29>
 
 const edgejs            = require('apigee-edge-js'),
       common            = edgejs.utility,
       apigeeEdge        = edgejs.edge,
       sprintf           = require('sprintf-js').sprintf,
       Getopt            = require('node-getopt'),
-      version           = '20181015-0949',
+      version           = '20190211-1256',
       defaults          = { expiry : '180d' },
       getopt            = new Getopt(common.commonOptions.concat([
         ['p' , 'product=ARG', 'name of the API product to enable on this app'],
@@ -65,17 +65,7 @@ if ( !opt.options.email ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     common.logWrite(JSON.stringify(result, null, 2));

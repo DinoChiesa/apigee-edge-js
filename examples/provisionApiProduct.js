@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // provision an Apigee Edge API Product
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-October-15 14:25:11>
+// last saved: <2019-February-11 12:57:33>
 
 const edgejs   = require('apigee-edge-js'),
     common     = edgejs.utility,
     apigeeEdge = edgejs.edge,
     sprintf    = require('sprintf-js').sprintf,
     Getopt     = require('node-getopt'),
-    version    = '20181015-1422',
+    version    = '20190211-1256',
     getopt     = new Getopt(common.commonOptions.concat([
       ['p' , 'proxy=ARG', 'Required. name of API proxy to include in the API Product'],
       ['x' , 'access=ARG', 'Optional. tag the API Product for {public,internal,private} access.'],
@@ -62,16 +62,7 @@ if ( !opt.options.productname ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     common.logWrite(JSON.stringify(result, null, 2));
@@ -99,7 +90,7 @@ apigeeEdge.connect(options, function(e, org) {
 
   if (opt.options.attr) {
     opt.options.attr.forEach( (attr) => {
-      var parts = attr.split(':');
+      const parts = attr.split(':');
       if (parts.length == 2) {
         options.attributes[parts[0]] = parts[1];
       }

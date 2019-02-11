@@ -25,7 +25,7 @@ const edgejs     = require('apigee-edge-js'),
       request    = promisifyRequest(require('request')),
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20181206-1112',
+      version    = '20190211-1249',
       defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
         ['L', 'list',     'optional. list the labels of certs in mkcert.' ],
@@ -217,18 +217,8 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
       }
 
       if (certs.length) {
-
-        let options = {
-              mgmtServer: opt.options.mgmtserver,
-              org : opt.options.org,
-              user: opt.options.username,
-              password: opt.options.password,
-              no_token: opt.options.notoken,
-              verbosity: opt.options.verbose || 0
-            };
         let trustStoreOptions = {environment:opt.options.env, name: opt.options.name};
-
-        apigeeEdge.connect(options)
+        apigeeEdge.connect(common.getOptToOptions(opt))
           .then( (org) => {
             org.keystores.get(trustStoreOptions)
               .then( (result) =>

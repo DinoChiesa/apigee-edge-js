@@ -6,7 +6,7 @@
 // ex:
 // node ./createKeystore.js -v -n -o amer-demo4 -s ks1 -e test -k ./dchiesa.net.key  -c ./dchiesa.net.cert -a alias1
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,23 +20,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-May-31 16:41:19>
+// last saved: <2019-February-11 13:18:22>
 
-const edgejs = require('apigee-edge-js'),
-      fs = require('fs'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['s' , 'keystore=ARG', 'required. name of the keystore to create'],
-      ['k' , 'keyfile=ARG', 'required. path to the key file (PEM format)'],
-      ['c' , 'certfile=ARG', 'required. path to the cert file'],
-      ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
-      ['a' , 'alias=ARG', 'required. alias for the key'],
-      ['P' , 'keypassword=ARG', 'optional. password for the RSA Key']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      fs         = require('fs'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1317',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['s' , 'keystore=ARG', 'required. name of the keystore to create'],
+        ['k' , 'keyfile=ARG', 'required. path to the key file (PEM format)'],
+        ['c' , 'certfile=ARG', 'required. path to the cert file'],
+        ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
+        ['a' , 'alias=ARG', 'required. alias for the key'],
+        ['P' , 'keypassword=ARG', 'optional. password for the RSA Key']
+      ])).bindHelp();
 
 // ========================================================
 
@@ -79,17 +79,7 @@ if ( !opt.options.alias ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     common.logWrite(JSON.stringify(result, null, 2));

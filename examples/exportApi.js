@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // export one or more Apigee Edge proxy bundles
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,26 +18,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:15:33>
+// last saved: <2019-February-11 13:16:44>
 
-var fs = require('fs'),
-    path = require('path'),
-    mkdirp = require('mkdirp'),
-    edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    async = require('async'),
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    defaults = { destination : 'exported' },
-    getopt = new Getopt(common.commonOptions.concat([
-      ['N' , 'name=ARG', 'name of existing API proxy or shared flow'],
-      ['P' , 'pattern=ARG', 'regex pattern for name of existing API proxy or shared flow; this always exports the latest revision.'],
-      ['D' , 'destination=ARG', 'directory for export. Default: exported'],
-      ['t' , 'trial', 'trial only. Do not actually export'],
-      ['R' , 'revision=ARG', 'revision of the asset to export. Default: latest']
-    ])).bindHelp();
+const fs         = require('fs'),
+      path       = require('path'),
+      mkdirp     = require('mkdirp'),
+      edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      async      = require('async'),
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1316',
+      defaults   = { destination : 'exported' },
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['N' , 'name=ARG', 'name of existing API proxy or shared flow'],
+        ['P' , 'pattern=ARG', 'regex pattern for name of existing API proxy or shared flow; this always exports the latest revision.'],
+        ['D' , 'destination=ARG', 'directory for export. Default: exported'],
+        ['t' , 'trial', 'trial only. Do not actually export'],
+        ['R' , 'revision=ARG', 'revision of the asset to export. Default: latest']
+      ])).bindHelp();
 
 function exportOneProxyRevision(org, name, revision, cb) {
   if (opt.options.trial) {
@@ -129,16 +129,7 @@ mkdirp.sync(opt.options.destination);
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);

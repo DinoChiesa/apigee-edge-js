@@ -1,7 +1,7 @@
 // findProxyForBasepath.js
 // ------------------------------------------------------------------
 //
-// Copyright 2018 Google LLC.
+// Copyright 2018-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-June-19 08:16:54>
+// last saved: <2019-February-11 13:11:17>
 
-const edgejs = require('apigee-edge-js'),
-      common = edgejs.utility,
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
-      async = require('async'),
-      Getopt = require('node-getopt'),
-      version = '20180619-0825',
-      getopt = new Getopt(common.commonOptions.concat([
-      ['B' , 'basepath=ARG', 'Required. the basepath to find.'],
-      ['R' , 'regexp', 'Optional. Treat the -B option as a regexp. Default: perform string match.']
-    ])).bindHelp();
+      async      = require('async'),
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1310',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['B' , 'basepath=ARG', 'Required. the basepath to find.'],
+        ['R' , 'regexp', 'Optional. Treat the -B option as a regexp. Default: perform string match.']
+      ])).bindHelp();
 
 function handleError(e) {
     if (e) {
@@ -130,21 +130,12 @@ if (opt.options.regexp) {
   opt.options.regexp = new RegExp(opt.options.basepath);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   handleError(e);
   //common.logWrite('searching...');
   org.proxies.get(function(e, apiproxies) {
     handleError(e);
-    if (options.verbose) {
+    if (opt.opions.verbose) {
       common.logWrite('total count of API proxies for that org: %d', apiproxies.length);
     }
     async.mapSeries(apiproxies, analyzeOneProxy(org), doneAllProxies);

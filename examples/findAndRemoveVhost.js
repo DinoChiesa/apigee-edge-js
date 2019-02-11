@@ -7,7 +7,7 @@
 // the vhost from the proxy if it is not the only vhost. Can be helpful in
 // removing the 'default' (insecure) vhost from all proxies.
 //
-// Copyright 2017 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-December-03 13:56:06>
+// last saved: <2019-February-11 12:52:45>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -31,7 +31,7 @@ var async = require('async'),
     Getopt = require('node-getopt'),
     merge = require('merge'),
     regexp1,
-    version = '20180619-0825',
+    version = '20190211-1252',
     getopt = new Getopt(common.commonOptions.concat([
       ['V' , 'vhost=ARG', 'Required. The vhost to look for.'],
       ['R' , 'remove', 'Optional. Remove vhost from such proxies.']
@@ -138,17 +138,7 @@ if ( ! opt.options.vhost) {
   getopt.showHelp();
   process.exit(1);
 }
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org){
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     process.exit(1);

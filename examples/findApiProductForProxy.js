@@ -1,7 +1,7 @@
 // findApiProductForProxy.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2018-June-19 08:15:46>
+// last saved: <2019-February-11 13:15:53>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['P' , 'proxy=ARG', 'Required. the proxy to find.']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1315',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['P' , 'proxy=ARG', 'Required. the proxy to find.']
+      ])).bindHelp();
 
 function handleError(e) {
     if (e) {
@@ -54,16 +54,7 @@ if ( !opt.options.proxy ) {
   process.exit(1);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   handleError(e);
   common.logWrite('searching...');
   org.products.get({expand:true}, function(e, result) {

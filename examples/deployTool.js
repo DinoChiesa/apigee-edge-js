@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // deploy or undeploy one or more Apigee Edge proxy bundles or shared flows.
 // example:
-//  node ./deployTool.js -v -n -o therealdinochiesa2-eval -e prod,test -N raisefaulttest,externalaccesstoken-1 
+//  node ./deployTool.js -v -n -o therealdinochiesa2-eval -e prod,test -N raisefaulttest,externalaccesstoken-1
 //
 // Copyright 2017-2019 Google LLC.
 //
@@ -20,19 +20,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-January-16 15:12:35>
+// last saved: <2019-February-11 12:49:12>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20190116-1512',
+      version    = '20190211-1248',
       defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
         ['N' , 'name=ARG', 'name of the proxy or sharedflow to deploy. The asset must exist. Separate multiple environments with a comma.'],
         ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
-        ['U' , 'undeploy', 'undeploy. Default is to deploy.'], 
+        ['U' , 'undeploy', 'undeploy. Default is to deploy.'],
         ['S' , 'sharedflow', 'deploy a sharedflow. Default: deploy a proxy.']
       ])).bindHelp();
 
@@ -60,16 +60,7 @@ if ( ! opt.options.env ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options)
+apigeeEdge.connect(common.getOptToOptions(opt))
   .then( (org) => {
     common.logWrite('connected');
 

@@ -2,19 +2,21 @@
 // ------------------------------------------------------------------
 //
 // created: Sat Mar 17 17:20:25 2018
-// last saved: <2018-June-19 08:17:12>
+// last saved: <2019-February-11 13:07:42>
+/* jshint esversion: 6, node: true */
+/* global process, console */
 
 'use strict';
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    getopt = new Getopt(common.commonOptions.concat([
-      ['A' , 'app=ARG', 'Required. the name of the app to query.'],
-      ['D' , 'developer=ARG', 'Required. the developer that owns the app.']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1306',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['A' , 'app=ARG', 'Required. the name of the app to query.'],
+        ['D' , 'developer=ARG', 'Required. the developer that owns the app.']
+      ])).bindHelp();
 
 function handleError(e) {
     if (e) {
@@ -49,16 +51,7 @@ if ( !opt.options.developer ) {
   process.exit(1);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   handleError(e);
   common.logWrite('searching...');
   org.developerapps.get({name:opt.options.app, email:opt.options.developer}, function(e, app) {

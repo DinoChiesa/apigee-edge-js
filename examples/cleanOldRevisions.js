@@ -5,7 +5,7 @@
 // In Apigee Edge, for all proxies or sharedflows in an org, remove all
 // but the latest N revisions. (Never remove a deployed revision).
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-January-29 18:58:30>
+// last saved: <2019-February-11 12:47:38>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -28,7 +28,7 @@ var async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
     merge = require('merge'),
-    version = '20180716-0845',
+    version = '20190211-1247',
     gRegexp,
     getopt = new Getopt(common.commonOptions.concat([
       ['R' , 'regexp=ARG', 'Optional. Cull only proxies with names matching this regexp.'],
@@ -119,16 +119,7 @@ if ( !opt.options.numToKeep ) {
   process.exit(1);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options)
+apigeeEdge.connect(common.getOptToOptions(opt))
   .then ( org => {
     let readOptions = {};
     const collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";

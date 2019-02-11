@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // generate an RSA 256-bit keypair and load into Apigee Edge KVM
 //
-// Copyright 2017 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,60 +18,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:17:01>
+// last saved: <2019-February-11 13:09:58>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    async = require('async'),
-    NodeRSA = require('node-rsa'),
-    uuidV4 = require('uuid/v4'),
-    Getopt = require('node-getopt'),
-    version = '20180619-0825',
-    defaults = { privkeysmap : 'PrivateKeys', pubkeysmap: 'NonSecrets', kidmap: 'NonSecrets' },
-    getopt = new Getopt(common.commonOptions.concat([
-      ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
-      ['b' , 'keystrength=ARG', 'strength in bits of the RSA keypair. Default: 2048'],
-      ['K' , 'privkeysmap=ARG', 'name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.privkeysmap],
-      ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap]
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      async      = require('async'),
+      NodeRSA    = require('node-rsa'),
+      uuidV4     = require('uuid/v4'),
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1308',
+      defaults   = { privkeysmap : 'PrivateKeys', pubkeysmap: 'NonSecrets', kidmap: 'NonSecrets' },
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
+        ['b' , 'keystrength=ARG', 'strength in bits of the RSA keypair. Default: 2048'],
+        ['K' , 'privkeysmap=ARG', 'name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.privkeysmap],
+        ['I' , 'kidmap=ARG', 'name of the KVM in Edge for Key IDs. Will be created if nec. Default: ' + defaults.kidmap]
+      ])).bindHelp();
 
 // ========================================================
-
-console.log(
-  'Apigee Edge KVM Provisioning tool, version: ' + version + '\n' +
-    'Node.js ' + process.version + '\n');
-
-common.logWrite('start');
-
-// process.argv array starts with 'node' and 'scriptname.js'
-var opt = getopt.parse(process.argv.slice(2));
-
-if ( !opt.options.env ) {
-  console.log('You must specify an environment');
-  getopt.showHelp();
-  process.exit(1);
-}
-
-if ( !opt.options.privkeysmap ) {
-  common.logWrite(sprintf('defaulting to %s for privkeys map', defaults.privkeysmap));
-  opt.options.privkeysmap = defaults.privkeysmap;
-}
-if ( !opt.options.pubkeysmap ) {
-  common.logWrite(sprintf('defaulting to %s for pubkeys map', defaults.pubkeysmap));
-  opt.options.pubkeysmap = defaults.pubkeysmap;
-}
-if ( !opt.options.kidmap ) {
-  common.logWrite(sprintf('defaulting to %s for kid map', defaults.kidmap));
-  opt.options.kidmap = defaults.kidmap;
-}
-
-if ( ! opt.options.keystrength ) {
-  opt.options.keystrength = 2048; // default
-}
-
-common.verifyCommonRequiredParameters(opt.options, getopt);
 
 function loadKeysIntoMap(org, cb) {
   var uuid = uuidV4();
@@ -125,19 +91,46 @@ function createOneKvm(org) {
 }
 
 function dedupe(e, i, c) { // extra step to remove duplicates
-        return c.indexOf(e) === i;
-    }
+  return c.indexOf(e) === i;
+}
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
+// ========================================================
 
-apigeeEdge.connect(options, function(e, org) {
+console.log(
+  'Apigee Edge KVM Provisioning tool, version: ' + version + '\n' +
+    'Node.js ' + process.version + '\n');
+
+common.logWrite('start');
+
+// process.argv array starts with 'node' and 'scriptname.js'
+var opt = getopt.parse(process.argv.slice(2));
+
+if ( !opt.options.env ) {
+  console.log('You must specify an environment');
+  getopt.showHelp();
+  process.exit(1);
+}
+
+if ( !opt.options.privkeysmap ) {
+  common.logWrite(sprintf('defaulting to %s for privkeys map', defaults.privkeysmap));
+  opt.options.privkeysmap = defaults.privkeysmap;
+}
+if ( !opt.options.pubkeysmap ) {
+  common.logWrite(sprintf('defaulting to %s for pubkeys map', defaults.pubkeysmap));
+  opt.options.pubkeysmap = defaults.pubkeysmap;
+}
+if ( !opt.options.kidmap ) {
+  common.logWrite(sprintf('defaulting to %s for kid map', defaults.kidmap));
+  opt.options.kidmap = defaults.kidmap;
+}
+
+if ( ! opt.options.keystrength ) {
+  opt.options.keystrength = 2048; // default
+}
+
+common.verifyCommonRequiredParameters(opt.options, getopt);
+
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);

@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // list and query developers in Apigee Edge
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:17:26>
+// last saved: <2019-February-11 12:46:53>
 
 var edgejs = require('apigee-edge-js'),
     common = edgejs.utility,
@@ -26,7 +26,7 @@ var edgejs = require('apigee-edge-js'),
     async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    version = '20180619-0825',
+    version = '20190211-1246',
     getopt = new Getopt(common.commonOptions.concat([
       ['E' , 'expand', 'expand for each developer']
     ])).bindHelp();
@@ -43,19 +43,12 @@ common.logWrite('start');
 var opt = getopt.parse(process.argv.slice(2));
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
-    common.logWrite(JSON.stringify(result, null, 2));
+    if (result) {
+      common.logWrite(JSON.stringify(result, null, 2));
+    }
     process.exit(1);
   }
   common.logWrite('connected');

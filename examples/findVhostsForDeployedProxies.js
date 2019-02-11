@@ -10,7 +10,7 @@
 //  node ./examples/findVhostsForDeployedProxies.js -n -v -o myorgname -R default
 //
 //
-// Copyright 2018 Google LLC.
+// Copyright 2018-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,20 +24,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-September-11 15:41:08>
+// last saved: <2019-February-11 13:01:26>
 
-var async = require('async'),
-    edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    merge = require('merge'),
-    version = '20180910-1433',
-    gRegexp,
-    getopt = new Getopt(common.commonOptions.concat([
-      ['R' , 'regexp=ARG', 'Optional. List proxies with vhosts matching this regexp.']
-    ])).bindHelp();
+const async      = require('async'),
+      edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      merge      = require('merge'),
+      version    = '20190211-1300',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['R' , 'regexp=ARG', 'Optional. List proxies with vhosts matching this regexp.']
+      ])).bindHelp();
+
+var gRegexp;
 
 // ========================================================
 
@@ -123,17 +124,7 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 if (opt.options.regexp) {
   gRegexp = new RegExp(opt.options.regexp);
 }
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org){
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
   handleError(e);
 
   var readOptions = {};

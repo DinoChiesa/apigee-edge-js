@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // find the developer and app name for an API key from an Edge org.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-21 09:48:32>
+// last saved: <2019-February-11 13:02:33>
 
-const edgejs        = require('apigee-edge-js'),
-      common        = edgejs.utility,
-      apigeeEdge    = edgejs.edge,
-      Getopt        = require('node-getopt'),
-      version       = '20180820-1541',
-      getopt        = new Getopt(common.commonOptions.concat([
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      Getopt     = require('node-getopt'),
+      version    = '20190211-1302',
+      getopt     = new Getopt(common.commonOptions.concat([
         ['k' , 'key=ARG', 'required. the key to find.']
       ])).bindHelp();
 
@@ -56,16 +56,7 @@ if ( !opt.options.key ) {
   process.exit(1);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   handleError(e);
   org.appcredentials.find({key:opt.options.key}, function(e, found) {
     handleError(e);

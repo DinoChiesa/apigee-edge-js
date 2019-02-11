@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // add a new credential, generated or explicitly specified, to a developer app in Apigee Edge.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-October-02 12:07:42>
+// last saved: <2019-February-11 13:00:08>
 
-var edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20181002-1052',
-    getopt = new Getopt(common.commonOptions.concat([
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      version    = '20181002-1052',
+      getopt     = new Getopt(common.commonOptions.concat([
       ['p' , 'product=ARG', 'required. name of the API product to enable on this app'],
       ['E' , 'email=ARG', 'required. email address of the developer for which to create the app'],
       ['A' , 'appname=ARG', 'required. name for the app'],
-      ['C' , 'clientId=ARG', 'optional. the client id for this credential. Default: auto-generated.'],
+      ['I' , 'clientId=ARG', 'optional. the client id for this credential. Default: auto-generated.'],
       ['S' , 'secret=ARG', 'optional. the client secret for this credential. Default: auto-generated.'],
       ['x' , 'expiry=ARG', 'optional. expiry for the credential']
     ])).bindHelp();
@@ -65,17 +65,7 @@ if ( !opt.options.email ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-let options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     common.logWrite(JSON.stringify(result, null, 2));

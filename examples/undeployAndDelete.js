@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // undeploy and delete an Apigee Edge proxy that has a name with a specific prefix.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-June-19 08:18:06>
+// last saved: <2019-February-11 12:50:59>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -27,7 +27,7 @@ const edgejs     = require('apigee-edge-js'),
       merge      = require('merge'),
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20180619-0802',
+      version    = '20190211-1250',
       getopt     = new Getopt(common.commonOptions.concat([
         ['P' , 'prefix=ARG', 'required. name prefix. All API Proxies with names starting with this prefix will be removed.' ]
       ])).bindHelp();
@@ -117,24 +117,13 @@ if ( ! opt.options.prefix ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org){
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org){
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     process.exit(1);
   }
   common.logWrite('connected');
-
-  common.logWrite('importing');
+  common.logWrite('undeploying and deleting...');
   org.proxies.get(function(e, proxies) {
     if (e) {
       common.logWrite('error: ' + JSON.stringify(e, null, 2));

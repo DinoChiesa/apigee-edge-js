@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // Revoke a developer, app, credential, or product-on-credential.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-20 16:44:25>
+// last saved: <2019-February-11 13:01:59>
 
 const edgejs   = require('apigee-edge-js'),
     common     = edgejs.utility,
     apigeeEdge = edgejs.edge,
     Getopt     = require('node-getopt'),
-    version    = '20180820-1643',
+    version    = '20190211-1301',
     getopt     = new Getopt(common.commonOptions.concat([
       ['d' , 'developer=ARG', 'optional. the email of the developer to revoke.'],
       ['a' , 'app=ARG', 'optional. the developer app to revoke.'],
@@ -43,7 +43,6 @@ function handleError(e) {
       process.exit(1);
     }
 }
-
 
 // ========================================================
 
@@ -87,16 +86,7 @@ if ( ! action) {
   process.exit(1);
 }
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
-
-apigeeEdge.connect(options, function(e, org) {
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   handleError(e);
 
   if ( opt.options.key ) {

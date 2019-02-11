@@ -16,15 +16,15 @@
 // limitations under the License.
 //
 
-const request = require('request'),
-      edgejs = require('apigee-edge-js'),
-      common = edgejs.utility,
-      apigeeEdge = edgejs.edge,
-      sprintf = require('sprintf-js').sprintf,
+const request            = require('request'),
+      edgejs             = require('apigee-edge-js'),
+      common             = edgejs.utility,
+      apigeeEdge         = edgejs.edge,
+      sprintf            = require('sprintf-js').sprintf,
       eightHoursInMillis = 8 * 60 * 60 * 1000,
-      version = '20180619-0825',
-      Getopt = require('node-getopt'),
-      getopt = new Getopt(common.commonOptions.concat([
+      version            = '20190211-1311',
+      Getopt             = require('node-getopt'),
+      getopt             = new Getopt(common.commonOptions.concat([
         ['P' , 'proxy=ARG+', 'the proxy to find. You can pecify this option multiple times.']
       ])).bindHelp();
 
@@ -41,24 +41,6 @@ function transformArrayIntoHash(a) {
     }, {});
 }
 
-// ========================================================
-
-console.log(
-  'Apigee Edge Last Editor finder tool, version: ' + version + '\n' +
-    'Node.js ' + process.version + '\n');
-
-common.logWrite('start');
-
-// process.argv array starts with 'node' and 'scriptname.js'
-var opt = getopt.parse(process.argv.slice(2));
-
-if ( !opt.options.proxy ) {
-  console.log('You must specify at least one proxy to find');
-  getopt.showHelp();
-  process.exit(1);
-}
-
-common.verifyCommonRequiredParameters(opt.options, getopt);
 
 // ========================================================
 
@@ -138,16 +120,25 @@ function getOneBatch(org, startTime, endTime, proxyData, cb) {
 }
 
 
-var options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
+// ========================================================
 
-apigeeEdge.connect(options, function(e, org) {
+console.log(
+  'Apigee Edge Last Editor finder tool, version: ' + version + '\n' +
+    'Node.js ' + process.version + '\n');
+
+common.logWrite('start');
+
+// process.argv array starts with 'node' and 'scriptname.js'
+var opt = getopt.parse(process.argv.slice(2));
+
+if ( !opt.options.proxy ) {
+  console.log('You must specify at least one proxy to find');
+  getopt.showHelp();
+  process.exit(1);
+}
+
+common.verifyCommonRequiredParameters(opt.options, getopt);
+apigeeEdge.connect(common.getOptToOptions(opt), function(e, org) {
   if (e) {
     common.logWrite(JSON.stringify(e, null, 2));
     //console.log(e.stack);
@@ -157,10 +148,10 @@ apigeeEdge.connect(options, function(e, org) {
 
   //const auditUrlBase = joinUrlElements(opt.options.mgmtserver, auditBase, opt.options.org);
   const now = (new Date()).getTime();
-  var endTime = now;
-  var startTime = now - eightHoursInMillis;
+  const endTime = now;
+  const startTime = now - eightHoursInMillis;
 
-  var proxyData = transformArrayIntoHash(opt.options.proxy);
+  const proxyData = transformArrayIntoHash(opt.options.proxy);
 
   getOneBatch(org, startTime, endTime, proxyData, function(e, results) {
     console.log('\n');
