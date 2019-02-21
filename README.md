@@ -36,7 +36,7 @@ apigeeEdge.connect(options)
   });
 ```
 
-You can also tell the library to read credentials from [.netrc](https://www.google.com/search?q=man+.netrc):
+You can also tell the library to read credentials from [.netrc](https://linux.die.net/man/5/netrc):
 
 ```js
 var edgejs = require('apigee-edge-js'),
