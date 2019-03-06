@@ -18,7 +18,7 @@
         <Policy>addBook-extract-form-param</Policy>
     </Policies>
     <ProxyEndpoints>
-        <ProxyEndpoint>default</ProxyEndpoint>
+        <ProxyEndpoint>endpoint1</ProxyEndpoint>
     </ProxyEndpoints>
     <Resources/>
     <Spec></Spec>

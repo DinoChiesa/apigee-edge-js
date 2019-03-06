@@ -1,10 +1,9 @@
-<ProxyEndpoint name='default'>
+<ProxyEndpoint name='endpoint1'>
   <Description>Default Proxy</Description>
   <HTTPProxyConnection>
     <BasePath>/resourcetest1</BasePath>
     <Properties/>
-    <VirtualHost>default</VirtualHost>
-    <!-- <VirtualHost>secure</VirtualHost> -->
+    <VirtualHost>secure</VirtualHost>
   </HTTPProxyConnection>
 
   <FaultRules/>
@@ -24,10 +23,10 @@
       <Request/>
       <Response>
         <Step>
-          <Name>AssignMessage-BasicResponse</Name>
+          <Name>AM-BasicResponse</Name>
         </Step>
         <Step>
-          <Name>Javascript-InsertResponseHeader</Name>
+          <Name>JS-InsertResponseHeader</Name>
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/foo") and (request.verb = "GET")</Condition>
@@ -35,7 +34,7 @@
 
     <Flow name='unknown request'>
       <Request>
-        <Step><Name>RaiseFault-UnknownRequest</Name></Step>
+        <Step><Name>RF-UnknownRequest</Name></Step>
       </Request>
       <Response/>
     </Flow>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<TargetEndpoint name="default">
-    <Description>SOAP target generated from http://stormy-plains-8756.herokuapp.com/Library?wsdl</Description>
+<TargetEndpoint name="library-soap">
+    <Description>SOAP target generated Library.wsdl</Description>
     <Flows/>
     <PreFlow name="PreFlow">
         <Request>
@@ -21,7 +21,7 @@
         </Response>
     </PreFlow>
     <HTTPTargetConnection>
-        <URL>http://stormy-plains-8756.herokuapp.com:80/Library</URL>
+        <URL>https://library-soap.herokuapp.com/Library</URL>
     </HTTPTargetConnection>
     <PostFlow name="PostFlow">
         <Request/>

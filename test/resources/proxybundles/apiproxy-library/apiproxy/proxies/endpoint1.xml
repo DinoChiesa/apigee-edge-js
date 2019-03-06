@@ -1,0 +1,47 @@
+<ProxyEndpoint name="endpoint1">
+    <Description>SOAP proxy generated from Library.wsdl</Description>
+
+    <HTTPProxyConnection>
+        <BasePath>/v1/library</BasePath>
+        <VirtualHost>secure</VirtualHost>
+    </HTTPProxyConnection>
+
+    <PreFlow name="PreFlow">
+        <Request/>
+        <Response/>
+    </PreFlow>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response/>
+    </PostFlow>
+
+    <Flows>
+        <Flow name="addBook">
+            <Description>addBook</Description>
+            <Request>
+                <Step>
+                    <Name>addBook-extract-form-param</Name>
+                </Step>
+                <Step>
+                    <Name>addBook-build-soap</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/book") and (request.verb = "POST")</Condition>
+        </Flow>
+        <Flow name="Unknown-Resource">
+            <Description>Unknown Resource</Description>
+            <Request>
+                <Step>
+                    <Name>Unknown-Resource</Name>
+                </Step>
+            </Request>
+            <Response/>
+        </Flow>
+    </Flows>
+
+    <RouteRule name="route1">
+        <TargetEndpoint>library-soap</TargetEndpoint>
+    </RouteRule>
+
+</ProxyEndpoint>

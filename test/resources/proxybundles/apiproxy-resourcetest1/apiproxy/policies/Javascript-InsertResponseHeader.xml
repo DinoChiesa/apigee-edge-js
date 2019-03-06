@@ -1,4 +1,0 @@
-<Javascript enabled='true' continueOnError='false' async='false' name='Javascript-InsertResponseHeader'>
-  <DisplayName>Javascript-InsertResponseHeader</DisplayName>
-  <ResourceURL>jsc://insertResponseHeader.js</ResourceURL>
-</Javascript>
