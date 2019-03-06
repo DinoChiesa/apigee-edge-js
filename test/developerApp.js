@@ -3,7 +3,7 @@
 //
 // Tests for operations on Developer apps.
 //
-// Copyright 2017-2018 Google LLC
+// Copyright 2017-2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,7 +73,9 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.create(options)
           .then( (result) => {
             assert.exists(result.error);
-            assert.equal(result.error, "bad status");
+            assert.equal(result.error, "Error: bad status: 409");
+            assert.exists(result.result);
+            result = result.result;
             assert.equal(result.message, `App with name ${entityName} already exists`);
           } );
 
@@ -89,7 +91,9 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.create(options)
           .then( (result) => {
             assert.exists(result.error);
-            assert.equal(result.error, "bad status");
+            assert.equal(result.error, "Error: bad status: 400");
+            assert.exists(result.result);
+            result = result.result;
             assert.isTrue(result.message.startsWith(`API Product [${fakeName}] does not exist`));
           } );
 
@@ -128,6 +132,8 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.get({developerEmail, name:nonExistentApp})
           .then ( (result) => {
             assert.isNotNull(result.error, "the expected error did not occur");
+            assert.exists(result.result);
+            result = result.result;
             assert.exists(result.message);
             assert.equal(result.message, `App named ${nonExistentApp} does not exist under ${developerEmail}`);
           });
@@ -138,6 +144,8 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.get({developerEmail:nonExistentDev})
           .then ( (result) => {
             assert.isNotNull(result.error, "the expected error did not occur");
+            assert.exists(result.result);
+            result = result.result;
             assert.exists(result.message);
             assert.equal(result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${edgeOrg.conn.orgname}`);
           });
@@ -160,7 +168,9 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.del({developerEmail, name : fakeName})
          .then( (result) => {
            assert.exists(result.error);
-           assert.equal(result.error,"bad status");
+           assert.equal(result.error,"Error: bad status: 404");
+           assert.exists(result.result);
+           result = result.result;
            assert.equal(result.code,"developer.service.AppDoesNotExist");
            assert.equal(result.message,`App named ${fakeName} does not exist under ${developerEmail}`);
          });
@@ -172,7 +182,9 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.del({developerEmail:fakeEmail, name : fakeName})
          .then( (result) => {
            assert.exists(result.error);
-           assert.equal(result.error,"bad status");
+           assert.equal(result.error,"Error: bad status: 404");
+           assert.exists(result.result);
+           result = result.result;
            assert.equal(result.code,"developer.service.DeveloperIdDoesNotExist");
            assert.equal(result.message,`DeveloperId ${fakeEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
          });

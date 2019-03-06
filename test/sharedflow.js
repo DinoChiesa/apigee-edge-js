@@ -3,7 +3,7 @@
 //
 // Tests for Sharedflow operations.
 //
-// Copyright 2017 Google LLC
+// Copyright 2017-2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-05 18:00:30>
+// last saved: <2019-March-05 17:59:58>
 
 /* global describe, faker, it, path, before */
 
 describe('Sharedflow', function() {
   const common = require('./common'),
         fs = require('fs'),
-        resourceDir = "./test/resources",
+        resourceDir = "./test/resources/sharedflows",
         dateVal = new Date().valueOf(),
         namePrefix = 'apigee-edge-js-test-' + dateVal;
 

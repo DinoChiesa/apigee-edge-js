@@ -3,7 +3,7 @@
 //
 // tests for Flowhooks
 //
-// Copyright 2017 Google LLC
+// Copyright 2017-2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:52:13>
+// last saved: <2019-March-05 18:00:05>
 
 /* global describe, faker, it, path, before */
 
@@ -35,7 +35,7 @@ describe('Flowhook', function() {
       it('should fail to list flowhooks', function(done) {
         edgeOrg.flowhooks.get({}, function(e, result){
           assert.isNotNull(e, "expected error is missing");
-          assert.equal(e, "Error: missing option: environment");
+          assert.equal(e, "Error: missing required parameter: environment");
           done();
         });
       });

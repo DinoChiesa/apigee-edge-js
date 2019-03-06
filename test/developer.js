@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2017-2018 Google LLC
+// Copyright 2017-2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-05 16:26:47>
+// last saved: <2019-March-05 17:59:35>
 
 /* global describe, faker, it */
 
@@ -28,9 +28,9 @@ describe('Developer', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
   common.connectEdge(function(edgeOrg){
-
-    var firstName = faker.name.firstName(); // Rowan
-    var lastName = faker.name.lastName(); // Nikolaus
+    const devs = edgeOrg.developers;
+    const firstName = faker.name.firstName(); // Rowan
+    const lastName = faker.name.lastName(); // Nikolaus
     var options = {
           developerEmail : lastName + '.' + firstName + "@apigee-edge-js-test.org",
           lastName : lastName,
@@ -41,7 +41,7 @@ describe('Developer', function() {
 
     describe('create', function() {
       it('should create a developer', function(done) {
-        edgeOrg.developers.create(options, function(e, result){
+        devs.create(options, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
           done();
         });
@@ -50,7 +50,7 @@ describe('Developer', function() {
       it('should fail to create a developer', function(done) {
         let badOptions = Object.assign({}, options);
         delete badOptions.developerEmail;
-        edgeOrg.developers.create(badOptions, function(e, result){
+        devs.create(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -60,21 +60,42 @@ describe('Developer', function() {
     describe('get', function() {
 
       it('should get a list of developers', () =>
-         edgeOrg.developers.get({})
+         devs.get({})
          .then ( (result) => {
            assert.notExists(result.error);
            assert.exists(result.length);
            assert.isAtLeast(result.length, 1);
          })
-      );
+        );
+
+      it('should get a few specific developers', (done) => {
+         devs.get({})
+         .then ( (result) => {
+           assert.notExists(result.error);
+           assert.exists(result.length);
+           assert.isAtLeast(result.length, 1);
+           let L = result.length, numDone = 0;
+           if (L>10) { L = 6;}
+           let tick = () => { if (++numDone >= L) { done(); }};
+           result.forEach( developerEmail => {
+             devs.get({developerEmail})
+               .then ( (result) => {
+                 assert.isFalse( !!result.error, "unexpected error");
+                 assert.equal(result.email, developerEmail, 'email');
+                 tick();
+               });
+           });
+         });
+      });
 
       it('should fail to get a non-existent developer', () => {
         const developerEmail = faker.random.alphaNumeric(22);
-        return edgeOrg.developers.get({developerEmail})
+        return devs.get({developerEmail})
          .then ( (result) => {
            assert.isNotNull(result.error, "the expected error did not occur");
-           assert.exists(result.message);
-           assert.equal(result.message,`DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+           assert.exists(result.result);
+           assert.equal(result.result.code,"developer.service.DeveloperIdDoesNotExist");
+           assert.equal(result.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
          });
       });
 
@@ -83,7 +104,7 @@ describe('Developer', function() {
 
     describe('delete', function() {
       it('should delete a developer', function(done) {
-        edgeOrg.developers.del({developerEmail:options.developerEmail}, function(e, result){
+        devs.del({developerEmail:options.developerEmail}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
           done();
         });
@@ -92,7 +113,7 @@ describe('Developer', function() {
       it('should fail to delete a developer because no email was specified', function(done) {
         let badOptions = Object.assign({}, options);
         delete badOptions.developerEmail;
-        edgeOrg.developers.del(badOptions, function(e, result){
+        devs.del(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -101,7 +122,7 @@ describe('Developer', function() {
       it('should fail to delete a non-existent developer', function(done) {
         let badOptions = Object.assign({}, options);
         badOptions.developerEmail = faker.random.alphaNumeric(22) + "@apigee-edge-js-test.org";
-        edgeOrg.developers.del(badOptions, function(e, result){
+        devs.del(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });

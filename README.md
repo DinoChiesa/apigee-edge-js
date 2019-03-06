@@ -135,6 +135,7 @@ hash with various child members as functions:
 | proxies              | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision, getProxyEndpoints |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |
+| resourcefiles        | get, create, update, del                                         |
 | sharedflows          | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision |
 | flowhooks            | get, put                                                         |
 | products             | get, create, del                                                 |

@@ -3,7 +3,7 @@
 //
 // Tests for promise wrappers.
 //
-// Copyright 2018 Google LLC.
+// Copyright 2018-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ describe('Promise', function() {
        common.connectEdge()
        .then( (org) =>
               org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)})
-              .then( (result) => assert.equal(result.error, "bad status") )
+              .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
               .then( () => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
               .then( (result) => assert.isTrue(result.error.startsWith("missing required inputs,")) )
             )
@@ -195,7 +195,7 @@ describe('Promise', function() {
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
         )
-       .then( (result) => assert.equal(result.error, "bad status") )
+       .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
       );
 
     it('should return proper errors when failing to delete from non-existent env', () =>
@@ -203,7 +203,7 @@ describe('Promise', function() {
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
         )
-       .then( (result) => assert.equal(result.error, "bad status") )
+       .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
       );
 
 
