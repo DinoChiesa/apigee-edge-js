@@ -159,6 +159,11 @@ You can examine [the examples directory](./examples) for some example code illus
 
 Pull requests are welcomed, for the code or for examples.
 
+## Pre-Requisites
+
+Nodejs v10.15.1 or later. The tests use Promise.finally and
+other recent node features are also used in the library and examples.
+
 
 ### Export the latest revision of an API Proxy
 
