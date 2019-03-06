@@ -201,3 +201,128 @@ node ./revokeOrApprove.js -n -v -o $ORG  -d developer@example.com -a appnamehere
 ```
 ./loadPemIntoKvm.js -n -v -o $ORG -e ENVNAME -m KVM_MAP_NAME -F ./public.pem -N NAME_OF_VALUE
 ```
+
+# Resource Tool
+
+## List
+```
+$ node ./resourceTool.js -v -n -o $ORG -A list -e test
+Edge API resourcefile tool, version: 20190306-0851
+Node.js v10.15.1
+
+[2019-Mar-06 08:43:16] start
+[2019-Mar-06 08:43:16] connect: {"orgname":"therealdinochiesa2-eval","loginBaseUrl":"https://login.apigee.com","user":"dchiesa@google.com","mgmtServer":"https://api.enterprise.apigee.com"}
+[2019-Mar-06 08:43:16] found stashed token.
+[2019-Mar-06 08:43:16] valid and not expired
+[2019-Mar-06 08:43:16] GET https://api.enterprise.apigee.com/v1/o/therealdinochiesa2-eval/e/test/resourcefiles
+[2019-Mar-06 08:43:17] status: 200
+{
+  "resourceFile": [
+    {
+      "name": "ScalCustomerOrder_ConvertSVToPKNamespace.xsl",
+      "type": "xsl"
+    },
+    {
+      "name": "ScalCustomerOrder_ConvertPKToSVNamespace.xsl",
+      "type": "xsl"
+    },
+    {
+      "name": "PKScalCustomerOrderService_1.wsdl",
+      "type": "wsdl"
+    },
+    {
+      "name": "SVScalCustomerOrderService_1.wsdl",
+      "type": "wsdl"
+    }
+  ]
+}
+```
+
+## Get
+```
+$ node ./resourceTool.js -v -n -o $ORG -A get -e test -t xsl -N ScalCustomerOrder_ConvertPKToSVNamespace.xsl
+Edge API resourcefile tool, version: 20190306-0851
+Node.js v10.15.1
+
+[2019-Mar-06 08:43:13] start
+[2019-Mar-06 08:43:13] connect: {"orgname":"therealdinochiesa2-eval","loginBaseUrl":"https://login.apigee.com","user":"dchiesa@google.com","mgmtServer":"https://api.enterprise.apigee.com"}
+[2019-Mar-06 08:43:13] found stashed token.
+[2019-Mar-06 08:43:13] valid and not expired
+[2019-Mar-06 08:43:13] GET https://api.enterprise.apigee.com/v1/o/therealdinochiesa2-eval/e/test/resourcefiles/xsl/ScalCustomerOrder_ConvertPKToSVNamespace.xsl
+[2019-Mar-06 08:43:13] status: 200
+
+<xsl:stylesheet version="1.0"  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pk="http://service.north.net/scalcustomerorder/PKScalCustomerOrderService/v1" >
+        <!--Identity transform-->
+        <xsl:template match="@* | node()">
+                <xsl:copy>
+                        <xsl:apply-templates select="@* | node()"/>
+                </xsl:copy>
+        </xsl:template>
+        <!--replace namespace of elements from PK to SV-->
+        <xsl:template match="pk:*">
+                <xsl:element name="pk:{local-name()}" namespace="http://service.north.net/scalcustomerorder/SVScalCustomerOrderService/v1">
+                        <xsl:apply-templates select="@* | node()"/>
+                </xsl:element>
+        </xsl:template>
+</xsl:stylesheet>
+
+```
+
+## Create
+```
+$ node ./resourceTool.js -v -n -o $ORG -e test -A create -F ./resourcefiles/xsl/apigee-edgejs-test-lowerCaseElements.xsl
+Edge API resourcefile tool, version: 20190306-0851
+Node.js v10.15.1
+
+[2019-Mar-06 08:48:35] start
+[2019-Mar-06 08:48:35] connect: {"orgname":"therealdinochiesa2-eval","loginBaseUrl":"https://login.apigee.com","user":"dchiesa@google.com","mgmtServer":"https://api.enterprise.apigee.com"}
+[2019-Mar-06 08:48:35] found stashed token.
+[2019-Mar-06 08:48:35] valid and not expired
+[2019-Mar-06 08:48:35] POST https://api.enterprise.apigee.com/v1/o/therealdinochiesa2-eval/e/test/resourcefiles?type=xsl&name=apigee-edgejs-test-lowerCaseElements.xsl
+[2019-Mar-06 08:48:36] status: 201
+[2019-Mar-06 08:48:36] Create result: {"name":"apigee-edgejs-test-lowerCaseElements.xsl","type":"xsl"}
+
+{
+  "name": "apigee-edgejs-test-lowerCaseElements.xsl",
+  "type": "xsl"
+}
+
+```
+
+## Update
+```
+$ node ./resourceTool.js -v -n -o $ORG -e test -A update -F ./resourcefiles/xsl/apigee-edgejs-test-lowerCaseElements.xsl
+Edge API resourcefile tool, version: 20190306-0851
+Node.js v10.15.1
+
+[2019-Mar-06 08:48:53] start
+[2019-Mar-06 08:48:53] connect: {"orgname":"therealdinochiesa2-eval","loginBaseUrl":"https://login.apigee.com","user":"dchiesa@google.com","mgmtServer":"https://api.enterprise.apigee.com"}
+[2019-Mar-06 08:48:53] found stashed token.
+[2019-Mar-06 08:48:53] valid and not expired
+[2019-Mar-06 08:48:53] PUT https://api.enterprise.apigee.com/v1/o/therealdinochiesa2-eval/e/test/resourcefiles/xsl/apigee-edgejs-test-lowerCaseElements.xsl
+[2019-Mar-06 08:48:55] status: 200
+[2019-Mar-06 08:48:55] Update result: {"name":"apigee-edgejs-test-lowerCaseElements.xsl","type":"xsl"}
+
+{
+  "name": "apigee-edgejs-test-lowerCaseElements.xsl",
+  "type": "xsl"
+}
+```
+
+## Delete
+
+```
+$ node ./resourceTool.js -v -n -o $ORG -e test -A delete -N apigee-edgejs-test-lowerCaseElements.xsl -t xsl
+Edge API resourcefile tool, version: 20190306-0851
+Node.js v10.15.1
+
+[2019-Mar-06 08:52:55] start
+[2019-Mar-06 08:52:55] connect: {"orgname":"therealdinochiesa2-eval","loginBaseUrl":"https://login.apigee.com","user":"dchiesa@google.com","mgmtServer":"https://api.enterprise.apigee.com"}
+[2019-Mar-06 08:52:55] found stashed token.
+[2019-Mar-06 08:52:55] valid and not expired
+[2019-Mar-06 08:52:55] DELETE https://api.enterprise.apigee.com/v1/o/therealdinochiesa2-eval/e/test/resourcefiles/xsl/apigee-edgejs-test-lowerCaseElements.xsl
+[2019-Mar-06 08:52:56] status: 200
+OK
+{"name":"apigee-edgejs-test-lowerCaseElements.xsl","type":"xsl"}
+
+```
