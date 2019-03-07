@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-March-06 13:02:49>
+// last saved: <2019-March-06 17:14:49>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -50,6 +50,7 @@ describe('Proxy', function() {
     });
 
     describe('import-from-zip', function() {
+      this.timeout(65000);
       var zipFileList;
 
       before(function(done){
@@ -65,7 +66,6 @@ describe('Proxy', function() {
       });
 
       it('should import proxy zips into an org', () => {
-        this.timeout(65000);
         var numDone = 0;
         let fn = (p, zip) =>
           p.then( () => edgeOrg.proxies.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip}) );
@@ -74,13 +74,11 @@ describe('Proxy', function() {
       });
 
       it('should import proxy zips via the simple method', () => {
-        this.timeout(65000);
         let fn = (p, zip) =>
           p.then( () => edgeOrg.proxies.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}));
 
         return zipFileList.reduce(fn, Promise.resolve());
       });
-
 
     });
 
@@ -242,64 +240,55 @@ describe('Proxy', function() {
 
     });
 
-    describe('deploy', function(done) {
+    describe('deploy', function() {
       this.timeout(45000);
 
-      it('should deploy one test proxy previously imported into this org', function(done) {
-        edgeOrg.proxies.get({})
+      it('should deploy one test proxy previously imported into this org', () => {
+        let p = edgeOrg.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
-            if (proxies.length<1) { return done(); }
+            if (proxies.length<1) { return Promise.resolve({}); }
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
             let selectedEnv = selectRandomValue(environments);
-            edgeOrg.proxies.deploy({name:selectedProxy, environment: selectedEnv})
-              .then( r => {
-                assert.isNotNull(r, 'deployment failed');
-              })
-              .catch( e => {
-                console.log(e.stack);
-                return assert.isTrue(false);
-              })
-              .finally( () => done());
-          })
-          .catch( e => {console.log(e.stack); return done();} );
+            return edgeOrg.proxies.deploy({name:selectedProxy, environment:selectedEnv});
+          });
+        return assert.isFulfilled(p, "failed to deploy");
       });
 
-      it('should fail to deploy a non-existent proxy', function(done) {
+      it('should fail to deploy a non-existent proxy', () => {
         let fakeProxyName = 'a' + faker.random.alphaNumeric(18);
         let selectedEnv = selectRandomValue(environments);
-        edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
-          .then( r => {
-            assert.isTrue(false, 'deployment succeeded unexpectedly');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
-          .finally( () => done());
+        let p = edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
+          .then( (r) => {
+            if (r.error) {
+              throw new Error(r.result.message);
+            }
+            return true;
+          });
+        return assert.isRejected(p, /does not exist/);
       });
 
-      it('should fail to deploy a proxy to a non-existent environment', function(done) {
-        edgeOrg.proxies.get({})
+      it('should fail to deploy a proxy to a non-existent environment', () => {
+        let p = edgeOrg.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
-            if (proxies.length<1) { return done(); }
+            if (proxies.length<1) { return Promise.resolve({}); }
             let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
-            edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment})
-              .then( r => {
-                assert.isTrue(false, 'deployment succeeded unexpectedly');
-              })
-              .catch( e => {
-                return assert.isNotNull(e);
-              })
-              .finally( () => done());
-          })
-          .catch( e => {console.log(e.stack); return done();} );
+            return edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment})
+              .then(r => {
+                if (r.error) {
+                  throw new Error(r.result.message);
+                }
+                return true;
+              });
+          });
+        return assert.isRejected(p, /does not exist/);
       });
 
     });
 
-    describe('undeploy', function(done) {
+    describe('undeploy', function() {
       let theChosenProxy = null, theDeployedEnvironment = null, aNonDeployedProxy = null;
       this.timeout(45000);
 
@@ -329,16 +318,16 @@ describe('Proxy', function() {
           });
       });
 
-      it('should fail to undeploy a proxy from a non-existent environment', function(done) {
+      it('should fail to undeploy a proxy from a non-existent environment', () => {
         let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
-        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
-          .then( r => {
-            assert.isTrue(false, 'undeployment succeeded unexpectedly');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
-          .finally(done);
+        let p = edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
+          .then(r => {
+            if (r.error) {
+              throw new Error(r.result.message);
+            }
+            return true;
+          });
+        return assert.isRejected(p, /does not exist/);
       });
 
       it('should fail to undeploy a proxy from an env to which it is not deployed', function(done) {
@@ -353,7 +342,6 @@ describe('Proxy', function() {
           })
           .finally(done);
       });
-
 
       it('should undeploy the one test proxy previously deployed', function(done) {
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
@@ -388,8 +376,8 @@ describe('Proxy', function() {
           .finally( () => setTimeout(done, 1400));
       });
 
-
     });
+
 
     describe('delete', function() {
       this.timeout(45000);

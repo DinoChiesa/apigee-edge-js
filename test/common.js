@@ -16,15 +16,18 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2018-December-05 17:35:30>
+// last saved: <2019-March-06 16:26:29>
 
 /* global exports, global */
 
-const assert = require('chai').assert;
+const chai = require('chai');
+const assert = chai.assert;
 const path   = require('path');
 const apigee = require('../index.js');
 const faker  = require('faker');
 //var sprintf = require('sprintf-js').sprintf;
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
 
 var config = require('../testConfig.json');
 // testConfig.json ought to look something like this:

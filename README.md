@@ -1,5 +1,7 @@
 # apigee-edge-js
 
+![Test](test/badge.svg)
+
 A library of functions for administering Apigee Edge from nodejs.
 
 Do you want to automate the administration or management of Apigee Edge from Nodejs?
