@@ -1,6 +1,6 @@
 # apigee-edge-js
 
-![Test](test/badge.svg)
+![Test](https://raw.githubusercontent.com/DinoChiesa/apigee-edge-js/master/test/badge.svg?sanitize=true)
 
 A library of functions for administering Apigee Edge from nodejs.
 
