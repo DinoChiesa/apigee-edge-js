@@ -60,6 +60,10 @@ describe('DeveloperApp', function() {
             assert.exists(result.name);
             assert.exists(result.credentials);
             assert.isAtLeast(result.credentials.length, 1);
+          })
+          .catch( reason => {
+            console.log(reason.error);
+            assert.fail('should not be reached');
           });
       });
 
@@ -119,11 +123,24 @@ describe('DeveloperApp', function() {
     describe('get', function() {
 
       it('should get a list of developerapps', () =>
-         edgeOrg.developerapps.get({developerEmail})
-         .then ( (result) => {
+         edgeOrg.developerapps
+         .get({developerEmail})
+         .then ( result => {
            assert.notExists(result.error);
            assert.exists(result.length);
            assert.isAtLeast(result.length, 1);
+         })
+         .catch(reason => assert.fail('should not be reached'))
+        );
+
+      it('should fail to get apps when supplying no identifier', () =>
+         edgeOrg.developerapps
+         .get({nothing:'useful'})
+         .then ( () => assert.fail('should not be reached') )
+         .catch(reason => {
+           //const util = require('util');
+           //console.log('reason: ' + util.format(reason));
+           assert.equal(reason.error, "Error: missing developer email or id");
          })
         );
 
@@ -154,19 +171,101 @@ describe('DeveloperApp', function() {
     });
 
 
+
+    describe('attributes', function() {
+      var originalAttrCount = 0;
+      it('should get the custom attributes on an existing developerapp', () => {
+        //edgeOrg.conn.verbosity = 1;
+        return edgeOrg.developerapps.get({ developerEmail, name : entityName })
+          .then ( result => {
+            assert.exists(result.attributes);
+            assert.isTrue(Array.isArray(result.attributes));
+            originalAttrCount = result.attributes.length;
+            if (result.attributes.length > 0) {
+              //console.log('[0]: ' +JSON.stringify(result.attributes[0]));
+            }
+          })
+          .catch(reason => {
+            const util = require ('util');
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
+      });
+
+      it('should update the custom attributes on an existing developerapp', () => {
+        const attributes = {
+                updatedBy : 'apigee-edge-js-test',
+                updateDate: new Date().toISOString()
+              };
+        return edgeOrg.developerapps.update({ developerEmail, name : entityName, attributes })
+          .then ( result => {
+            assert.exists(result.attributes);
+            //console.log('attrs: ' + JSON.stringify(result.attributes));
+            assert.equal(result.attributes.length, 2 + originalAttrCount);
+            assert.isTrue(result.attributes.find( x => x.name == 'updatedBy').value == 'apigee-edge-js-test');
+            assert(result.attributes.find( x => x.name == 'updateDate'));
+          });
+        //.catch(reason => assert.fail('should not be reached'));
+      });
+
+      it('should read the custom attributes on an existing developerapp', () => {
+        return edgeOrg.developerapps.get({ developerEmail, name : entityName })
+          .then ( result => {
+            assert.exists(result.attributes);
+            assert.equal(result.attributes.length, 2 + originalAttrCount);
+            assert.isTrue(result.attributes.find( x => x.name == 'updatedBy').value == 'apigee-edge-js-test');
+            assert(result.attributes.find( x => x.name == 'updateDate'));
+          });
+        // .catch(reason => assert.fail('should not be reached'));
+      });
+
+      it('should replace the custom attributes on an existing developerapp', () => {
+        const attributes = {};
+        return edgeOrg.developerapps.update({ developerEmail, name : entityName, replace:true, attributes })
+          .then ( result => {
+            assert.exists(result.attributes);
+            assert.equal(result.attributes.length, 0);
+          })
+          .catch(reason => assert.fail('should not be reached'));
+      });
+
+
+    });
+
+
     describe('delete', function() {
 
       it('should delete a developerapp', () =>
-         edgeOrg.developerapps.del({developerEmail, name : entityName}) );
+         edgeOrg.developerapps
+         .del({developerEmail, name : entityName})
+         .catch( reason => {
+            console.log(reason.error);
+            assert.fail('should not be reached');
+         })
+        );
 
       it('should fail to delete a developerapp because no email', () =>
-         edgeOrg.developerapps.del({name : entityName})
-          .then( () => assert.fail('should not be reached'))
-          .catch( reason => assert.exists(reason.error)));
+         edgeOrg.developerapps
+         .del({name : entityName})
+         .then( () => assert.fail('should not be reached'))
+         .catch( reason => {
+           assert.exists(reason.error);
+           assert.equal(reason.error, "Error: missing developer email or id");
+         }));
+
+      it('should fail to delete a developerapp because no name', () =>
+         edgeOrg.developerapps
+         .del({developerEmail})
+         .then( () => assert.fail('should not be reached'))
+         .catch( reason => {
+           assert.exists(reason.error);
+           assert.equal(reason.error, "Error: missing developer app name");
+         }));
 
       it('should fail to delete a non-existent developerapp', () => {
         const fakeName = faker.random.alphaNumeric(22);
-        return edgeOrg.developerapps.del({developerEmail, name : fakeName})
+        return edgeOrg.developerapps
+          .del({developerEmail, name : fakeName})
           .then( () => assert.fail('should not be reached'))
           .catch( reason => {
             assert.exists(reason.error);
