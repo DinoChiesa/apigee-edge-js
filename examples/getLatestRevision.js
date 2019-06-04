@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2019-February-11 12:52:06>
+// last saved: <2019-May-16 12:20:49>
 
 /* jshint esversion: 6, node: true */
 /* global process, console, Buffer */
@@ -13,7 +13,7 @@ const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20190211-1251',
+      version    = '20190516-1220',
       getopt     = new Getopt(common.commonOptions.concat([
         ['P' , 'prefix=ARG', 'optional. name prefix. query revision of proxies with names starting with this prefix.' ],
         ['S' , 'sharedflow', 'optional. query sharedflows. Default: query proxies.']
@@ -33,7 +33,7 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 apigeeEdge.connect(common.optToOptions(opt))
   .then( (org) => {
     common.logWrite('connected');
-
+    //console.log(org);
     const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
     collection.get({})
       .then( (items) => {
@@ -45,6 +45,7 @@ apigeeEdge.connect(common.optToOptions(opt))
                        );
 
         items
+            .sort()
             .filter( name => (! opt.options.prefix) || name.startsWith(opt.options.prefix ))
             .reduce(reducer, Promise.resolve([]))
             .then( (arrayOfResults) => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) )
