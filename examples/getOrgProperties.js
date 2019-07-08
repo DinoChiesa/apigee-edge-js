@@ -1,8 +1,7 @@
 #! /usr/local/bin/node
 /*jslint node:true */
-// getToken.js
+// getOrgProperties.js
 // ------------------------------------------------------------------
-// authenticate, get a token suitable for use with the Apigee Edge Admin API.
 //
 // Copyright 2019 Google LLC.
 //
@@ -18,17 +17,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-July-08 16:07:40>
+// last saved: <2019-July-08 14:07:01>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20190708-1607',
+      version    = '20190708-1404',
       getopt     = new Getopt(common.commonOptions).bindHelp();
 
 console.log(
-  'Edge Get Token, version: ' + version + '\n' +
+  'Edge Get Org Properties, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 var opt = getopt.parse(process.argv.slice(2));
@@ -37,23 +36,9 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 
 apigeeEdge.connect(common.optToOptions(opt))
   .then( org => {
-    org.conn.getExistingToken()
-      .then( existingToken => {
-        if (opt.options.verbose) {
-          console.log();
-        }
-        console.log(existingToken.access_token);
-        if (opt.options.verbose) {
-          let jwt = existingToken.access_token,
-              jwtparts = jwt.split(new RegExp('\\.')),
-              payload = Buffer.from(jwtparts[1], 'base64').toString('utf-8'),
-              claims = JSON.parse(payload);
-          console.log( '\nissuer: ' + claims.iss);
-          console.log( 'user: ' + claims.user_name);
-          console.log( 'issued at: ' + (new Date(claims.iat * 1000)).toISOString());
-          console.log( 'expires: ' + (new Date(claims.exp * 1000)).toISOString());
-          console.log( 'client_id: ' + claims.client_id);
-        }
+    org.getProperties()
+      .then (props => {
+        console.log(JSON.stringify(props, null, 2) + '\n') ;
       });
   })
   .catch( e => { console.error('error: ' + e);} );

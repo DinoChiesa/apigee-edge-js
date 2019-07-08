@@ -3,7 +3,7 @@
 // refreshToken.js
 // ------------------------------------------------------------------
 // refresh a token for use with the Apigee Edge Admin API, regardless of
-// whether there is an existing token or if it is expired or not. 
+// whether there is an existing token or if it is expired or not.
 //
 // Copyright 2019 Google LLC.
 //
@@ -19,13 +19,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-June-04 11:58:31>
+// last saved: <2019-July-08 16:07:48>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20190604-1017',
+      version    = '20190708-1607',
       getopt     = new Getopt(common.commonOptions).bindHelp();
 
 console.log(
@@ -38,28 +38,32 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 
 apigeeEdge.connect(common.optToOptions(opt))
   .then( org => {
-    if(opt.options.token && opt.options.token.access_token) {
-      org.conn.refreshToken(opt.options.token)
-        .then (token => {
-          if (opt.options.verbose) {
-            console.log();
-          }
-          console.log(token.access_token);
-          if (opt.options.verbose) {
-            let jwt = token.access_token,
-                jwtparts = jwt.split(new RegExp('\\.')),
-                payload = Buffer.from(jwtparts[1], 'base64').toString('utf-8'),
-                claims = JSON.parse(payload);
-            console.log( '\nissuer: ' + claims.iss);
-            console.log( 'user: ' + claims.user_name);
-            console.log( 'issued at: ' + (new Date(claims.iat * 1000)).toISOString());
-            console.log( 'expires: ' + (new Date(claims.exp * 1000)).toISOString());
-            console.log( 'client_id: ' + claims.client_id);
-          }
-          else {
-            console.log('no token found');
-          }
-        });
-    }
+    org.conn.getExistingToken()
+      .then( existingToken => {
+        if (opt.options.verbose) {
+          let util = require('util');
+          console.log(util.inspect(existingToken));
+        }
+      })
+      .then( x => {
+        org.conn.refreshToken()
+          .then (token => {
+            if (opt.options.verbose) {
+              console.log();
+            }
+            console.log(token.access_token);
+            if (opt.options.verbose) {
+              let jwt = token.access_token,
+                  jwtparts = jwt.split(new RegExp('\\.')),
+                  payload = Buffer.from(jwtparts[1], 'base64').toString('utf-8'),
+                  claims = JSON.parse(payload);
+              console.log( '\nissuer: ' + claims.iss);
+              console.log( 'user: ' + claims.user_name);
+              console.log( 'issued at: ' + (new Date(claims.iat * 1000)).toISOString());
+              console.log( 'expires: ' + (new Date(claims.exp * 1000)).toISOString());
+              console.log( 'client_id: ' + claims.client_id);
+            }
+          });
+      });
   })
   .catch( e => { console.error('error: ' + e);} );
