@@ -56,7 +56,7 @@ describe('DeveloperApp', function() {
               };
 
         return edgeOrg.developerapps.create(options)
-          .then( (result) => {
+          .then( result => {
             assert.exists(result.name);
             assert.exists(result.credentials);
             assert.isAtLeast(result.credentials.length, 1);

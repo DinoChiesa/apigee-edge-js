@@ -144,7 +144,7 @@ hash with various child members as functions:
 | developers           | get, create, del,revoke, approve                                 |
 | keystores            | get, create, del, import key and cert, create references         |
 | targetservers        | get, create, del, disable, enable, update                        |
-| developerapps        | get, create, del, revoke, approve                                |
+| developerapps        | get, create, del, revoke, approve, update                        |
 | appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
 | stats                | get                                                              |
@@ -172,13 +172,14 @@ other recent node features are also used in the library and examples.
 using promises:
 ```js
 edgeOrg.proxies.export({name:'proxyname'})
-  .then ( (result) => {
+  .then ( result => {
     fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
     console.log('ok');
-  });
+  })
+  .catch( reason => { console.log(reason.error);});
 ```
 
-In the case of an error, the result object will contain an error member. Check it! 
+In the case of an error, the catch()  will get the reason. There will be 2 members to the reason object: error, and result. The result is the payload send back, if any. 
 
 using callbacks:
 ```js
@@ -198,7 +199,7 @@ edgeOrg.proxies.export({name:'proxyname'}, function(e,result) {
 promises:
 ```js
 edgeOrg.proxies.export({name:'proxyname', revision:3})
-  .then ( (result) => {
+  .then ( result => {
     fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
     console.log('ok');
   });
@@ -404,7 +405,7 @@ const edgejs = require('apigee-edge-js');
 const apigeeEdge = edgejs.edge;
 var options = {org : 'ORGNAME', netrc: true, verbosity : 1 };
 apigeeEdge.connect(options)
-  .then ( (org) => {
+  .then ( org => {
     console.log('org: ' + org.conn.orgname);
     return org.targetservers.create({
       environment : 'test',
@@ -420,6 +421,44 @@ apigeeEdge.connect(options)
 
 ```
 
+### Create a Developer App
+
+```js
+apigeeEdge.connect(connectOptions)
+  .then ( org => {
+    const options = {
+            developerEmail,
+            name : entityName,
+            apiProduct : apiProducts[0]
+          };
+    org.developerapps.create(options)
+      .then( result => {
+        ...
+      })
+      .catch( reason => {
+        console.log('failed to create: ' + reason.error);
+      });
+  });
+```
+
+### Update attributes on a Developer App
+
+```js
+apigeeEdge.connect(connectOptions)
+  .then ( org => {
+    const attributes = {
+            updatedBy : 'apigee-edge-js',
+            updateDate: new Date().toISOString()
+          };
+    org.developerapps.update({ developerEmail, app, attributes })
+      .then ( result => {
+        console.log('attrs: ' + JSON.stringify(result.attributes));
+      })
+      .catch( reason => {
+        console.log('failed to create: ' + reason.error);
+      });
+  });
+```
 
 ### Lots More Examples
 
