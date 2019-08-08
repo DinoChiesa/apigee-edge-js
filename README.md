@@ -30,11 +30,11 @@ apigeeEdge.connect(options)
           userName : "JD1"
         };
 
-    org.developers.create(options)
+    return org.developers.create(options)
       .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
   })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
+  .catch ( reason => {
+    console.log('error: ' + reason.error.stack);
   });
 ```
 
@@ -229,13 +229,12 @@ var options = {
       password:password
     };
 apigeeEdge.connect(options)
-  .then ( (org) => {
+  .then ( org =>
     org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'})
-      .then ( (result) =>
-        console.log('import ok. %s name: %s r%d', term, result.name, result.revision) );
-  })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
+      .then ( result =>
+        console.log('import ok. %s name: %s r%d', term, result.name, result.revision) ) )
+  .catch ( reason => {
+    console.log('error: ' + reason.error.stack);
   });
 ```
 
@@ -275,14 +274,8 @@ var options = {
 };
 
 org.proxies.deploy(options)
-  .then( (result) => {
-    if (result.error) {
-      console.log('deployment failed.');
-    }
-    else {
-      console.log('deployment succeeded.');
-    }
-  });
+  .then( result => console.log('deployment succeeded.') )
+  .catch reason => console.log('deployment failed.') );
 ```
 
 
@@ -293,6 +286,7 @@ org.proxies.getRevisions({name:'proxyname-here'})
   then( (result) => {
     console.log('revisions: ' + JSON.stringify(result)); // eg, [ "1", "2", "3"]
     var latestRevision = result[result.length-1];
+     ...
   });
 ```
 
@@ -322,7 +316,7 @@ apigeeEdge.connect(options)
 
       });
   })
-  .catch( (e) => console.error('error: ' + e.stack) );
+  .catch( reason => console.error('error: ' + reason.error.stack) );
 ```
 
 
@@ -399,9 +393,7 @@ apigeeEdge.connect(options)
       .then( () => org.maskconfigs.add({ namespaces : { prefix:'apigee', value:'urn://apigee' } })
       .then( (result) => console.log(JSON.stringify(result)) )
     })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
-  });
+  .catch ( reason => console.log('error: ' + reason.error.stack) );
 ```
 
 ### Create a Target Server
@@ -424,9 +416,8 @@ apigeeEdge.connect(options)
       }
     });
   })
-  .catch ( (e) => {
-    console.log('error: ' + e.stack);
-  });
+  .catch ( reason => console.log('error: ' + reason.error.stack) );
+
 ```
 
 
@@ -509,7 +500,7 @@ This code is Copyright (C) 2017-2019 Google LLC, and is licensed under the Apach
 
 ## Bugs
 
-* The tests are incomplete
+* The tests are a work in progress
 
 ## Related
 
