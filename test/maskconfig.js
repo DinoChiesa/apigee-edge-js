@@ -42,7 +42,7 @@ describe('Maskconfig', function() {
           });
       });
     });
-    
+
     after(function(done) {
       const apply = () =>
         edgeOrg.maskconfigs.set(originalDefaultMaskconfig)
@@ -60,7 +60,7 @@ describe('Maskconfig', function() {
       });
     });
 
-    
+
     describe('reset', function() {
       it('should clear the default maskconfig from the org if necessary', function(done) {
         edgeOrg.maskconfigs.get({}, function(e, result){
@@ -73,16 +73,16 @@ describe('Maskconfig', function() {
           });
         });
       });
-      
+
       it('should verify that there is no default maskconfig in the org', function(done) {
         edgeOrg.maskconfigs.get({name:'default'})
-          .then ( r => {
-            assert.equal(r.result.code, "distribution.DebugMaskConfigurationNotFound");
-            done();
-          })
-          .catch(e => { console.log(e); assert.isNull(e); done(); });
+          .then( () => assert.fail('should not be reached') )
+          .catch( reason =>
+                  assert.equal(reason.result.code, "distribution.DebugMaskConfigurationNotFound") )
+
+          .finally (done);
       });
-      
+
     });
 
     describe('set', function() {
@@ -94,7 +94,7 @@ describe('Maskconfig', function() {
             } ],
             "xPathsRequest" : [ "/emp:employee/emp:name" ]
           };
-      
+
       it('should set a maskconfig for the org', function(done) {
         edgeOrg.maskconfigs.set(desiredMaskConfig0, function(e, result){
           assert.isNull(e, "error setting: " + JSON.stringify(e));
@@ -121,7 +121,7 @@ describe('Maskconfig', function() {
             } ],
             "xpath" : [ "/emp:employee/emp:name" ]
           };
-            
+
       it('should set a maskconfig for the org using shorthand xml', function(done) {
         edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
@@ -138,8 +138,8 @@ describe('Maskconfig', function() {
               "prefix" : "emp",
               "value" : "https://example.com"
             } ],
-            "xPathsFault" : [ "/emp:employee/emp:name" ], 
-            "xPathsRequest" : [ "/emp:employee/emp:name" ], 
+            "xPathsFault" : [ "/emp:employee/emp:name" ],
+            "xPathsRequest" : [ "/emp:employee/emp:name" ],
             "xPathsResponse" : [ "/emp:employee/emp:name" ]
           };
 
@@ -158,7 +158,7 @@ describe('Maskconfig', function() {
             "name" : "default",
             "json" : [ "$.field1", "$.field2" ]
           };
-            
+
       it('should set a maskconfig for the org using shorthand json', function(done) {
         edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
@@ -184,7 +184,7 @@ describe('Maskconfig', function() {
           done();
         });
       });
-     
+
     });
 
     describe('set-variables', function() {
@@ -192,7 +192,7 @@ describe('Maskconfig', function() {
             "name" : "default",
             "variables" : [ "request.header.authorization", "request.queryparam.foo" ]
           };
-            
+
       it('should set a maskconfig for the org for variables', function(done) {
         edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
@@ -211,11 +211,11 @@ describe('Maskconfig', function() {
           done();
         });
       });
-     
+
     });
 
     // TODO: tests for proxy-based maskconfigs
-    // Need to import a dummy proxy and then remove it after the test run. 
+    // Need to import a dummy proxy and then remove it after the test run.
 
   });
 

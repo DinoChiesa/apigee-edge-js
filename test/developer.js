@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-March-05 17:59:35>
+// last saved: <2019-August-07 18:23:13>
 
 /* global describe, faker, it */
 
@@ -69,34 +69,37 @@ describe('Developer', function() {
         );
 
       it('should get a few specific developers', (done) => {
-         devs.get({})
-         .then ( (result) => {
-           assert.notExists(result.error);
-           assert.exists(result.length);
-           assert.isAtLeast(result.length, 1);
-           let L = result.length, numDone = 0;
-           if (L>10) { L = 6;}
-           let tick = () => { if (++numDone >= L) { done(); }};
-           result.forEach( developerEmail => {
-             devs.get({developerEmail})
-               .then ( (result) => {
-                 assert.isFalse( !!result.error, "unexpected error");
-                 assert.equal(result.email, developerEmail, 'email');
-                 tick();
-               });
-           });
-         });
+        devs.get({})
+          .then ( (result) => {
+            assert.notExists(result.error);
+            assert.exists(result.length);
+            assert.isAtLeast(result.length, 1);
+            let L = result.length, numDone = 0;
+            if (L>10) { L = 6;}
+            let tick = () => { if (++numDone >= L) { done(); }};
+            result.forEach( developerEmail => {
+              devs.get({developerEmail})
+                .then ( (result) => {
+                  assert.isFalse( !!result.error, "unexpected error");
+                  assert.equal(result.email, developerEmail, 'email');
+                  tick();
+                });
+            });
+          });
       });
 
       it('should fail to get a non-existent developer', () => {
         const developerEmail = faker.random.alphaNumeric(22);
         return devs.get({developerEmail})
-         .then ( (result) => {
-           assert.isNotNull(result.error, "the expected error did not occur");
-           assert.exists(result.result);
-           assert.equal(result.result.code,"developer.service.DeveloperIdDoesNotExist");
-           assert.equal(result.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
-         });
+          .then((res) => {
+            assert.fail('should not be reached');
+          })
+          .catch(reason => {
+            assert.exists(reason.error);
+            assert.equal(reason.result.code,"developer.service.DeveloperIdDoesNotExist");
+            assert.equal(reason.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+
+          });
       });
 
     });

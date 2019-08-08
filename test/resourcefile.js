@@ -227,9 +227,9 @@ describe('Resourcefile', function() {
         let numDone = 0;
         let bong = () => { if (++numDone == environments.length) { done(); } };
         let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        let typ = selectRandomValue(Object.keys(resourcefileDirs));
-        let rsrc = selectRandomValue(resourcefileDirs[typ]);
-        let filename = path.resolve(resourceDir, typ, rsrc);
+        //let typ = selectRandomValue(Object.keys(resourcefileDirs));
+        //let rsrc = selectRandomValue(resourcefileDirs[typ]);
+        //let filename = path.resolve(resourceDir, typ, rsrc);
         environments.forEach(function(environment) {
           rf.create({environment, name:badName}, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
@@ -240,8 +240,8 @@ describe('Resourcefile', function() {
 
       it('fail to create an org-scoped resourcefile with no filename', function(done) {
         let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        let key = selectRandomValue(Object.keys(resourcefileDirs));
-        let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
+        //let key = selectRandomValue(Object.keys(resourcefileDirs));
+        //let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
         rf.create({name:badName}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();

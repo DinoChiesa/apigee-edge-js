@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:53:03>
+// last saved: <2019-August-08 10:06:08>
 
 /* global path, faker, describe, it, before, after */
 
@@ -168,7 +168,8 @@ describe('Keystore', function() {
       it('should import key and cert into a keystore', function(done){
         this.timeout(65000);
         var numDone = 0;
-
+        let tick = () => { if (++numDone == envlist.length) { done(); } };
+        //edgeOrg.conn.verbosity = 1;
         envlist.forEach(function(env){
           var options = {
                 environment : env,
@@ -181,10 +182,7 @@ describe('Keystore', function() {
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
             edgeOrg.keystores.importCert(options, function(e, result){
               assert.isNull(e, "error importing cert and key: " + JSON.stringify(e));
-              numDone++;
-              if (numDone == envlist.length) {
-                done();
-              }
+              tick();
             });
           });
 

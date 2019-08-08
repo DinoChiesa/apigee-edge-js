@@ -97,9 +97,10 @@ describe('Promise', function() {
     it('should connect and fail to get flowhooks (no environment)', () =>
       common.connectEdge()
        .then ( (org) => org.flowhooks.get() )
-       .then ( (result) => {
-         assert.isFalse(Array.isArray(result) ) ;
-         assert.exists(result.error) ;
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.exists(reason.error) ;
+         assert.equal(reason.error, "Error: missing required parameter: environment");
        })
       );
 
@@ -107,114 +108,148 @@ describe('Promise', function() {
       common.connectEdge()
         .then ( (org) => {
           org.environments.get()
-            .then( (result) => org.environments.getVhosts({ env: environments[0] }) )
-            .then( (result) => org.developers.get() )
-            .then( (result) => {
+            .then( result => org.environments.getVhosts({ env: environments[0] }) )
+            .then( result => org.developers.get() )
+            .then( result => {
               //console.log('developers: ' + JSON.stringify(result, null, 2));
             })
-            .then( (result) => org.products.get( {} ) )
-            .then( (result) => {
+            .then( result => org.products.get( {} ) )
+            .then( result => {
               //console.log('products: ' + JSON.stringify(result, null, 2));
             })
-            .then( (result) => org.proxies.get( {} ) )
-            .then( (result) => {
+            .then( result => org.proxies.get( {} ) )
+            .then( result => {
               //console.log('proxies: ' + JSON.stringify(result, null, 2));
             })
-            .then( (result) => org.caches.get( { env:environments[0] }) )
-            .then( (result) => org.kvms.get( {} ) )
-            .then( (result) => org.kvms.get( { env:environments[0] }) )
-            .then( (result) => done() )
-            .catch( (e) => {
-              console.log('error: ' + e.stack);
+            .then( result => org.caches.get( { env:environments[0] }) )
+            .then( result => org.kvms.get( {} ) )
+            .then( result => org.kvms.get( { env:environments[0] }) )
+            .catch( reason => {
+              console.log('error: ' + reason.error.stack);
               assert.isTrue(false, "unexpected error");
-            });
+            })
+            .finally( done );
         });
     });
 
   });
 
 
-  describe('create', function() {
+  describe('cache', function() {
 
     it('should create a cache in an env via promises', () =>
        common.connectEdge()
-        .then ( (org) =>
-                org.caches.create({cacheName, environment:environments[0]})
-                .then( (result) => assert.equal(result.name, cacheName) )
-              )
+       .then ( (org) => {
+         //org.conn.verbosity = 1;
+         return org.caches.create({cacheName, environment:environments[0]})
+           .then( result => assert.equal(result.name, cacheName) )
+           .catch(reason => assert.fail('should not be reached'));
+       } )
       );
 
-    it('should create a developer in an env via promises', () =>
+    it('should return proper error on failure to create a cache', () =>
        common.connectEdge()
-       .then ( (org) => org.developers.create({
-                 developerEmail,
-                 lastName,
-                 firstName,
-                 userName : entityName + '-developer',
-                 attributes: { uuid: faker.random.uuid() }
-               })
-             )
-      );
+       .then( org => org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)}) )
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.equal(reason.error, "Error: bad status: 404");
+         assert.equal(reason.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+       }));
 
-  });
-
-  describe('create-failure', function() {
-    it('should return proper errors via promises on failure to create a few things', () =>
-       common.connectEdge()
-       .then( (org) =>
-              org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)})
-              .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
-              .then( () => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
-              .then( (result) => assert.isTrue(result.error.startsWith("missing required inputs,")) )
-            )
-      );
-  });
-
-
-  describe('delete', () => {
     it('should delete a cache in an env via promises', () =>
       common.connectEdge()
-        .then ( (org) =>
-                org.caches.del({cacheName:entityName + '-cache', environment:environments[0]})
-                  .then( () => org.developers.del({developerEmail}) )
-              )
+       .then ( org =>
+               org.caches.del({cacheName, environment:environments[0]}) )
+       .then( result => assert.equal(result.name, cacheName) )
+       .catch(reason => assert.fail('should not be reached'))
       );
-
-    it('should delete a developer via promises', () =>
-      common.connectEdge()
-        .then ( (org) => org.developers.del({developerEmail}) )
-      );
-
-  });
-
-
-  describe('delete-failure', () => {
 
     it('should return proper errors when failing to delete non-existent cache', () =>
       common.connectEdge()
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
         )
-       .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.equal(reason.error, "Error: bad status: 404");
+         assert.equal(reason.result.code, "messaging.config.beans.CacheDoesNotExist");
+       })
       );
 
-    it('should return proper errors when failing to delete from non-existent env', () =>
+    it('should fail properly when on delete from non-existent env', () =>
       common.connectEdge()
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
         )
-       .then( (result) => assert.equal(result.error, "Error: bad status: 404") )
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.equal(reason.error, "Error: bad status: 404");
+         assert.equal(reason.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+       })
       );
 
-
-    it('should return proper errors when failing to delete because of unspecified name', () =>
+    it('should fail properly on delete when name is unspecified', () =>
       common.connectEdge()
         .then ( (org) =>
           org.caches.del({environment:faker.random.alphaNumeric(22)})
         )
-       .then( (result) => assert.equal(result.error, "missing name for cache") )
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.equal(reason.error, "missing name for cache");
+       })
       );
 
+  });
+
+
+  describe('developer', function() {
+
+    it('should create a developer via promises', () =>
+       common.connectEdge()
+       .then ( org => {
+         //org.conn.verbosity = 1;
+         let devOptions = {
+                 developerEmail,
+                 lastName,
+                 firstName,
+                 userName : entityName + '-developer',
+                 attributes: { uuid: faker.random.uuid() }
+             };
+         return org.developers.create(devOptions)
+           .then( result => assert.isNotNull(result))
+           .catch ( reason => {
+             assert.fail('should not be reached');
+           });
+       })
+      );
+
+    it('should return proper error on failure to create a developer', () =>
+       common.connectEdge()
+        .then( org => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
+       .then( () => assert.fail('should not be reached'))
+       .catch( reason => {
+         assert.equal(reason.error, "missing required inputs, one of {email, firstName, lastName, userName}");
+       }));
+
+    it('should get developers via promises', () =>
+       common.connectEdge()
+       .then ( org => {
+         //org.conn.verbosity = 1;
+         return org.developers.get()
+           .then( result => assert.isTrue(Array.isArray(result)))
+           .catch( reason => assert.fail('should not be reached'));
+       })
+      );
+
+    it('should delete a developer via promises', () =>
+      common.connectEdge()
+       .then ( org => {
+         //org.conn.verbosity = 1;
+         return org.developers.del({developerEmail})
+           .then( result => assert.equal(result.email, developerEmail) )
+           .catch(reason => assert.fail('should not be reached'));
+       })
+      );
 
   });
 

@@ -18,10 +18,9 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-March-06 17:14:49>
+// last saved: <2019-August-08 11:09:56>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
-
 
 const selectRandomValue = (a) => {
         var L1 = a.length, n = Math.floor(Math.random() * L1);
@@ -258,32 +257,34 @@ describe('Proxy', function() {
       it('should fail to deploy a non-existent proxy', () => {
         let fakeProxyName = 'a' + faker.random.alphaNumeric(18);
         let selectedEnv = selectRandomValue(environments);
-        let p = edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
-          .then( (r) => {
-            if (r.error) {
-              throw new Error(r.result.message);
-            }
-            return true;
+        edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
+          .then( () => assert.fail('should not be reached'))
+          .catch( reason => {
+            assert.equal(typeof reason, "object");
+            assert.exists(reason.error);
+            assert.exists(reason.error.stack);
+            assert.equal(reason.error.message, 'bad status: 404');
           });
-        return assert.isRejected(p, /does not exist/);
+        return undefined;
       });
 
       it('should fail to deploy a proxy to a non-existent environment', () => {
-        let p = edgeOrg.proxies.get({})
+        edgeOrg.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
             if (proxies.length<1) { return Promise.resolve({}); }
             let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
-            return edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment})
-              .then(r => {
-                if (r.error) {
-                  throw new Error(r.result.message);
-                }
-                return true;
-              });
+            return edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment});
+          })
+          .then( () => assert.fail('should not be reached'))
+          .catch( reason => {
+            assert.equal(typeof reason, "object");
+            assert.exists(reason.error);
+            assert.exists(reason.error.stack);
+            assert.equal(reason.error.message, 'bad status: 404');
           });
-        return assert.isRejected(p, /does not exist/);
+        return undefined;
       });
 
     });
@@ -320,59 +321,44 @@ describe('Proxy', function() {
 
       it('should fail to undeploy a proxy from a non-existent environment', () => {
         let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
-        let p = edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
-          .then(r => {
-            if (r.error) {
-              throw new Error(r.result.message);
-            }
-            return true;
+        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
+          .then( () => assert.fail('should not be reached'))
+          .catch( reason => {
+            assert.equal(typeof reason, "object");
+            assert.exists(reason.error);
+            assert.exists(reason.error.stack);
+            assert.equal(reason.error.message, 'bad status: 404');
           });
-        return assert.isRejected(p, /does not exist/);
+        return undefined;
       });
 
       it('should fail to undeploy a proxy from an env to which it is not deployed', function(done) {
         const selector = (src) => src[ ~~(Math.random() * src.length) ];
         let selectedEnvironment = selector( environments.filter( x => x != theDeployedEnvironment));
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: selectedEnvironment})
-          .then( r => {
-            assert.isTrue(false, 'undeployment succeeded unexpectedly');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
+          .then( r => assert.isTrue(false, 'undeployment succeeded unexpectedly'))
+          .catch( reason => assert.isNotNull(reason) )
           .finally(done);
       });
 
       it('should undeploy the one test proxy previously deployed', function(done) {
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
-          .then( r => {
-            assert.isNotNull(r, 'undeployment response is empty');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
+          .then( r => assert.isNotNull(r, 'undeployment response is empty') )
+          .catch( e => assert.isNotNull(e) )
           .finally(() => setTimeout(done, 1400));
       });
 
       it('should fail to undeploy a test proxy that is not currently deployed', function(done) {
         edgeOrg.proxies.undeploy({name:aNonDeployedProxy, environment: theDeployedEnvironment})
-          .then( r => {
-            assert.isTrue(false, 'undeployment unexpectedly succeeded');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
+          .then( r => assert.isTrue(false, 'undeployment unexpectedly succeeded') )
+          .catch( e => assert.isNotNull(e) )
           .finally(done);
       });
 
       it('should fail to undeploy a test proxy that is already undeployed', function(done) {
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
-          .then( r => {
-            assert.isTrue(false, 'undeployment unexpectedly succeeded');
-          })
-          .catch( e => {
-            return assert.isNotNull(e);
-          })
+          .then( r => assert.isTrue(false, 'undeployment unexpectedly succeeded') )
+          .catch( e => assert.isNotNull(e) )
           .finally( () => setTimeout(done, 1400));
       });
 
@@ -403,25 +389,23 @@ describe('Proxy', function() {
       it('should fail to delete non-existent proxies', function(done) {
         this.timeout(25000);
         var numDone = 0, L = 3;
+        let shouldNotBeReached = () => assert.fail('should not be reached') ;
+        let shouldHaveReason = reason => assert.isNotNull( reason );
         var tick = function() { if (++numDone >= L) { done(); } };
         for (var i = 0; i<L; i++) {
           let fakeName = 'a' + faker.random.alphaNumeric(22);
           edgeOrg.proxies.del({name:fakeName})
-            .then( (r) => assert.isTrue(false))  // should always throw
-            .catch( (e) => {
-              assert.isNotNull(e, "expected error did not occur");
-            })
-            .finally( () => tick());
+            .then( shouldNotBeReached )
+            .catch( shouldHaveReason )
+            .finally( tick );
         }
       });
 
       it('should fail to delete when not spec ifying a name', function(done) {
         edgeOrg.proxies.del({})
           .then( (r) => assert.isTrue(false))  // should always throw
-          .catch( (e) => {
-            assert.isNotNull(e, "expected error did not occur");
-          })
-          .finally( () => done());
+          .catch( (e) => assert.isNotNull(e, "expected error did not occur") )
+          .finally( done );
       });
 
 

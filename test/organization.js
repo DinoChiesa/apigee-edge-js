@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2018-December-04 12:49:59>
+// last saved: <2019-August-08 10:59:25>
 
 /* global describe, faker, it */
 
@@ -41,6 +41,7 @@ describe('Organization', function() {
            assert.notExists(result[contrivedPropertyName1]);
            assert.notExists(result[contrivedPropertyName2]);
          })
+         .catch( reason => assert.fail('should not be reached'))
         );
 
     });
@@ -69,7 +70,8 @@ describe('Organization', function() {
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName1], 42);
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
     });
@@ -85,7 +87,8 @@ describe('Organization', function() {
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName1], 187);
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
       it('should set a new property on the org', () => {
@@ -96,7 +99,8 @@ describe('Organization', function() {
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName2], "hello");
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
     });
@@ -112,7 +116,8 @@ describe('Organization', function() {
             assert.equal(typeof result, "object");
             assert.notExists(result[contrivedPropertyName1]);
             assert.notExists(result[contrivedPropertyName2]);
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
     });
@@ -126,7 +131,8 @@ describe('Organization', function() {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.key.length']);
             assert.equal(result['keymanagement.consumer.key.length'], "42");
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
       it('should set the consumer secret length for the org', () => {
@@ -135,26 +141,29 @@ describe('Organization', function() {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.secret.length']);
             assert.equal(result['keymanagement.consumer.secret.length'], "48");
-          });
+          })
+          .catch( reason => assert.fail('should not be reached'));
       });
 
       it('should fail to set the consumer key length for the org', () => {
         return edgeOrg.setConsumerKeyLength(101010)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
-            assert.exists(result.error);
-            assert.exists(result.error.stack);
-            assert.equal(result.error.message, "invalid argument");
+          .then( r => assert.fail('should not be reached'))
+          .catch( reason => {
+            assert.equal(typeof reason, "object");
+            assert.exists(reason.error);
+            assert.exists(reason.error.stack);
+            assert.equal(reason.error.message, "invalid argument");
           });
       });
 
       it('should fail to set the consumer secret length for the org', () => {
         return edgeOrg.setConsumerSecretLength(179238)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
-            assert.exists(result.error);
-            assert.exists(result.error.stack);
-            assert.equal(result.error.message, "invalid argument");
+          .then( () => assert.fail('should not be reached'))
+          .catch( reason => {
+            assert.equal(typeof reason, "object");
+            assert.exists(reason.error);
+            assert.exists(reason.error.stack);
+            assert.equal(reason.error.message, "invalid argument");
           });
       });
 
