@@ -1,13 +1,13 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "description": "nodejs library for the administration API for Apigee Edge.",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/mocha/bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
     "test1": "node_modules/mocha/bin/mocha --grep '^Proxy.*' --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
     "simpletest": "node_modules/mocha/bin/mocha  --reporter spec",
-    "badgegen": "node_modules/mocha/bin/mocha  --reporter mocha-badge-generator"
+    "badgegen-willnotwork-badgegen-vulnerabilities": "node_modules/mocha/bin/mocha  --reporter mocha-badge-generator"
   },
   "repository": {
     "type": "git",
@@ -40,7 +40,6 @@
     "chai-as-promised": "^7.1.1",
     "faker": "4.1.0",
     "mocha": "^5.2.0",
-    "mocha-badge-generator": "^0.2.2",
     "mocha-multi-reporters": "^1.1.7"
   },
   "engines": {
