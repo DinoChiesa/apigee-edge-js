@@ -98,9 +98,9 @@ describe('Promise', function() {
       common.connectEdge()
        .then ( (org) => org.flowhooks.get() )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.exists(reason.error) ;
-         assert.equal(reason.error, "Error: missing required parameter: environment");
+       .catch( error => {
+         assert.exists(error.message) ;
+         assert.equal(error.message, "missing required parameter: environment");
        })
       );
 
@@ -151,9 +151,9 @@ describe('Promise', function() {
        common.connectEdge()
        .then( org => org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)}) )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.equal(reason.error, "Error: bad status: 404");
-         assert.equal(reason.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+       .catch( error => {
+         assert.equal(error, "Error: bad status: 404");
+         assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
        }));
 
     it('should delete a cache in an env via promises', () =>
@@ -170,9 +170,9 @@ describe('Promise', function() {
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
         )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.equal(reason.error, "Error: bad status: 404");
-         assert.equal(reason.result.code, "messaging.config.beans.CacheDoesNotExist");
+       .catch( error => {
+         assert.equal(error, "Error: bad status: 404");
+         assert.equal(error.result.code, "messaging.config.beans.CacheDoesNotExist");
        })
       );
 
@@ -182,9 +182,9 @@ describe('Promise', function() {
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
         )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.equal(reason.error, "Error: bad status: 404");
-         assert.equal(reason.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+       .catch( error => {
+         assert.equal(error, "Error: bad status: 404");
+         assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
        })
       );
 
@@ -194,8 +194,8 @@ describe('Promise', function() {
           org.caches.del({environment:faker.random.alphaNumeric(22)})
         )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.equal(reason.error, "missing name for cache");
+       .catch( error => {
+         assert.equal(error, "Error: missing name for cache");
        })
       );
 
@@ -227,8 +227,8 @@ describe('Promise', function() {
        common.connectEdge()
         .then( org => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
        .then( () => assert.fail('should not be reached'))
-       .catch( reason => {
-         assert.equal(reason.error, "missing required inputs, one of {email, firstName, lastName, userName}");
+       .catch( error => {
+         assert.equal(error.message, "missing required inputs, one of {email, firstName, lastName, userName}");
        }));
 
     it('should get developers via promises', () =>

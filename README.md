@@ -33,8 +33,8 @@ apigeeEdge.connect(options)
     return org.developers.create(options)
       .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
   })
-  .catch ( reason => {
-    console.log('error: ' + reason.error.stack);
+  .catch ( error => {
+    console.log('error: ' + error);
   });
 ```
 
@@ -176,10 +176,10 @@ edgeOrg.proxies.export({name:'proxyname'})
     fs.writeFileSync(path.join('/Users/foo/export', result.filename), result.buffer);
     console.log('ok');
   })
-  .catch( reason => { console.log(reason.error);});
+  .catch( error => console.log(util.format(error)) );
 ```
 
-In the case of an error, the catch()  will get the reason. There will be 2 members to the reason object: error, and result. The result is the payload send back, if any. 
+In the case of an error, the catch()  will get the Error object. There will be an additional member on the reason object: result. The result is the payload send back, if any.
 
 using callbacks:
 ```js
@@ -234,8 +234,8 @@ apigeeEdge.connect(options)
     org.proxies.import({name:opt.options.name, source:'/tmp/path/dir'})
       .then ( result =>
         console.log('import ok. %s name: %s r%d', term, result.name, result.revision) ) )
-  .catch ( reason => {
-    console.log('error: ' + reason.error.stack);
+  .catch ( error => {
+    console.log(util.format(error));
   });
 ```
 
@@ -276,7 +276,7 @@ var options = {
 
 org.proxies.deploy(options)
   .then( result => console.log('deployment succeeded.') )
-  .catch reason => console.log('deployment failed.') );
+  .catch( error => console.log('deployment failed. ' + error) );
 ```
 
 
@@ -313,11 +313,11 @@ apigeeEdge.connect(options)
         items
             .reduce(reducer, Promise.resolve([]))
             .then( (arrayOfResults) => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) )
-            .catch( (e) => console.error('error: ' + e.stack) );
+            .catch( e => console.error('error: ' + e) );
 
       });
   })
-  .catch( reason => console.error('error: ' + reason.error.stack) );
+  .catch( e => console.error(e) );
 ```
 
 
@@ -394,7 +394,7 @@ apigeeEdge.connect(options)
       .then( () => org.maskconfigs.add({ namespaces : { prefix:'apigee', value:'urn://apigee' } })
       .then( (result) => console.log(JSON.stringify(result)) )
     })
-  .catch ( reason => console.log('error: ' + reason.error.stack) );
+  .catch ( e => console.log(e) );
 ```
 
 ### Create a Target Server
@@ -417,7 +417,7 @@ apigeeEdge.connect(options)
       }
     });
   })
-  .catch ( reason => console.log('error: ' + reason.error.stack) );
+  .catch ( e => console.log(e) );
 
 ```
 
@@ -435,8 +435,8 @@ apigeeEdge.connect(connectOptions)
       .then( result => {
         ...
       })
-      .catch( reason => {
-        console.log('failed to create: ' + reason.error);
+      .catch( e => {
+        console.log('failed to create: ' + e);
       });
   });
 ```
@@ -454,8 +454,8 @@ apigeeEdge.connect(connectOptions)
       .then ( result => {
         console.log('attrs: ' + JSON.stringify(result.attributes));
       })
-      .catch( reason => {
-        console.log('failed to create: ' + reason.error);
+      .catch( e => {
+        console.log('failed to update: ' + e);
       });
   });
 ```

@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-August-08 10:59:25>
+// last saved: <2019-September-05 15:20:56>
 
 /* global describe, faker, it */
 
@@ -148,22 +148,20 @@ describe('Organization', function() {
       it('should fail to set the consumer key length for the org', () => {
         return edgeOrg.setConsumerKeyLength(101010)
           .then( r => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.equal(typeof reason, "object");
-            assert.exists(reason.error);
-            assert.exists(reason.error.stack);
-            assert.equal(reason.error.message, "invalid argument");
+          .catch( error => {
+            assert.exists(error);
+            assert.exists(error.stack);
+            assert.equal(error.message, "invalid argument");
           });
       });
 
       it('should fail to set the consumer secret length for the org', () => {
         return edgeOrg.setConsumerSecretLength(179238)
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.equal(typeof reason, "object");
-            assert.exists(reason.error);
-            assert.exists(reason.error.stack);
-            assert.equal(reason.error.message, "invalid argument");
+          .catch( error => {
+            assert.exists(error);
+            assert.exists(error.stack);
+            assert.equal(error.message, "invalid argument");
           });
       });
 

@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-August-07 18:23:13>
+// last saved: <2019-September-05 15:19:44>
 
 /* global describe, faker, it */
 
@@ -94,10 +94,9 @@ describe('Developer', function() {
           .then((res) => {
             assert.fail('should not be reached');
           })
-          .catch(reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(reason.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+          .catch(error => {
+            assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
+            assert.equal(error.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
 
           });
       });

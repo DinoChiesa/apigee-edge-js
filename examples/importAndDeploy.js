@@ -18,14 +18,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-June-04 10:50:42>
+// last saved: <2019-August-27 14:16:40>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
+      util       = require('util'),
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20190211-1248',
+      version    = '20190827-1405',
       defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
         ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
@@ -40,6 +41,9 @@ const edgejs     = require('apigee-edge-js'),
 console.log(
   'Apigee Edge Proxy/Sharedflow Import + Deploy tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
+
+process.on('unhandledRejection',
+            r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
 
 common.logWrite('start');
 
@@ -60,8 +64,9 @@ if (opt.options.basepath && opt.options.sharedflow) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-apigeeEdge.connect(common.optToOptions(opt))
-  .then( (org) => {
+apigeeEdge
+  .connect(common.optToOptions(opt))
+  .then( org => {
     common.logWrite('connected');
 
     const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
@@ -89,19 +94,22 @@ apigeeEdge.connect(common.optToOptions(opt))
           const reducer = (promise, env) =>
             promise .then( () =>
                            collection
-                             .deploy(Object.assign(options, { environment:env }))
-                             .then( (result) => common.logWrite('deployment ' + ((result.error) ? 'failed: ' + JSON.stringify(result) : 'ok.') ))
+                           .deploy(Object.assign(options, { environment:env }))
+                           .then( (result) => common.logWrite('deployment ' + ((result.error) ? 'failed: ' + JSON.stringify(result) : 'ok.') ))
                          );
 
           return envs.split(',')
             .reduce(reducer, Promise.resolve())
             .then( () => common.logWrite('all done...') );
-            //.catch( (e) => console.error('error: ' + e.stack) );
+          //.catch( (e) => console.error('error: ' + e.stack) );
         }
         else {
           common.logWrite('not deploying...');
           common.logWrite('finish');
         }
       });
+
   })
-  .catch( (e) => { console.error('error: ' + e);} );
+  .catch( e => {
+    console.log('while connecting, error: ' + e);
+  } );

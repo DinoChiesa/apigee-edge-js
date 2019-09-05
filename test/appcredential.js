@@ -118,9 +118,9 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( reason => {
+          .catch( error => {
             //console.log(reason.error);
-            assert.equal(reason.error, 'Error: bad status: 404');
+            assert.equal(error, 'Error: bad status: 404');
           });
       });
 
@@ -162,8 +162,8 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( reason => {
-            assert.equal(reason.error, 'Error: missing key');
+          .catch( error => {
+            assert.equal(error, 'Error: missing key');
           });
       });
 
@@ -182,8 +182,9 @@ describe('AppCredential', function() {
           .then( result => {
             //console.log(JSON.stringify(result));
           })
-          .catch( reason => {
-            console.log(reason.error);
+          .catch( error => {
+            var util = require('util');
+            console.log(util.format(error));
             assert.fail('should not be reached');
           });
       });
@@ -198,8 +199,8 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( reason => {
-            assert.equal(reason.error, 'Error: missing appName or key');
+          .catch( error => {
+            assert.equal(error, 'Error: missing appName or key');
           });
       });
 
@@ -213,9 +214,9 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( reason => {
-            assert.equal(reason.error, 'Error: bad status: 404');
-            assert.equal(reason.result.code, "keymanagement.service.InvalidClientIdForGivenApp");
+          .catch( error => {
+            assert.equal(error, 'Error: bad status: 404');
+            assert.equal(error.result.code, "keymanagement.service.InvalidClientIdForGivenApp");
           });
       });
 
@@ -229,9 +230,9 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( reason => {
-            assert.equal(reason.error, 'Error: bad status: 404');
-            assert.equal(reason.result.code, "developer.service.AppDoesNotExist");
+          .catch( error => {
+            assert.equal(error, 'Error: bad status: 404');
+            assert.equal(error.result.code, "developer.service.AppDoesNotExist");
           });
       });
 

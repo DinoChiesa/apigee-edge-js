@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-August-08 11:09:56>
+// last saved: <2019-September-05 15:27:36>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -259,11 +259,10 @@ describe('Proxy', function() {
         let selectedEnv = selectRandomValue(environments);
         edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.equal(typeof reason, "object");
-            assert.exists(reason.error);
-            assert.exists(reason.error.stack);
-            assert.equal(reason.error.message, 'bad status: 404');
+          .catch( error => {
+            assert.exists(error);
+            assert.exists(error.stack);
+            assert.equal(error.message, 'bad status: 404');
           });
         return undefined;
       });
@@ -278,11 +277,10 @@ describe('Proxy', function() {
             return edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment});
           })
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.equal(typeof reason, "object");
-            assert.exists(reason.error);
-            assert.exists(reason.error.stack);
-            assert.equal(reason.error.message, 'bad status: 404');
+          .catch( error => {
+            assert.exists(error);
+            assert.exists(error.stack);
+            assert.equal(error.message, 'bad status: 404');
           });
         return undefined;
       });
@@ -323,11 +321,10 @@ describe('Proxy', function() {
         let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.equal(typeof reason, "object");
-            assert.exists(reason.error);
-            assert.exists(reason.error.stack);
-            assert.equal(reason.error.message, 'bad status: 404');
+          .catch( error => {
+            assert.exists(error);
+            assert.exists(error.stack);
+            assert.equal(error.message, 'bad status: 404');
           });
         return undefined;
       });

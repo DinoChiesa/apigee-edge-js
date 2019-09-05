@@ -148,11 +148,11 @@ describe('TargetServer', function() {
                                             .then((res) => {
                                               assert.fail('should not be reached');
                                             })
-                                            .catch(reason => {
-                                              assert.exists(reason.error);
-                                              assert.exists(reason.result.code);
-                                              assert.exists(reason.result.message);
-                                              assert.equal(reason.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                            .catch(error => {
+                                              assert.exists(error.result);
+                                              assert.exists(error.result.code);
+                                              assert.exists(error.result.message);
+                                              assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
                                             })
                                           );
 
@@ -179,11 +179,11 @@ describe('TargetServer', function() {
                                             .then((res) => {
                                               assert.fail('should not be reached');
                                             })
-                                            .catch(reason => {
-                                              assert.exists(reason.error);
-                                              assert.exists(reason.result.code);
-                                              assert.exists(reason.result.message);
-                                              assert.equal(reason.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                            .catch(error => {
+                                              assert.exists(error.result);
+                                              assert.exists(error.result.code);
+                                              assert.exists(error.result.message);
+                                              assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
                                             })
                                           );
 

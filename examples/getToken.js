@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-July-08 16:07:40>
+// last saved: <2019-September-05 15:24:02>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -56,4 +56,4 @@ apigeeEdge.connect(common.optToOptions(opt))
         }
       });
   })
-  .catch( e => { console.error('error: ' + e);} );
+  .catch( e => console.error('error: ' + e) );

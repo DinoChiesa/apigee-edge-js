@@ -61,8 +61,9 @@ describe('DeveloperApp', function() {
             assert.exists(result.credentials);
             assert.isAtLeast(result.credentials.length, 1);
           })
-          .catch( reason => {
-            console.log(reason.error);
+          .catch( error => {
+            var util = require('util');
+            console.log(util.format(error));
             assert.fail('should not be reached');
           });
       });
@@ -76,11 +77,10 @@ describe('DeveloperApp', function() {
 
         return edgeOrg.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.error, "Error: bad status: 409");
-            assert.exists(reason.result);
-            assert.equal(reason.result.message, `App with name ${entityName} already exists`);
+          .catch( error => {
+            assert.equal(error, "Error: bad status: 409");
+            assert.exists(error.result);
+            assert.equal(error.result.message, `App with name ${entityName} already exists`);
           });
       });
 
@@ -93,11 +93,10 @@ describe('DeveloperApp', function() {
               };
         return edgeOrg.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.error, "Error: bad status: 400");
-            assert.exists(reason.result);
-            assert.isTrue(reason.result.message.startsWith(`API Product [${fakeName}] does not exist`));
+          .catch( error => {
+            assert.equal(error, "Error: bad status: 400");
+            assert.exists(error.result);
+            assert.isTrue(error.result.message.startsWith(`API Product [${fakeName}] does not exist`));
           } );
 
       });
@@ -111,9 +110,8 @@ describe('DeveloperApp', function() {
 
         return edgeOrg.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.error, "missing required inputs, one of {developer, appName, apiProduct}");
+          .catch( error => {
+            assert.equal(error, "Error: missing required inputs, one of {developer, appName, apiProduct}");
           } );
       });
 
@@ -137,10 +135,10 @@ describe('DeveloperApp', function() {
          edgeOrg.developerapps
          .get({nothing:'useful'})
          .then ( () => assert.fail('should not be reached') )
-         .catch(reason => {
+         .catch( error => {
            //const util = require('util');
            //console.log('reason: ' + util.format(reason));
-           assert.equal(reason.error, "Error: missing developer email or id");
+           assert.equal(error, "Error: missing developer email or id");
          })
         );
 
@@ -160,11 +158,11 @@ describe('DeveloperApp', function() {
         const nonExistentDev = faker.random.alphaNumeric(22);
         return edgeOrg.developerapps.get({developerEmail:nonExistentDev})
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.isNotNull(reason.error, "the expected error did not occur");
-            assert.exists(reason.result);
-            assert.exists(reason.result.message);
-            assert.equal(reason.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${edgeOrg.conn.orgname}`);
+          .catch( error => {
+            assert.isNotNull(error, "the expected error did not occur");
+            assert.exists(error.result);
+            assert.exists(error.result.message);
+            assert.equal(error.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${edgeOrg.conn.orgname}`);
           });
       });
 
@@ -248,18 +246,16 @@ describe('DeveloperApp', function() {
          edgeOrg.developerapps
          .del({name : entityName})
          .then( () => assert.fail('should not be reached'))
-         .catch( reason => {
-           assert.exists(reason.error);
-           assert.equal(reason.error, "Error: missing developer email or id");
+         .catch( error => {
+           assert.equal(error, "Error: missing developer email or id");
          }));
 
       it('should fail to delete a developerapp because no name', () =>
          edgeOrg.developerapps
          .del({developerEmail})
          .then( () => assert.fail('should not be reached'))
-         .catch( reason => {
-           assert.exists(reason.error);
-           assert.equal(reason.error, "Error: missing developer app name");
+         .catch( error => {
+           assert.equal(error, "Error: missing developer app name");
          }));
 
       it('should fail to delete a non-existent developerapp', () => {
@@ -267,12 +263,11 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps
           .del({developerEmail, name : fakeName})
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.error,"Error: bad status: 404");
-            assert.exists(reason.result);
-            assert.equal(reason.result.code,"developer.service.AppDoesNotExist");
-            assert.equal(reason.result.message,`App named ${fakeName} does not exist under ${developerEmail}`);
+          .catch( error => {
+            assert.equal(error,"Error: bad status: 404");
+            assert.exists(error.result);
+            assert.equal(error.result.code,"developer.service.AppDoesNotExist");
+            assert.equal(error.result.message,`App named ${fakeName} does not exist under ${developerEmail}`);
           });
       });
 
@@ -281,12 +276,11 @@ describe('DeveloperApp', function() {
         const fakeEmail = faker.random.alphaNumeric(22);
         return edgeOrg.developerapps.del({developerEmail:fakeEmail, name : fakeName})
           .then( () => assert.fail('should not be reached'))
-          .catch( reason => {
-            assert.exists(reason.error);
-            assert.equal(reason.error,"Error: bad status: 404");
-            assert.exists(reason.result);
-            assert.equal(reason.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(reason.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+          .catch( error => {
+            assert.equal(error,"Error: bad status: 404");
+            assert.exists(error.result);
+            assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
+            assert.equal(error.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
           });
       });
 
