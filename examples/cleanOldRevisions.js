@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 12:47:38>
+// last saved: <2019-September-12 16:55:41>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -78,8 +78,14 @@ function doneAllRevisions(collectionName, itemName, callback) {
   return function(e, results) {
     handleError(e);
     // results is an array of arrays
-    var flattened = [].concat.apply([], results);
-    common.logWrite('removed revisions of ' + collectionName + ': '+ itemName + ': ' + JSON.stringify(flattened.map( x => x.revision )));
+    var flattened = [].concat.apply([], results).filter( x => x);
+    if (flattened.length>0) {
+      common.logWrite('removed revisions of ' + collectionName + ': '+ itemName + ': ' +
+                      JSON.stringify(flattened.map( x =>  x?x.revision:'' )));
+    }
+    else {
+      common.logWrite('no revisions to remove of ' + collectionName + ': '+ itemName);
+    }
     callback(null, flattened);
   };
 }
@@ -87,7 +93,12 @@ function doneAllRevisions(collectionName, itemName, callback) {
 function doneAllItems(e, results) {
   handleError(e);
   var flattened = [].concat.apply([], results);
-  common.logWrite('result %s', JSON.stringify(flattened));
+  if (flattened.length> 0) {
+    common.logWrite('result %s', JSON.stringify(flattened));
+  }
+  else {
+    common.logWrite('nothing removed.');
+  }
 }
 
 function analyzeOneItem(org, collectionName) {
