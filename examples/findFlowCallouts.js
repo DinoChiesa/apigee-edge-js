@@ -21,7 +21,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 12:53:51>
+// last saved: <2019-September-17 06:26:41>
 
 var async = require('async'),
     edgejs = require('apigee-edge-js'),
@@ -31,7 +31,7 @@ var async = require('async'),
     Getopt = require('node-getopt'),
     version = '20190211-1253',
     getopt = new Getopt(common.commonOptions.concat([
-      ['F' , 'sharedflow=ARG', 'Optional. find only FlowCallouts referncing a specific Sharedflow.'],
+      ['F' , 'sharedflow=ARG', 'Optional. find only FlowCallouts referencing a specific Sharedflow.'],
       ['L' , 'list', 'Optional. don\'t find. just list the SharedFlows in the org.'],
       ['R' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
     ])).bindHelp();
@@ -124,12 +124,13 @@ apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
       common.logWrite('found %d sharedflows', result.length);
       common.logWrite(result.join(', '));
     });
+    return;
   }
-  else {
-    org.proxies.get({}, function(e, result){
-      handleError(e);
-      common.logWrite('found %d proxies', result.length);
-      async.mapSeries(result, analyzeOneProxy(org), doneAllProxies);
-    });
-  }
+
+  org.proxies.get({}, function(e, result){
+    handleError(e);
+    common.logWrite('found %d proxies', result.length);
+    async.mapSeries(result, analyzeOneProxy(org), doneAllProxies);
+  });
+
 });
