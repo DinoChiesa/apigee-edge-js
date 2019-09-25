@@ -1,8 +1,8 @@
-// getLatestRevision.js
+// countRevisions.js
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2019-September-25 16:12:36>
+// last saved: <2019-September-25 16:15:14>
 
 /* jshint esversion: 9, node: true, strict:implied */
 /* global process, console, Buffer */
@@ -21,7 +21,7 @@ const edgejs     = require('apigee-edge-js'),
 // ========================================================
 
 console.log(
-  'Apigee Edge GetLatestRevision tool, version: ' + version + '\n' +
+  'Apigee Edge CountRevisions tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -39,8 +39,8 @@ apigeeEdge.connect(common.optToOptions(opt))
         let reducer = (promise, proxyname) =>
           promise .then( results =>
                          collection
-                           .get({ name: proxyname })
-                           .then( ({revision}) => [ ...results, {proxyname, revision:revision[revision.length-1]} ] )
+                         .get({ name: proxyname })
+                         .then( ({revision}) => [ ...results, {proxyname, count:revision.length} ] )
                        );
 
         return items

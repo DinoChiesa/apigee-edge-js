@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-September-25 16:01:30>
+// last saved: <2019-September-25 16:08:19>
 
 
 // DISCLAIMER
@@ -98,7 +98,7 @@ if ( (opt.options.action == 'create' || opt.options.action == 'update') &&
 
 apigeeEdge.connect(common.optToOptions(opt))
   .then( org => {
-    let specs = org.specs;
+    const specs = org.specs;
     if ( opt.options.action == 'list' ) {
 
       return specs.list()
@@ -109,9 +109,7 @@ apigeeEdge.connect(common.optToOptions(opt))
     }
 
     if ( opt.options.action == 'get' ) {
-      let getOptions = {name:opt.options.name};
-
-      return specs.get(getOptions)
+      return specs.get({name:opt.options.name})
         .then( r => {
           console.log();
           console.log(r);
@@ -119,9 +117,7 @@ apigeeEdge.connect(common.optToOptions(opt))
     }
 
     if ( opt.options.action == 'getMeta' ) {
-      let getOptions = {name:opt.options.name};
-
-      return specs.getMeta(getOptions)
+      return specs.getMeta({name:opt.options.name})
         .then( r => {
           console.log();
           console.log(r);
@@ -129,8 +125,7 @@ apigeeEdge.connect(common.optToOptions(opt))
     }
 
     if ( opt.options.action == 'delete' ) {
-      let delOptions = {name:opt.options.name};
-       return specs.del(delOptions)
+       return specs.del({name:opt.options.name})
         .then( r => {
           console.log();
           console.log(r);
@@ -138,11 +133,11 @@ apigeeEdge.connect(common.optToOptions(opt))
      }
 
     if (opt.options.action == 'create' || opt.options.action == 'update') {
-      let moreOptions = {
-            filename:opt.options.file,
-            name:opt.options.name
-          };
-      return specs[opt.options.action](moreOptions)
+      const putOptions = {
+              filename:opt.options.file,
+              name:opt.options.name
+            };
+      return specs[opt.options.action](putOptions)
         .then( r => {
           console.log();
           console.log(r);
