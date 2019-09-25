@@ -469,24 +469,53 @@ apigeeEdge.connect(connectOptions)
   });
 ```
 
+### Load data from a file into a KVM entry
+
+```js
+function loadKeyIntoMap(org) {
+  var re = new RegExp('(?:\r\n|\r|\n)', 'g');
+  var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\n');
+  var options = {
+        env: opt.options.env,
+        kvm: opt.options.mapname,
+        key: opt.options.entryname,
+        value: pemcontent
+      };
+  common.logWrite('storing new key \'%s\'', opt.options.entryname);
+  return org.kvms.put(options)
+    .then( _ => common.logWrite('ok. the key was loaded successfully.'));
+}
+
+apigeeEdge.connect(common.optToOptions(opt))
+  .then ( org => {
+    common.logWrite('connected');
+    return org.kvms.get({ env })
+      .then( maps => {
+        if (maps.indexOf(mapname) == -1) {
+          // the map does not yet exist
+          common.logWrite('Need to create the map');
+          return org.kvms.create({ env: opt.options.env, name: opt.options.mapname, encrypted:opt.options.encrypted})
+            .then( _ => loadKeyIntoMap(org) );
+        }
+
+        common.logWrite('ok. the required map exists');
+        return loadKeyIntoMap(org);
+      });
+  })
+  .catch( e => console.log('Error: ' + util.format(e)));
+```
+
 ### Import an OpenAPI Spec
 
 ```js
 apigeeEdge.connect(connectOptions)
-  .then ( org => {
-    const createOptions = {
-            name: 'mySpec',
-            filename: '~/foo/bar/spec1.yaml'
-          };
-    org.specs.create(createOptions)
+  .then ( org =>
+     org.specs.create({ name: 'mySpec', filename: '~/foo/bar/spec1.yaml' })
         .then( r => {
           console.log();
           console.log(r);
-        })
-      .catch( e => {
-        console.log('failed to create: ' + util.format(e));
-      });
-  });
+        }) )
+  .catch( e => console.log('failed to create: ' + util.format(e)) );
 ```
 
 ### Lots More Examples

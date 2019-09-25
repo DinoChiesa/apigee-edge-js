@@ -18,16 +18,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 12:59:13>
+// last saved: <2019-September-25 15:52:25>
 
 const fs         = require('fs'),
       edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
-      async      = require('async'),
+      util       = require('util'),
       Getopt     = require('node-getopt'),
-      version    = '20190211-1257',
+      version    = '20190925-1538',
       defaults   = { mapname : 'PrivateKeys' },
       getopt     = new Getopt(common.commonOptions.concat([
       ['e' , 'env=ARG', 'required. the Edge environment for which to store the KVM data'],
@@ -39,7 +39,7 @@ const fs         = require('fs'),
 
 // ========================================================
 
-function loadKeyIntoMap(org, cb) {
+function loadKeyIntoMap(org) {
   var re = new RegExp('(?:\r\n|\r|\n)', 'g');
   var pemcontent = fs.readFileSync(opt.options.pemfile, "utf8").replace(re,'\n');
   var options = {
@@ -48,17 +48,9 @@ function loadKeyIntoMap(org, cb) {
         key: opt.options.entryname,
         value: pemcontent
       };
-  common.logWrite('storing new key');
-  org.kvms.put(options, cb);
-}
-
-function keysLoadedCb(e, result){
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
-    process.exit(1);
-  }
-  common.logWrite('ok. the key was loaded successfully.');
+  common.logWrite('storing new key \'%s\'', opt.options.entryname);
+  return org.kvms.put(options)
+    .then( _ => common.logWrite('ok. the key was loaded successfully.'));
 }
 
 // ========================================================
@@ -66,6 +58,9 @@ function keysLoadedCb(e, result){
 console.log(
   'Apigee Edge PEM KVM-loader tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
+
+process.on('unhandledRejection',
+            r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
 
 common.logWrite('start');
 
@@ -78,43 +73,32 @@ if ( !opt.options.env ) {
   process.exit(1);
 }
 
+if ( !opt.options.entryname ) {
+  console.log('You must specify an entryname');
+  getopt.showHelp();
+  process.exit(1);
+}
+
 if ( !opt.options.mapname ) {
   common.logWrite(sprintf('defaulting to %s for KVM mapname', defaults.mapname));
   opt.options.mapname = defaults.mapname;
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
-    process.exit(1);
-  }
-  common.logWrite('connected');
-
-  org.kvms.get({ env: opt.options.env }, function(e, result) {
-    if (e) {
-      common.logWrite(JSON.stringify(e, null, 2));
-      //console.log(e.stack);
-      process.exit(1);
-    }
-
-    if (result.indexOf(opt.options.mapname) == -1) {
-      // the map does not yet exist
-      common.logWrite('Need to create the map');
-      org.kvms.create({ env: opt.options.env, name: opt.options.mapname, encrypted:opt.options.encrypted},
-                      function(e, result) {
-        if (e) {
-          common.logWrite(JSON.stringify(e, null, 2));
-          //console.log(e.stack);
-          process.exit(1);
+apigeeEdge.connect(common.optToOptions(opt))
+  .then ( org => {
+    common.logWrite('connected');
+    return org.kvms.get({ env: opt.options.env })
+      .then( maps => {
+        if (maps.indexOf(opt.options.mapname) == -1) {
+          // the map does not yet exist
+          common.logWrite('Need to create the map');
+          return org.kvms.create({ env: opt.options.env, name: opt.options.mapname, encrypted:opt.options.encrypted})
+            .then( _ => loadKeyIntoMap(org) );
         }
-        loadKeyIntoMap(org, keysLoadedCb);
+
+        common.logWrite('ok. the required map exists');
+        return loadKeyIntoMap(org);
       });
-    }
-    else {
-      common.logWrite('ok. the required map exists');
-      loadKeyIntoMap(org, keysLoadedCb);
-    }
-  });
-});
+  })
+  .catch( e => console.log('Error: ' + util.format(e)));

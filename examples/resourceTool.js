@@ -19,14 +19,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-September-05 15:23:39>
+// last saved: <2019-September-25 16:00:47>
 
 const edgejs       = require('apigee-edge-js'),
       common       = edgejs.utility,
       apigeeEdge   = edgejs.edge,
       Getopt       = require('node-getopt'),
-      version      = '20190306-0851',
-      validActions = ["list", "get", "create", "update", "delete"],
+      version      = '20190925-1559',
+      validActions = ['list', 'get', 'create', 'update', 'delete'],
       getopt       = new Getopt(common.commonOptions.concat([
         ['A' , 'action=ARG', 'required. valid actions: ' + validActions.join(',')],
         ['F' , 'file=ARG', 'optional. the source for the resourcefile being created or updated.'],
@@ -40,6 +40,9 @@ const edgejs       = require('apigee-edge-js'),
 console.log(
   'Edge API resourcefile tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
+
+process.on('unhandledRejection',
+            r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
 
 common.logWrite('start');
 
@@ -84,42 +87,46 @@ let baseOptions = (opt.options.environment) ?
 apigeeEdge.connect(common.optToOptions(opt))
   .then( org => {
     let rf = org.resourcefiles;
+
     if ( opt.options.action == 'list' ) {
 
-      rf.get(baseOptions)
-        .then( (r) => {
+      return rf.get(baseOptions)
+        .then( r => {
           console.log();
           console.log(JSON.stringify(r, null, 2));
         });
     }
-    else if ( opt.options.action == 'get' ) {
+
+    if ( opt.options.action == 'get' ) {
       let getOptions = {name:opt.options.name, type:opt.options.type};
 
-      rf.get({...baseOptions, ...getOptions})
-        .then( (r) => {
+      return rf.get({...baseOptions, ...getOptions})
+        .then( r => {
           console.log();
           console.log(r);
         });
     }
-    else if ( opt.options.action == 'delete' ) {
+
+    if ( opt.options.action == 'delete' ) {
       let delOptions = {name:opt.options.name, type:opt.options.type};
-      rf.del({...baseOptions, ...delOptions})
-        .then( (r) => {
+      return rf.del({...baseOptions, ...delOptions})
+        .then( r => {
           console.log("OK");
           console.log(JSON.stringify(r));
         });
     }
-    else if (opt.options.action == 'create' || opt.options.action == 'update') {
+
+    if (opt.options.action == 'create' || opt.options.action == 'update') {
       let moreOptions = {
             filename:opt.options.file,
             type:opt.options.type, // maybe empty
             name:opt.options.name  // maybe empty
           };
-      rf[opt.options.action]({...baseOptions, ...moreOptions})
-        .then( (r) => {
+      return rf[opt.options.action]({...baseOptions, ...moreOptions})
+        .then( r => {
           console.log();
           console.log(JSON.stringify(r, null, 2));
         });
     }
   })
-  .catch( (e) => console.error('error: ' + e) );
+  .catch( e => console.error('error: ' + util.format(e)) );

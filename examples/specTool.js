@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-September-25 11:58:10>
+// last saved: <2019-September-25 16:01:30>
 
 
 // DISCLAIMER
@@ -32,9 +32,10 @@
 const edgejs       = require('apigee-edge-js'),
       common       = edgejs.utility,
       apigeeEdge   = edgejs.edge,
+      util         = require('util'),
       Getopt       = require('node-getopt'),
-      version      = '20190925-1013',
-      validActions = ["list", "get", "getMeta", "create", "update", "delete"],
+      version      = '20190925-1535',
+      validActions = ['list', 'get', 'getMeta', 'create', 'update', 'delete'],
       getopt       = new Getopt(common.commonOptions.concat([
         ['A' , 'action=ARG', 'required. valid actions: ' + validActions.join(',')],
         ['F' , 'file=ARG', 'optional. the source for the spec being created or updated.'],
@@ -47,9 +48,10 @@ console.log(
   'Edge API spec tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
+process.on('unhandledRejection',
+            r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
 
-console.log('\n' +
-            '*************\n' +
+console.log('*************\n' +
             '*** DISCLAIMER\n' +
             '*** \n' +
             '*** This tool uses a module that wraps the /dapi API, which is at this moment\n' +
@@ -99,48 +101,55 @@ apigeeEdge.connect(common.optToOptions(opt))
     let specs = org.specs;
     if ( opt.options.action == 'list' ) {
 
-      specs.list()
+      return specs.list()
         .then( r => {
           console.log();
           console.log(JSON.stringify(r, null, 2));
         });
     }
-    else if ( opt.options.action == 'get' ) {
+
+    if ( opt.options.action == 'get' ) {
       let getOptions = {name:opt.options.name};
 
-      specs.get(getOptions)
+      return specs.get(getOptions)
         .then( r => {
           console.log();
           console.log(r);
         });
     }
-    else if ( opt.options.action == 'getMeta' ) {
+
+    if ( opt.options.action == 'getMeta' ) {
       let getOptions = {name:opt.options.name};
 
-      specs.getMeta(getOptions)
+      return specs.getMeta(getOptions)
         .then( r => {
           console.log();
           console.log(r);
         });
     }
-    else if ( opt.options.action == 'delete' ) {
+
+    if ( opt.options.action == 'delete' ) {
       let delOptions = {name:opt.options.name};
-      specs.del(delOptions)
+       return specs.del(delOptions)
         .then( r => {
           console.log();
           console.log(r);
         });
-    }
-    else if (opt.options.action == 'create' || opt.options.action == 'update') {
+     }
+
+    if (opt.options.action == 'create' || opt.options.action == 'update') {
       let moreOptions = {
             filename:opt.options.file,
             name:opt.options.name
           };
-      specs[opt.options.action](moreOptions)
+      return specs[opt.options.action](moreOptions)
         .then( r => {
           console.log();
           console.log(r);
         });
     }
+
+    return Promise.reject(new Error('unsupported action'));
+
   })
-  .catch( (e) => console.error('error: ' + e) );
+  .catch( e => console.error('error: ' + util.format(e) ) );
