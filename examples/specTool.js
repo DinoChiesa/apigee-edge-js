@@ -19,7 +19,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-September-25 11:08:54>
+// last saved: <2019-September-25 11:58:10>
+
+
+// DISCLAIMER
+//
+// This module wraps the /dapi API, which is at this moment undocumented and
+// unsupported, and subject to change.  That means this module may stop
+// functioning at some point.  Use it at your own risk!
+//
 
 const edgejs       = require('apigee-edge-js'),
       common       = edgejs.utility,
@@ -38,6 +46,17 @@ const edgejs       = require('apigee-edge-js'),
 console.log(
   'Edge API spec tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
+
+
+console.log('\n' +
+            '*************\n' +
+            '*** DISCLAIMER\n' +
+            '*** \n' +
+            '*** This tool uses a module that wraps the /dapi API, which is at this moment\n' +
+            '*** undocumented and unsupported, and subject to change. This tool may stop\n' +
+            '*** functioning at any time. Use it at your own risk!\n' +
+            '*************\n');
+
 
 common.logWrite('start');
 

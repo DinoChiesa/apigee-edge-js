@@ -148,6 +148,7 @@ hash with various child members as functions:
 | appcredentials       | add, del, revoke, approve                                        |
 | audits               | get                                                              |
 | stats                | get                                                              |
+| specs                | get, getMeta, list, create, update, del                          |
 | maskconfigs          | get, set, add/update, remove                                     |
 
 Each child function gets invoked as a function returning a promise: `fn(options)`, or in old-school callback style: `fn(options, callback)` .
@@ -160,6 +161,14 @@ As you can see from the function list above, pretty much all the basic stuff you
 You can examine [the examples directory](./examples) for some example code illustrating some practical possibilities. A few specific code examples are shown here.
 
 Pull requests are welcomed, for the code or for examples.
+
+One disclaimer:
+
+* The spec module wraps the /dapi API, which is at this moment undocumented and
+  unsupported, and subject to change. It works today, but the spec module may stop
+  functioning at any point. Use it at your own risk!
+
+
 
 ## Pre-Requisites
 
@@ -456,6 +465,26 @@ apigeeEdge.connect(connectOptions)
       })
       .catch( e => {
         console.log('failed to update: ' + e);
+      });
+  });
+```
+
+### Import an OpenAPI Spec
+
+```js
+apigeeEdge.connect(connectOptions)
+  .then ( org => {
+    const createOptions = {
+            name: 'mySpec',
+            filename: '~/foo/bar/spec1.yaml'
+          };
+    org.specs.create(createOptions)
+        .then( r => {
+          console.log();
+          console.log(r);
+        })
+      .catch( e => {
+        console.log('failed to create: ' + util.format(e));
       });
   });
 ```
