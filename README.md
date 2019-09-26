@@ -12,18 +12,18 @@ Example:
 To create a new developer in Apigee Edge:
 
 ```js
-var edgejs = require('apigee-edge-js'),
-    apigeeEdge = edgejs.edge;
+const edgejs = require('apigee-edge-js'),
+      apigeeEdge = edgejs.edge;
 
-var options = {
+const options = {
     org : config.org,
     user: config.username,
     password: config.password
-    };
+  };
 
 apigeeEdge.connect(options)
-  .then ( (org) => {
-    var options = {
+  .then ( org => {
+    const options = {
           developerEmail : "JDimaggio@example.org",
           lastName : "Dimaggio",
           firstName : "Josephine",
@@ -31,11 +31,9 @@ apigeeEdge.connect(options)
         };
 
     return org.developers.create(options)
-      .then( (result) => console.log('ok. developer: ' + JSON.stringify(result)) )
+      .then( result => console.log('ok. developer: ' + JSON.stringify(result)) )
   })
-  .catch ( error => {
-    console.log('error: ' + error);
-  });
+  .catch ( error => console.log('error: ' + error) );
 ```
 
 You can also tell the library to read credentials from [.netrc](https://linux.die.net/man/5/netrc):
@@ -69,13 +67,14 @@ apigeeEdge.connect(options).then(...);
 
 The methods on the various objects accept callbacks, and return promises. In code
 you write that uses this library, it's probably best if you choose one or the
-other. Here's an example using old-school callbacks instead of ES6 promises:
+other. Promises are probably better, because they're more succinct. But some
+people prefer callbacks. Here's an example using old-school callbacks instead of ES6 promises:
 
 ```js
-var edgejs = require('apigee-edge-js'),
+const edgejs = require('apigee-edge-js'),
     apigeeEdge = edgejs.edge;
 
-var options = {
+const options = {
       mgmtServer: config.mgmtserver,
       org : config.org,
       user: config.username,
@@ -89,7 +88,7 @@ apigeeEdge.connect(options, function(e, org){
     process.exit(1);
   }
 
-  var options = {
+  const options = {
         developerEmail : "JDimaggio@example.org",
         lastName : "Dimaggio",
         firstName : "Josephine",
@@ -175,6 +174,7 @@ One disclaimer:
 Nodejs v10.15.1 or later. The tests use Promise.finally and
 other recent node features are also used in the library and examples.
 
+## Examples
 
 ### Export the latest revision of an API Proxy
 
@@ -310,20 +310,40 @@ apigeeEdge.connect(options)
   .then( (org) => {
     common.logWrite('connected');
     org.proxies.get({})
-      .then( (items) => {
-        var reducer = (promise, proxyname) =>
-          promise .then( (results) =>
+      .then( items => {
+        const reducer = (promise, proxyname) =>
+          promise .then( accumulator =>
                          org.proxies
                            .get({ name: proxyname })
-                           .then( ({revision}) => [ ...results, {proxyname, revision:revision[revision.length-1]} ] )
-
+                           .then( ({revision}) => [ ...accumulator, {proxyname, revision:revision[revision.length-1]} ] )
                        );
-
-        items
+        return items
             .reduce(reducer, Promise.resolve([]))
-            .then( (arrayOfResults) => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) )
-            .catch( e => console.error('error: ' + e) );
+            .then( arrayOfResults => console.log(JSON.stringify(arrayOfResults)) );
+      });
+  })
+  .catch( e => console.error(e) );
+```
 
+### Count the number of revisions of every API Proxy in an org
+
+Same approach as above.
+
+```js
+apigeeEdge.connect(options)
+  .then( (org) => {
+    common.logWrite('connected');
+    org.proxies.get({})
+      .then( items => {
+        const reducer = (promise, proxyname) =>
+          promise .then( accumulator =>
+                         org.proxies
+                           .get({ name: proxyname })
+                           .then( ({revision}) => [ ...accumulator, {proxyname, count:revision.length} ] )
+                       );
+        return items
+            .reduce(reducer, Promise.resolve([]))
+            .then( arrayOfResults => console.log(JSON.stringify(arrayOfResults)) );
       });
   })
   .catch( e => console.error(e) );
@@ -459,14 +479,11 @@ apigeeEdge.connect(connectOptions)
             updatedBy : 'apigee-edge-js',
             updateDate: new Date().toISOString()
           };
-    org.developerapps.update({ developerEmail, app, attributes })
-      .then ( result => {
-        console.log('attrs: ' + JSON.stringify(result.attributes));
-      })
-      .catch( e => {
-        console.log('failed to update: ' + e);
-      });
-  });
+    return org.developerapps.update({ developerEmail, app, attributes })
+      .then ( result => console.log('new attrs: ' + JSON.stringify(result.attributes)) );
+   })
+   .catch( e => console.log('failed to update: ' + util.format(e)) );
+
 ```
 
 ### Load data from a file into a KVM entry

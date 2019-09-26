@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2019-September-25 16:45:13>
+// last saved: <2019-September-25 17:41:18>
 
 /* jshint esversion: 9, node: true, strict:implied */
 /* global process, console, Buffer */
@@ -44,11 +44,11 @@ apigeeEdge.connect(common.optToOptions(opt))
           return Promise.resolve(true);
         }
 
-        const reducer = (promise, proxyname) =>
+        const reducer = (promise, itemname) =>
           promise .then( accumulator =>
                          collection
-                         .get({ name: proxyname })
-                         .then( ({revision}) => [ ...accumulator, {proxyname, count:revision.length} ] )
+                         .get({ name: itemname })
+                         .then( ({revision}) => [ ...accumulator, {itemname, count:revision.length} ] )
                        );
 
         return items
