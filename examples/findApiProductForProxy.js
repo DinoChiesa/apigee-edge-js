@@ -1,6 +1,9 @@
 // findApiProductForProxy.js
 // ------------------------------------------------------------------
 //
+/* global process */
+/* jshint esversion:9, node:true, strict:implied */
+
 // Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,24 +19,17 @@
 // limitations under the License.
 //
 // created: Mon Mar 20 09:57:02 2017
-// last saved: <2019-February-11 13:15:53>
+// last saved: <2019-September-25 17:28:30>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       Getopt     = require('node-getopt'),
-      version    = '20190211-1315',
+      util       = require('util'),
+      version    = '20190925-1723',
       getopt     = new Getopt(common.commonOptions.concat([
         ['P' , 'proxy=ARG', 'Required. the proxy to find.']
       ])).bindHelp();
-
-function handleError(e) {
-    if (e) {
-      console.log(e);
-      console.log(e.stack);
-      process.exit(1);
-    }
-}
 
 // ========================================================
 
@@ -54,26 +50,28 @@ if ( !opt.options.proxy ) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
-  handleError(e);
+apigeeEdge.connect(common.optToOptions(opt))
+  .then(org => {
   common.logWrite('searching...');
-  org.products.get({expand:true}, function(e, result) {
-    handleError(e);
-    var apiproducts = result.apiProduct;
-    common.logWrite('total count of API products for that org: %d', apiproducts.length);
-    var filtered = apiproducts.filter(function(product) {
-          return (product.proxies.indexOf(opt.options.proxy) >= 0);
-        });
+    return org.products.get({expand:true})
+      .then(result => {
+        let apiproducts = result.apiProduct;
+        common.logWrite('total count of API products for that org: %d', apiproducts.length);
+        let filtered = apiproducts.filter( product => (product.proxies.indexOf(opt.options.proxy) >= 0));
 
-    if (filtered) {
-      common.logWrite('count of API products containing %s: %d', opt.options.proxy, filtered.length);
-      if (filtered.length) {
-        common.logWrite('list: ' + filtered.map( function(item) { return item.name;}).join(', '));
-      }
-      if ( opt.options.verbose ) {
-        common.logWrite(JSON.stringify(filtered, null, 2));
-      }
-    }
-
-  });
-});
+        if (filtered) {
+          common.logWrite('count of API products containing %s: %d', opt.options.proxy, filtered.length);
+          if (filtered.length) {
+            common.logWrite('list: ' + filtered.map( item => item.name).join(', '));
+          }
+          if ( opt.options.verbose ) {
+            common.logWrite(JSON.stringify(filtered, null, 2));
+          }
+        }
+        else {
+          common.logWrite('No API products containing %s: %d', opt.options.proxy);
+        }
+        return Promise.resolve(true);
+      });
+  })
+  .catch( e => console.error('error: ' + util.format(e) ) );
