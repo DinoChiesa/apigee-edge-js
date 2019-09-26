@@ -2,7 +2,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2019-September-25 16:15:14>
+// last saved: <2019-September-25 16:45:13>
 
 /* jshint esversion: 9, node: true, strict:implied */
 /* global process, console, Buffer */
@@ -36,16 +36,22 @@ apigeeEdge.connect(common.optToOptions(opt))
     const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
     return collection.get({})
       .then( items => {
-        let reducer = (promise, proxyname) =>
-          promise .then( results =>
+        items = items
+          .sort()
+          .filter( name => (! opt.options.prefix) || name.startsWith(opt.options.prefix ));
+
+        if ( !items || items.length == 0) {
+          return Promise.resolve(true);
+        }
+
+        const reducer = (promise, proxyname) =>
+          promise .then( accumulator =>
                          collection
                          .get({ name: proxyname })
-                         .then( ({revision}) => [ ...results, {proxyname, count:revision.length} ] )
+                         .then( ({revision}) => [ ...accumulator, {proxyname, count:revision.length} ] )
                        );
 
         return items
-            .sort()
-            .filter( name => (! opt.options.prefix) || name.startsWith(opt.options.prefix ))
             .reduce(reducer, Promise.resolve([]))
             .then( arrayOfResults => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) );
       });
