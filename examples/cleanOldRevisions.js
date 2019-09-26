@@ -1,5 +1,5 @@
 #! /usr/local/bin/node
-/*jslint node:true, esversion:6 */
+/* jshint node:true, esversion:9, strict:implied */
 // cleanOldRevisions.js
 // ------------------------------------------------------------------
 // In Apigee Edge, for all proxies or sharedflows in an org, remove all
@@ -19,22 +19,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-September-12 16:55:41>
+// last saved: <2019-September-25 17:05:57>
 
-var async = require('async'),
-    edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    merge = require('merge'),
-    version = '20190211-1247',
-    gRegexp,
-    getopt = new Getopt(common.commonOptions.concat([
-      ['R' , 'regexp=ARG', 'Optional. Cull only proxies with names matching this regexp.'],
-      ['K' , 'numToKeep=ARG', 'Required. Max number of revisions of each proxy to retain.'],
-      ['S' , 'sharedflows', 'Optional. Cull only sharedflows, not apiproxies.']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      sprintf    = require('sprintf-js').sprintf,
+      Getopt     = require('node-getopt'),
+      merge      = require('merge'),
+      util       = require('util'),
+      version    = '20190925-1705',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['R' , 'regexp=ARG', 'Optional. Cull only proxies with names matching this regexp.'],
+        ['K' , 'numToKeep=ARG', 'Required. Max number of revisions of each proxy to retain.'],
+        ['S' , 'sharedflows', 'Optional. Cull only sharedflows, not apiproxies.']
+      ])).bindHelp();
 
 // ========================================================
 
@@ -42,85 +41,47 @@ console.log(
   'Apigee Edge Proxy / Sharedflow revision cleaner tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
+process.on('unhandledRejection',
+            r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
+
 common.logWrite('start');
 
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
 
-function handleError(e) {
-    if (e) {
-      console.log(e);
-      console.log(e.stack);
-      process.exit(1);
-    }
-}
+function examineRevisions(collection, itemName, revisions) {
+    common.logWrite('revisions %s: %s', itemName, JSON.stringify(revisions));
+    if (revisions && revisions.length > opt.options.numToKeep) {
+      revisions.sort( (a, b) => b - a );
+      revisions.reverse();
+      let revisionsToExamine = revisions.slice(0, revisions.length - opt.options.numToKeep);
+      revisionsToExamine.reverse();
 
-function checkAndMaybeRemoveRevision (org, collectionName, itemName) {
-  return function (revision, callback) {
-    var options = { name:itemName, revision:revision };
-    org[collectionName].getDeployments(options, function(e, deployments) {
-      if (opt.options.verbose) {
-        common.logWrite('deployments (%s r%s): %s', itemName, revision, JSON.stringify(deployments));
-      }
-      if (! deployments.environment || deployments.environment.length === 0) {
-        org[collectionName].del(options, function(e, result) {
-          callback(e, options);
+      const reducer = (promise, revision) =>
+        promise.then( accumulator => {
+          const options = { name: itemName, revision };
+          return collection.getDeployments(options)
+            .then( deployments => {
+              if (opt.options.verbose) {
+                common.logWrite('deployments (%s r%s): %s', itemName, revision, JSON.stringify(deployments));
+              }
+              if (! deployments.environment || deployments.environment.length === 0) {
+                return collection.del(options)
+                  .then ( _ => [ ...accumulator, revision ] );
+              }
+              return Promise.resolve(accumulator);
+            });
         });
-      }
-      else {
-        callback(e, null);
-      }
-    });
-  };
-}
 
-function doneAllRevisions(collectionName, itemName, callback) {
-  return function(e, results) {
-    handleError(e);
-    // results is an array of arrays
-    var flattened = [].concat.apply([], results).filter( x => x);
-    if (flattened.length>0) {
-      common.logWrite('removed revisions of ' + collectionName + ': '+ itemName + ': ' +
-                      JSON.stringify(flattened.map( x =>  x?x.revision:'' )));
+      return revisionsToExamine.reduce(reducer, Promise.resolve([]))
+        .then ( r => {
+          common.logWrite("deleted %s: %s", itemName, JSON.stringify(r));
+          return {"item": itemName, revisions: r};
+        } );
     }
-    else {
-      common.logWrite('no revisions to remove of ' + collectionName + ': '+ itemName);
-    }
-    callback(null, flattened);
-  };
+    return null;
 }
 
-function doneAllItems(e, results) {
-  handleError(e);
-  var flattened = [].concat.apply([], results);
-  if (flattened.length> 0) {
-    common.logWrite('result %s', JSON.stringify(flattened));
-  }
-  else {
-    common.logWrite('nothing removed.');
-  }
-}
-
-function analyzeOneItem(org, collectionName) {
-  return function(itemName, callback) {
-    org[collectionName].getRevisions({ name: itemName }, function(e, result) {
-      handleError(e);
-      common.logWrite('revisions %s: %s', itemName, JSON.stringify(result));
-      if (result && result.length > opt.options.numToKeep) {
-        result.sort(function(a, b) { return b - a; });
-        result.reverse();
-        var revisionsToExamine = result.slice(0, result.length - opt.options.numToKeep);
-        revisionsToExamine.reverse();
-        async.mapSeries(revisionsToExamine,
-                        checkAndMaybeRemoveRevision(org, collectionName, itemName),
-                        doneAllRevisions(collectionName, itemName, callback));
-      }
-      else {
-        return callback(null, []);
-      }
-    });
-  };
-}
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
@@ -134,16 +95,38 @@ apigeeEdge.connect(common.optToOptions(opt))
   .then ( org => {
     let readOptions = {};
     const collectionName = (opt.options.sharedflows) ? "sharedflows" : "proxies";
-    org[collectionName].get(readOptions, function(e, results) {
-    if (opt.options.regexp) {
-      var re1 = new RegExp(opt.options.regexp);
-      results = results.filter(function(item) { return re1.test(item); });
-    }
-    if (opt.options.verbose) {
-      common.logWrite('found %s%s: %s', (opt.options.regexp)?"matching ":"", collectionName, JSON.stringify(results));
-    }
-    if (results.length > 0) {
-      async.mapSeries(results, analyzeOneItem(org, collectionName), doneAllItems);
-    }
-  });
-});
+    const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
+
+    return collection.get(readOptions)
+      .then( results => {
+        if (opt.options.regexp) {
+          const re1 = new RegExp(opt.options.regexp);
+          results = results.filter( item => re1.test(item) );
+        }
+        if ( !results || results.length == 0) {
+          common.logWrite('No %s%s', (opt.options.regexp)?"matching ":"", collectionName);
+          return Promise.resolve(true);
+        }
+
+        if (opt.options.verbose) {
+          common.logWrite('found %d %s%s', results.length, (opt.options.regexp)?"matching ":"", collectionName);
+        }
+
+        const reducer = (promise, itemname) =>
+          promise.then( accumulator =>
+                        collection.getRevisions({ name: itemname })
+                        .then( async (r) => {
+                          const x = await examineRevisions(collection, itemname, r);
+                          return [ ...accumulator, x ] ;
+                        })
+                      );
+
+        return results
+            .reduce(reducer, Promise.resolve([]))
+            .then( arrayOfResults => {
+              arrayOfResults = arrayOfResults.filter( x => !!x );
+              common.logWrite('summary deleted: ' + JSON.stringify(arrayOfResults));
+            });
+      });
+  })
+  .catch( e => console.error('error: ' + util.format(e) ) );
