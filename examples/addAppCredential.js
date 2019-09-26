@@ -18,14 +18,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 13:00:08>
+// last saved: <2019-September-25 17:20:49>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20181002-1052',
+      util       = require('util'),
+      version    = '20190925-1708',
       getopt     = new Getopt(common.commonOptions.concat([
       ['p' , 'product=ARG', 'required. name of the API product to enable on this app'],
       ['E' , 'email=ARG', 'required. email address of the developer for which to create the app'],
@@ -65,52 +66,34 @@ if ( !opt.options.email ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    common.logWrite(JSON.stringify(result, null, 2));
-    process.exit(1);
-  }
-  common.logWrite('connected');
-
-  if (opt.options.clientId) {
+apigeeEdge.connect(common.optToOptions(opt))
+  .then ( org => {
+    common.logWrite('connected');
     let options = {
           developerEmail : opt.options.email,
           appName : opt.options.appname,
-          clientId : opt.options.clientId,
-          clientSecret : opt.options.secret,
-          apiProduct : opt.options.product
-        };
-
-    org.appcredentials.add(options, function(e, result){
-      if (e) {
-        common.logWrite(JSON.stringify(e, null, 2));
-        common.logWrite(JSON.stringify(result, null, 2));
-        //console.log(e.stack);
-        process.exit(1);
-      }
-      //common.logWrite(sprintf('result %s', JSON.stringify(result)));
-      common.logWrite(sprintf('new apikey %s', result.consumerKey));
-      common.logWrite(sprintf('secret %s', result.consumerSecret));
-    });
-  }
-  else {
-    let options = {
-          developerEmail : opt.options.email,
-          appName : opt.options.appname,
-          apiProduct : opt.options.product,
+          apiProducts : opt.options.product.split(','),
           expiry : opt.options.expiry
         };
 
-    org.appcredentials.add(options, function(e, result){
-      if (e) {
-        common.logWrite(JSON.stringify(e, null, 2));
-        common.logWrite(JSON.stringify(result, null, 2));
-        //console.log(e.stack);
-        process.exit(1);
+    if (opt.options.clientId) {
+      options.clientId = opt.options.clientId;
+      options.clientSecret = opt.options.secret;
+      if (opt.options.expiry) {
+        common.logWrite('WARNING: expiry is not supported with an explicitly-supplied client id and secret');
       }
-      common.logWrite(sprintf('new apikey %s', result.credentials[0].consumerKey));
-      common.logWrite(sprintf('secret %s', result.credentials[0].consumerSecret));
-    });
-  }
-});
+    }
+
+    return org.appcredentials.add(options)
+      .then (result => {
+        if (opt.options.clientId) {
+          common.logWrite(sprintf('new apikey %s', result.consumerKey));
+          common.logWrite(sprintf('secret %s', result.consumerSecret));
+        }
+        else {
+          common.logWrite(sprintf('new apikey %s', result.credentials[0].consumerKey));
+          common.logWrite(sprintf('secret %s', result.credentials[0].consumerSecret));
+        }
+      });
+  })
+  .catch( e => console.error('error: ' + util.format(e) ) );
