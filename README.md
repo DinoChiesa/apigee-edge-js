@@ -608,9 +608,11 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 
 
 
-## License
 
-This code is Copyright (C) 2017-2019 Google LLC, and is licensed under the Apache 2.0 source license.
+## License and Copyright
+
+This material is [Copyright (c) 2016-2019 Google LLC](NOTICE),
+and is licensed under [the Apache 2.0 source license](LICENSE).
 
 ## Bugs
 
