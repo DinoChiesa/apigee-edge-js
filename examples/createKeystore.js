@@ -2,9 +2,11 @@
 /*jslint node:true */
 // createKeystore.js
 // ------------------------------------------------------------------
-// provision a keystore with a key and cert in Apigee Edge
-// ex:
-// node ./createKeystore.js -v -n -o amer-demo4 -s ks1 -e test -k ./dchiesa.net.key  -c ./dchiesa.net.cert -a alias1
+// provision a keystore with a key and cert in Apigee Edge, and create a reference
+// to it.
+//
+// example usage:
+// node ./createKeystore.js -v -n -o $ORG -s $KEYSTORE -e $ENV -k ./dchiesa.net.key  -c ./dchiesa.net.cert -a alias1
 //
 // Copyright 2017-2019 Google LLC.
 //
@@ -20,22 +22,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 13:18:22>
+// last saved: <2019-October-04 14:52:17>
 
 const edgejs     = require('apigee-edge-js'),
       fs         = require('fs'),
+      util       = require('util'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20190211-1317',
+      version    = '20191004-1202',
       getopt     = new Getopt(common.commonOptions.concat([
         ['s' , 'keystore=ARG', 'required. name of the keystore to create'],
         ['k' , 'keyfile=ARG', 'required. path to the key file (PEM format)'],
         ['c' , 'certfile=ARG', 'required. path to the cert file'],
         ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
         ['a' , 'alias=ARG', 'required. alias for the key'],
-        ['P' , 'keypassword=ARG', 'optional. password for the RSA Key']
+        ['P' , 'keypassword=ARG', 'optional. password for the RSA Key'],
+        ['R' , 'reference=ARG', 'optional. reference to create or update']
       ])).bindHelp();
 
 // ========================================================
@@ -79,40 +83,64 @@ if ( !opt.options.alias ) {
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.optToOptions(opt), function(e, org) {
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    common.logWrite(JSON.stringify(result, null, 2));
-    process.exit(1);
-  }
-  common.logWrite('connected');
-
-  var options = {
-        environment : opt.options.environment,
-        name : opt.options.keystore
-      };
-  org.keystores.create(options, function(e, result){
-    if (e) {
-      common.logWrite(JSON.stringify(e, null, 2));
-      common.logWrite(JSON.stringify(result, null, 2));
-      //console.log(e.stack);
-      process.exit(1);
+apigeeEdge.connect(common.optToOptions(opt))
+  .then( org => {
+    if (opt.options.verbose) {
+      common.logWrite('connected');
     }
-    common.logWrite('ok. created');
-    options.certFile = opt.options.certfile;
-    options.keyFile = opt.options.keyfile;
-    options.alias = opt.options.alias;
-    if (opt.options.keypassword) {
-      options.keyPassword = opt.options.keypassword;
-    }
-    org.keystores.importCert(options, function(e, result){
-      if (e) {
-        common.logWrite(JSON.stringify(e, null, 2));
-        common.logWrite(JSON.stringify(result, null, 2));
-        //console.log(e.stack);
-        process.exit(1);
-      }
-      common.logWrite('ok. key and cert stored.');
-    });
-  });
-});
+    const options = {
+            environment : opt.options.environment,
+            name : opt.options.keystore
+          };
+    return org.keystores.create(options)
+      .then( result => {
+        if (opt.options.verbose) {
+          common.logWrite('created keystore %s', opt.options.keystore);
+        }
+        options.certFile = opt.options.certfile;
+        options.keyFile = opt.options.keyfile;
+        options.alias = opt.options.alias;
+        if (opt.options.keypassword) {
+          options.keyPassword = opt.options.keypassword;
+        }
+        return org.keystores.importCert(options)
+          .then(result => {
+            if (opt.options.verbose) {
+              common.logWrite('key and cert stored.');
+            }
+            if ( ! opt.options.reference) {
+              const o = {
+                      org: org.conn.orgname,
+                      env: opt.options.environment,
+                      keystore: opt.options.keystore,
+                      ref: '-none-',
+                      keyalias: opt.options.alias,
+                      now: (new Date()).toISOString()
+                    };
+              console.log('\nsummary: ' + JSON.stringify(o, null, 2));
+              return Promise.resolve(true);
+            }
+            const options = {
+                    name : opt.options.reference,
+                    refers : opt.options.keystore,
+                    environment : opt.options.environment
+                  };
+            return org.references.createOrUpdate(options)
+              .then( result => {
+                if (opt.options.verbose) {
+                  common.logWrite('reference %s created or updated.', opt.options.reference);
+                  const o = {
+                          org: org.conn.orgname,
+                          env: opt.options.environment,
+                          keystore: opt.options.keystore,
+                          ref: opt.options.reference,
+                          keyalias: opt.options.alias,
+                          now: (new Date()).toISOString()
+                        };
+                  console.log('\nsummary: ' + JSON.stringify(o, null, 2));
+                }
+              });
+          });
+      });
+  })
+  .catch(e => console.log(util.format(e)));
