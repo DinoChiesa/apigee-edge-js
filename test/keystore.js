@@ -18,18 +18,19 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-August-08 10:06:08>
+// last saved: <2019-October-04 13:08:47>
 
 /* global path, faker, describe, it, before, after */
 
-var common = require('./common');
-var fs = require('fs');
+const common = require('./common'),
+      util = require('util'),
+      fs = require('fs');
 
 describe('Keystore', function() {
-  var resourceDir = "./test/resources";
-  var dateVal = new Date().valueOf();
-  var contrivedNameBasePrefix = 'apigee-edge-js-test-';
-  var contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
+  const resourceDir = "./test/resources",
+        dateVal = new Date().valueOf(),
+        contrivedNameBasePrefix = 'apigee-edge-js-test-',
+        contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
@@ -40,7 +41,7 @@ describe('Keystore', function() {
       var envlist = [];
       before(function(done){
         edgeOrg.environments.get(function(e, result) {
-          assert.isNull(e, "error listing: " + JSON.stringify(e));
+          assert.isNull(e, "error listing: " + util.format(e));
           envlist = result;
           done();
         });
@@ -54,7 +55,7 @@ describe('Keystore', function() {
                 name : contrivedNamePrefix + '-ks1'
               };
           edgeOrg.keystores.create(options, function(e, result){
-            assert.isNull(e, "error creating: " + JSON.stringify(e));
+            assert.isNull(e, "error creating: " + util.format(e));
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
               done();
@@ -69,7 +70,7 @@ describe('Keystore', function() {
       var combinations = [];
       before(function(done){
         edgeOrg.environments.get(function(e, result) {
-          assert.isNull(e, "error listing: " + JSON.stringify(e));
+          assert.isNull(e, "error listing: " + util.format(e));
           var envlist = result;
           var numDone = 0;
           envlist.forEach(function(env){
@@ -92,7 +93,7 @@ describe('Keystore', function() {
                 environment : env
               };
           edgeOrg.keystores.get(options, function(e, result){
-            assert.isNull(e, "error listing: " + JSON.stringify(e));
+            assert.isNull(e, "error listing: " + util.format(e));
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
               done();
@@ -112,7 +113,7 @@ describe('Keystore', function() {
           keystores.forEach(function(keystore) {
             options.keystore = keystore;
             edgeOrg.keystores.get(options, function(e, result){
-              assert.isNull(e, "error querying: " + JSON.stringify(e));
+              assert.isNull(e, "error querying: " + util.format(e));
               numKeystoresDone++;
               if (numKeystoresDone == keystores.length) {
                 numDone++;
@@ -152,13 +153,13 @@ describe('Keystore', function() {
       before(function(done){
         var actualPath = path.resolve(resourceDir);
         fs.readdir(actualPath, function(e, items) {
-          assert.isNull(e, "error getting cert and key: " + JSON.stringify(e));
+          assert.isNull(e, "error getting cert and key: " + util.format(e));
           var re1 = new RegExp('^.+\.cert$');
           certFileList = items
             .filter(item => item.match(re1) )
             .map(item => path.resolve( path.join(resourceDir, item)) );
           edgeOrg.environments.get(function(e, result) {
-            assert.isNull(e, "error listing: " + JSON.stringify(e));
+            assert.isNull(e, "error listing: " + util.format(e));
             envlist = result;
             done();
           });
@@ -176,12 +177,12 @@ describe('Keystore', function() {
                 name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
               };
           edgeOrg.keystores.create(options, function(e, result){
-            assert.isNull(e, "error creating keystore: " + JSON.stringify(e));
+            assert.isNull(e, "error creating keystore: " + util.format(e));
             options.certificateFile = certFileList[0];
             options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
             edgeOrg.keystores.importCert(options, function(e, result){
-              assert.isNull(e, "error importing cert and key: " + JSON.stringify(e));
+              assert.isNull(e, "error importing cert and key: " + util.format(e));
               tick();
             });
           });
@@ -196,7 +197,7 @@ describe('Keystore', function() {
       var combinations = [];
       before(function(done){
         edgeOrg.environments.get(function(e, result) {
-          assert.isNull(e, "error listing: " + JSON.stringify(e));
+          assert.isNull(e, "error listing: " + util.format(e));
           var envlist = result;
           var numDone = 0;
           envlist.forEach(function(env){
@@ -232,7 +233,7 @@ describe('Keystore', function() {
           keystores.forEach(function(keystore){
             var options = { environment : env, keystore: keystore };
             edgeOrg.keystores.getAlias(options, function(e, result) {
-              assert.isNull(e, "error: " + JSON.stringify(e));
+              assert.isNull(e, "error: " + util.format(e));
               assert.isNotNull(result, "error");
               var numDoneAliases = 0;
               var aliases = result;
@@ -244,7 +245,7 @@ describe('Keystore', function() {
                 aliases.forEach(function(alias) {
                   options.alias = alias;
                   edgeOrg.keystores.getAlias(options, function(e, result) {
-                    assert.isNull(e, "error: " + JSON.stringify(e));
+                    assert.isNull(e, "error: " + util.format(e));
                     assert.isNotNull(result, "error");
                     numDoneAliases++;
                     if (numDoneAliases == aliases.length) {
@@ -267,7 +268,7 @@ describe('Keystore', function() {
       var combinations = [];
       before(function(done){
         edgeOrg.environments.get(function(e, result) {
-          assert.isNull(e, "error listing: " + JSON.stringify(e));
+          assert.isNull(e, "error listing: " + util.format(e));
           var envlist = result;
           var numDone = 0;
           envlist.forEach(function(env){
@@ -294,7 +295,7 @@ describe('Keystore', function() {
             options.keystore = keystore;
             //console.log('  delete: %s/%s', env, keystore);
             edgeOrg.keystores.del(options, function(e, result){
-              assert.isNull(e, "error deleting: " + JSON.stringify(e));
+              assert.isNull(e, "error deleting: " + util.format(e));
               numDoneKeystores++;
               if (numDoneKeystores == keystores.length) {
                 numDone++;
