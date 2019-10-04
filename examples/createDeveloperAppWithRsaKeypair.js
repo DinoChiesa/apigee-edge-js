@@ -4,7 +4,7 @@
 // provision a developer app for an API Product in Apigee Edge,
 // with a keypair.
 //
-// last saved: <2019-October-04 10:57:18>
+// last saved: <2019-October-04 11:04:55>
 /* jshint esversion:9, strict:implied,node:true */
 
 const fs         = require('fs'),
@@ -59,8 +59,7 @@ apigeeEdge.connect(common.optToOptions(opt))
     common.logWrite('connected');
 
     const keypair = new NodeRSA({b: 2048}),
-          re = new RegExp('(?:\r\n|\r|\n)', 'g'),
-          publicKeyPem = keypair.exportKey('pkcs8-public-pem').replace(re,' '),
+          publicKeyPem = keypair.exportKey('pkcs8-public-pem'),
           privateKeyPem = keypair.exportKey('pkcs8-private-pem');
 
     const options = {
