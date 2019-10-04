@@ -101,7 +101,6 @@ describe('DeveloperApp', function() {
 
       });
 
-
       it('should fail to create a developer app - no name', () => {
         const options = {
                 developerEmail,
@@ -111,7 +110,33 @@ describe('DeveloperApp', function() {
         return edgeOrg.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
-            assert.equal(error, "Error: missing required inputs, one of {developer, appName, apiProduct}");
+            assert.equal(error, 'Error: missing required input: appName');
+          } );
+      });
+
+      it('should fail to create a developer app - no developer', () => {
+        const options = {
+                name : entityName + '-C',
+                apiProduct : faker.random.alphaNumeric(22)
+              };
+
+        return edgeOrg.developerapps.create(options)
+          .then( () => assert.fail('should not be reached'))
+          .catch( error => {
+            assert.equal(error, 'Error: missing required input: email');
+          } );
+      });
+
+      it('should fail to create a developer app - no product', () => {
+        const options = {
+                developerEmail,
+                name : entityName + '-D'
+              };
+
+        return edgeOrg.developerapps.create(options)
+          .then( () => assert.fail('should not be reached'))
+          .catch( error => {
+            assert.equal(error, 'Error: missing required input: apiProduct');
           } );
       });
 
