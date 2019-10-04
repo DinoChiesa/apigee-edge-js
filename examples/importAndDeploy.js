@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle or shared flow.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2019 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-August-27 14:16:40>
+// last saved: <2019-October-03 10:01:13>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -68,19 +68,12 @@ apigeeEdge
   .connect(common.optToOptions(opt))
   .then( org => {
     common.logWrite('connected');
-
     const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
     const term = (opt.options.sharedflow) ? 'sharedflow' : 'proxy';
 
     common.logWrite('importing a %s', term);
-    collection.import({name:opt.options.name, source:opt.options.source})
-      .then( (result) => {
-        if (result.error){
-          common.logWrite('error');
-          console.log(result.error.stack);
-          console.log(result.result);
-          return ;
-        }
+    return collection.import({name:opt.options.name, source:opt.options.source})
+      .then( result => {
         common.logWrite(sprintf('import ok. %s name: %s r%d', term, result.name, result.revision));
         let envs = opt.options.env || process.env.ENV;
         if (envs) {
@@ -101,15 +94,10 @@ apigeeEdge
           return envs.split(',')
             .reduce(reducer, Promise.resolve())
             .then( () => common.logWrite('all done...') );
-          //.catch( (e) => console.error('error: ' + e.stack) );
         }
-        else {
-          common.logWrite('not deploying...');
-          common.logWrite('finish');
-        }
-      });
 
+        common.logWrite('finished (not deploying)');
+        return Promise.resolve(true);
+      });
   })
-  .catch( e => {
-    console.log('while connecting, error: ' + e);
-  } );
+  .catch( e => console.log('while connecting, error: ' + util.format(e)) );
