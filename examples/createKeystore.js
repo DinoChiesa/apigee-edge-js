@@ -22,7 +22,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-October-04 14:52:17>
+// last saved: <2019-October-28 10:08:27>
 
 const edgejs     = require('apigee-edge-js'),
       fs         = require('fs'),
@@ -31,9 +31,9 @@ const edgejs     = require('apigee-edge-js'),
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20191004-1202',
+      version    = '20191028-1008',
       getopt     = new Getopt(common.commonOptions.concat([
-        ['s' , 'keystore=ARG', 'required. name of the keystore to create'],
+        ['s' , 'keystore=ARG', 'optional. name of the keystore to create. default: a generated random name'],
         ['k' , 'keyfile=ARG', 'required. path to the key file (PEM format)'],
         ['c' , 'certfile=ARG', 'required. path to the cert file'],
         ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
@@ -60,9 +60,10 @@ if ( !opt.options.environment ) {
 }
 
 if ( !opt.options.keystore ) {
-  console.log('You must specify a keystore');
-  getopt.showHelp();
-  process.exit(1);
+  // contrive a name
+  opt.options.keystore = new Date().toISOString(). replace(/-/g, '').substring(0,8) + '-' +
+    Math.random().toString(36).substring(2, 15);
+  common.logWrite('using keystore: %s', opt.options.keystore);
 }
 
 if ( !opt.options.keyfile || !fs.existsSync(opt.options.keyfile) ) {
