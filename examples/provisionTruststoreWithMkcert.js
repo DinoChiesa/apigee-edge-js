@@ -206,7 +206,7 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
       if (opt.options.filter) {
         let desiredLabels = opt.options.filter.split(',').map( x => x.trim().toLowerCase());
         certs = certs
-          .filter( (certName) =>
+          .filter( certName =>
                    desiredLabels.reduce( (acc, desiredLabel) => acc || certName.toLowerCase().startsWith(desiredLabel), false));
       }
       certs = certs.sort();
@@ -219,11 +219,11 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
       if (certs.length) {
         let trustStoreOptions = {environment:opt.options.env, name: opt.options.name};
         apigeeEdge.connect(common.optToOptions(opt))
-          .then( (org) => {
+          .then( org => {
             org.keystores.get(trustStoreOptions)
-              .then( (result) =>
+              .then( result =>
                      (result.error && result.statusCode == 404) ? org.keystores.create(trustStoreOptions) : {} )
-              .then( (resp) => {
+              .then( resp => {
                 handleError(resp);
                 common.logWrite('uploading %d certificates...', certs.length);
 
@@ -237,7 +237,7 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
                 return certs.reduce(fn, Promise.resolve());
               });
           })
-          .catch( (e) => console.log('error: ' + e.stack));
+          .catch( e => console.log('error: ' + e.stack));
       }
       else {
         common.logWrite('no certificates selected.');
@@ -247,4 +247,4 @@ request({method:'get', url: 'https://mkcert.org/labels/'})
       common.logWrite('no certificates found!?');
     }
   })
-  .catch( (e) => console.log('error: ' + e.stack));
+  .catch( e => console.log('error: ' + e.stack));
