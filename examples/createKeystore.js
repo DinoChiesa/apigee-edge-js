@@ -3,7 +3,7 @@
 // createKeystore.js
 // ------------------------------------------------------------------
 // provision a keystore with a key and cert in Apigee Edge, and create a reference
-// to it.
+// to it. Or, provision a keystore as truststore, and upload a cert to it.
 //
 // example usage:
 // node ./createKeystore.js -v -n -o $ORG -s $KEYSTORE -e $ENV -k ./dchiesa.net.key  -c ./dchiesa.net.cert -a alias1
@@ -22,7 +22,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-October-28 10:08:27>
+// last saved: <2019-November-25 08:50:11>
 
 const edgejs     = require('apigee-edge-js'),
       fs         = require('fs'),
@@ -31,13 +31,13 @@ const edgejs     = require('apigee-edge-js'),
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20191028-1008',
+      version    = '20191125-0850',
       getopt     = new Getopt(common.commonOptions.concat([
-        ['s' , 'keystore=ARG', 'optional. name of the keystore to create. default: a generated random name'],
-        ['k' , 'keyfile=ARG', 'required. path to the key file (PEM format)'],
-        ['c' , 'certfile=ARG', 'required. path to the cert file'],
         ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
+        ['s' , 'keystore=ARG', 'optional. name of the keystore to create. default: a generated random name'],
+        ['c' , 'certfile=ARG', 'required. path to the cert file'],
         ['a' , 'alias=ARG', 'required. alias for the key'],
+        ['k' , 'keyfile=ARG', 'optional. path to the key file (PEM format)'],
         ['P' , 'keypassword=ARG', 'optional. password for the RSA Key'],
         ['R' , 'reference=ARG', 'optional. reference to create or update']
       ])).bindHelp();
@@ -45,7 +45,7 @@ const edgejs     = require('apigee-edge-js'),
 // ========================================================
 
 console.log(
-  'Apigee Edge Keystore creation tool, version: ' + version + '\n' +
+  'Apigee Edge Keystore/Truststore creation tool, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -66,11 +66,14 @@ if ( !opt.options.keystore ) {
   common.logWrite('using keystore: %s', opt.options.keystore);
 }
 
-if ( !opt.options.keyfile || !fs.existsSync(opt.options.keyfile) ) {
-  console.log('You must specify a path to a key file');
-  getopt.showHelp();
-  process.exit(1);
+if ( opt.options.keyfile ) {
+  if (!fs.existsSync(opt.options.keyfile))  {
+    console.log('You must specify a path to a valid file for the keyfile');
+    getopt.showHelp();
+    process.exit(1);
+  }
 }
+
 if ( !opt.options.certfile || !fs.existsSync(opt.options.certfile) ) {
   console.log('You must specify a path to a cert file');
   getopt.showHelp();
@@ -99,15 +102,17 @@ apigeeEdge.connect(common.optToOptions(opt))
           common.logWrite('created keystore %s', opt.options.keystore);
         }
         options.certFile = opt.options.certfile;
-        options.keyFile = opt.options.keyfile;
         options.alias = opt.options.alias;
-        if (opt.options.keypassword) {
-          options.keyPassword = opt.options.keypassword;
+        if ( opt.options.keyfile ) {
+          options.keyFile = opt.options.keyfile;
+          if (opt.options.keypassword) {
+            options.keyPassword = opt.options.keypassword;
+          }
         }
         return org.keystores.importCert(options)
           .then(result => {
             if (opt.options.verbose) {
-              common.logWrite('key and cert stored.');
+              common.logWrite('%scert stored.', ( opt.options.keyfile) ? "key and " :"");
             }
             if ( ! opt.options.reference) {
               const o = {
@@ -115,9 +120,11 @@ apigeeEdge.connect(common.optToOptions(opt))
                       env: opt.options.environment,
                       keystore: opt.options.keystore,
                       ref: '-none-',
-                      keyalias: opt.options.alias,
                       now: (new Date()).toISOString()
                     };
+              if ( opt.options.keyfile ) {
+                o.keyalias = opt.options.alias;
+              }
               console.log('\nsummary: ' + JSON.stringify(o, null, 2));
               return Promise.resolve(true);
             }
@@ -135,9 +142,11 @@ apigeeEdge.connect(common.optToOptions(opt))
                           env: opt.options.environment,
                           keystore: opt.options.keystore,
                           ref: opt.options.reference,
-                          keyalias: opt.options.alias,
                           now: (new Date()).toISOString()
                         };
+              if ( opt.options.keyfile ) {
+                o.keyalias = opt.options.alias;
+              }
                   console.log('\nsummary: ' + JSON.stringify(o, null, 2));
                 }
               });
