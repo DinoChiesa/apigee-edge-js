@@ -31,7 +31,7 @@
     "qs": "6.4.0",
     "readline-sync": "1.4.7",
     "request": "2.88.0",
-    "sprintf-js": "1.0.3",
+    "sprintf-js": "1.1.2",
     "url-join": "2.0.x",
     "xml2js": "0.4.17"
   },
