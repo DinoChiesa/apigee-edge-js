@@ -47,7 +47,6 @@ var options = { org : config.org, netrc: true };
 apigeeEdge.connect(options).then(...);
 ```
 
-
 For customers who have SSO (SAML) enabled for their Edge SaaS organization, you can
 obtain a token [with a
 passcode](https://docs.apigee.com/api-platform/system-administration/using-saml#refresh).
