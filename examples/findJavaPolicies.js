@@ -1,5 +1,5 @@
 #! /usr/local/bin/node
-/*jslint node:true, esversion:6 */
+/*jslint node:true, esversion:9 */
 // findJavaPolicies.js
 // ------------------------------------------------------------------
 // In Apigee Edge, find all policies in all proxies that reference a Java callout.
@@ -21,22 +21,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 12:53:16>
+// last saved: <2019-December-05 21:15:00>
 
-var async = require('async'),
-    edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    merge = require('merge'),
-    version = '20190211-1253',
-    gRegexp,
-    getopt = new Getopt(common.commonOptions.concat([
-      ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
-      ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.'],
-      ['L' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
-    ])).bindHelp();
+const edgejs     = require('apigee-edge-js'),
+      common     = edgejs.utility,
+      apigeeEdge = edgejs.edge,
+      Getopt     = require('node-getopt'),
+      util       = require('util'),
+      version    = '20191205-1955',
+      getopt     = new Getopt(common.commonOptions.concat([
+        ['J' , 'jar=ARG', 'Optional. JAR name to find. Default: search for all JavaCallout policies.'],
+        ['R' , 'regexp', 'Optional. Treat the -J option as a regexp. Default: perform string match.'],
+        ['E' , 'proxyregexp=ARG', 'Optional. check only for proxies that match this regexp.'],
+        ['L' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
+      ])).bindHelp();
+
+function isKeeper(opt) {
+  if (opt.options.proxyregexp) {
+    common.logWrite('using regex match (%s)',opt.options.proxyregexp);
+    let re1 = new RegExp(opt.options.proxyregexp);
+    return function(name) {
+      return name.match(re1);
+    };
+  }
+  return () => true;
+}
+
+function checkRevisionForJar(org, proxyName) {
+  let regexp = (opt.options.regexp) ? new RegExp(opt.options.jar) : null;
+  return revision =>
+    org.proxies.getResourcesForRevision({name:proxyName, revision})
+        .then (result => {
+          let jars = result && result.filter( item => {
+                if ( ! item.startsWith('java://') ) return false;
+                let jarName = item.substring(7);
+                return (regexp) ? regexp.test(jarName) : (jarName == opt.options.jar);
+              });
+          return jars ? jars : null;
+        });
+}
+
+
+function checkRevisionForJava(org, proxyName) {
+  return revision =>
+    org.proxies.getPoliciesForRevision({name:proxyName, revision})
+    .then (policies => {
+      let reducer = (promise, policy) =>
+              promise .then( accumulator =>
+                             org.proxies.getPoliciesForRevision({ name: proxyName, revision, policy })
+                             .then( result =>  (result.policyType == 'JavaCallout') ? [ ...accumulator, policy ] : accumulator ));
+      return policies.reduce(reducer, Promise.resolve([]));
+    });
+}
 
 // ========================================================
 
@@ -49,110 +85,51 @@ common.logWrite('start');
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
 
-function handleError(e) {
-    if (e) {
-      console.log(e);
-      console.log(e.stack);
-      process.exit(1);
-    }
-}
-
-function examineOnePolicy(org, options) {
-  return function(policyName, callback) {
-    org.proxies.getPoliciesForRevision(merge(options, {policy:policyName}), function(e, result) {
-      handleError(e);
-      callback(null, (result.policyType == 'JavaCallout'));
-    });
-  };
-}
-
-function getOneRevision (org, proxyName) {
-  return function (revision, callback) {
-    var options = {name:proxyName, revision:revision};
-    if ( opt.options.jar ) {
-      // url = sprintf('apis/%s/revisions/%s/resources', proxyName, revision);
-      if (opt.options.regexp && !gRegexp) {
-        gRegexp = new RegExp(opt.options.jar);
-      }
-      org.proxies.getResourcesForRevision(options, function(e, result){
-        if (e) {
-          return callback(null, null);
-        }
-        var jars = result && result.filter(function(item){
-              var isJava = item.startsWith('java://');
-              if ( ! isJava ) return false;
-              var jarName = item.substring(7);
-              return (gRegexp)?gRegexp.test(jarName) : (jarName == opt.options.jar);
-            });
-        callback(null, (jars && jars.length>0)?sprintf('apis/%s/revisions/%s', proxyName, revision):null);
-      });
-    }
-    else {
-      //url = sprintf('apis/%s/revisions/%s/policies', proxyName, revision);
-      org.proxies.getPoliciesForRevision(options, function(e, allPolicies){
-        if (e) {
-          return callback(e, []);
-        }
-        async.filterSeries(allPolicies, examineOnePolicy(org, options), function(e, results) {
-          var javaPolicies = results.map(function(elt){ return sprintf('apis/%s/revisions/%s/policies/%s', proxyName, revision, elt); });
-          callback(null, javaPolicies);
-        });
-      });
-    }
-  };
-}
-
-function doneAllRevisions(proxyName, callback) {
-  return function(e, results) {
-    handleError(e);
-    if (opt.options.jar) {
-      results = results.filter(function(r) {return r;});
-      if (results && results.length > 0) {
-        //results = results.map(function(r) {return parseInt(r, 10);});
-        common.logWrite('proxy: '+ proxyName + ' ' + JSON.stringify(results));
-      }
-      callback(null, results);
-    }
-    else {
-      // results is an array of arrays
-      var flattened = [].concat.apply([], results);
-      common.logWrite('proxy: '+ proxyName + ' ' + JSON.stringify(flattened));
-      callback(null, flattened);
-    }
-  };
-}
-
-function doneAllProxies(e, results) {
-  handleError(e);
-  var flattened = [].concat.apply([], results);
-  common.logWrite('matching Java %s: %s', (opt.options.jar)?"proxies":"policies", JSON.stringify(flattened));
-}
-
-
-function analyzeOneProxy(org) {
-  return function(proxyName, callback) {
-    org.proxies.get({ name: proxyName }, function(e, result) {
-      handleError(e);
-      if (opt.options.latestrevisionnumber) {
-        result.revision.sort();
-        result.revision = [result.revision.pop()];
-      }
-      async.mapSeries(result.revision, getOneRevision(org, proxyName), doneAllRevisions(proxyName, callback));
-    });
-  };
-}
-
-
 common.verifyCommonRequiredParameters(opt.options, getopt);
-apigeeEdge.connect(common.optToOptions(opt), function(e, org){
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
-    process.exit(1);
-  }
+apigeeEdge.connect(common.optToOptions(opt))
+  .then ( org =>
+          org.proxies.get({})
+          .then(proxies => {
+            let reducer = (promise, proxyname) =>
+              promise .then( accumulator =>
+                             org.proxies.get({ name: proxyname })
+                             .then( ({revision}) => {
+                               if (opt.options.latestrevisionnumber) {
+                                 revision = [revision.pop()];
+                               }
+                               return [ ...accumulator, {proxyname, revision} ];
+                             }));
 
-  org.proxies.get({}, function(e, proxies) {
-    async.mapSeries(proxies, analyzeOneProxy(org), doneAllProxies);
-  });
+            // Starting from the list of proxies, filter to keep only those of
+            // interest, then get the revisions of each one (maybe confining the
+            // check to only the most recent revision), and then examine the
+            // policies or resources in those revisions.
+            return proxies
+              .sort()
+              .filter( isKeeper(opt) )
+              .reduce(reducer, Promise.resolve([]))
+              .then( proxiesAndRevisions => {
+                common.logWrite('checking...' + JSON.stringify(proxiesAndRevisions));
+                let getChecker = opt.options.jar ? checkRevisionForJar : checkRevisionForJava;
 
-});
+                // a function that returns a revision reducer for the named proxy
+                function makeRevisionReducer(proxyName) {
+                  let check = getChecker(org, proxyName);
+                  return (promise, revision) =>
+                    promise.then( accumulator =>
+                                  check(revision)
+                                  .then( policies => [...accumulator, {revision, policies}] ));
+                }
+
+                let proxyReducer = (promise, nameAndRevisions) =>
+                  promise.then( accumulator =>
+                                 nameAndRevisions.revision.reduce(makeRevisionReducer(nameAndRevisions.proxyname), Promise.resolve([]))
+                                 .then( a => [...accumulator, {proxyname: nameAndRevisions.proxyname, found:a}]) );
+
+                return proxiesAndRevisions.reduce(proxyReducer, Promise.resolve([]));
+              });
+          }))
+
+  .then( r => console.log('' + JSON.stringify(r, null, 2)) )
+
+  .catch( e => console.log('while executing, error: ' + util.format(e)) );
