@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 //
 // created: Mon Dec  3 13:31:48 2018
-// last saved: <2019-December-05 19:21:00>
+// last saved: <2019-December-05 21:16:36>
 
 /* jshint esversion: 9, node: true, strict:implied */
 /* global process, console, Buffer */
@@ -54,7 +54,6 @@ common.verifyCommonRequiredParameters(opt.options, getopt);
 apigeeEdge.connect(common.optToOptions(opt))
   .then( org => {
     common.logWrite('connected');
-    //console.log(org);
     const collection = (opt.options.sharedflow) ? org.sharedflows : org.proxies;
     return collection.get({})
       .then( items => {
@@ -69,7 +68,7 @@ apigeeEdge.connect(common.optToOptions(opt))
             .sort()
             .filter( isKeeper(opt) )
             .reduce(reducer, Promise.resolve([]))
-            .then( arrayOfResults => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults)) );
+            .then( arrayOfResults => common.logWrite('all done...\n' + JSON.stringify(arrayOfResults, null, 2)) );
       });
   })
   .catch( e => console.error('error: ' + util.format(e) ));
