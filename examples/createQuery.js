@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-December-04 19:53:58>
+// last saved: <2019-December-05 08:16:26>
 
 const edgejs     = require('apigee-edge-js'),
       fs         = require('fs'),
@@ -28,10 +28,12 @@ const edgejs     = require('apigee-edge-js'),
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
       version    = '20191204-1810',
+      defaults   = { format: "json" },
       getopt     = new Getopt(common.commonOptions.concat([
         ['e' , 'environment=ARG', 'required. environment in which the keystore will be created'],
         ['M' , 'metric=ARG', 'required. name of the metric to query. (eg, message_count)'],
-        ['D' , 'dimension=ARG', 'required. dimension (eg apiproxy)']
+        ['D' , 'dimension=ARG', 'required. dimension (eg apiproxy)'],
+        ['F' , 'format=ARG', 'optional. json or csv. Default: ' + defaults.format]
       ])).bindHelp();
 
 // ========================================================
@@ -114,7 +116,7 @@ apigeeEdge.connect(common.optToOptions(opt))
               groupByTimeUnit: "month",
               limit: 14400,
               filter:"(" + opt.options.metric + " ge 0)",
-              outputFormat: "json"
+              outputFormat: opt.options.format
             }
           };
 
