@@ -1,5 +1,5 @@
 #! /usr/local/bin/node
-/* jslint node:true, esversion:6 */
+/* jslint node:true, esversion:9 */
 
 // provisionTruststoreWithMkcert.js
 // ------------------------------------------------------------------
@@ -28,7 +28,7 @@ const edgejs     = require('apigee-edge-js'),
       version    = '20190211-1249',
       defaults   = { basepath : '/' },
       getopt     = new Getopt(common.commonOptions.concat([
-        ['L', 'list',     'optional. list the labels of certs in mkcert.' ],
+        ['L', 'list',     'optional. just list the labels of certs in mkcert (do not create truststore).' ],
         ['N', 'name=ARG', 'This is the name for the Truststore to be created and populated.' ],
         ['F', 'filter=ARG', 'the labels to include. Case insensitive. eg: --filter verisign,comodo,geotrust' ],
         ['e', 'env=ARG',  'the Edge environment in which to create the Truststore.' ]
@@ -199,6 +199,9 @@ if ( ! opt.options.list) {
 common.logWrite('inquiring mozilla certs...');
 request({method:'get', url: 'https://mkcert.org/labels/'})
   .then( ({response, body}) => {
+    if (response.statusCode != 200) {
+      return console.log('mkcert.org service is not available.');
+    }
     let certList = JSON.parse(body);
     if (certList.Certificates && certList.Certificates.length) {
 
