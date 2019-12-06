@@ -1,5 +1,5 @@
 #! /usr/local/bin/node
-/*jslint node:true, esversion:6 */
+/*jslint node:true, esversion:9 */
 // findPoliciesByName.js
 // ------------------------------------------------------------------
 // In Apigee Edge, find policies in all proxies and/or sharedflows that have a
@@ -19,28 +19,90 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-February-11 13:05:00>
+// last saved: <2019-December-05 23:01:54>
 
-const async      = require('async'),
-      edgejs     = require('apigee-edge-js'),
+const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
       apigeeEdge = edgejs.edge,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20180619-0825',
+      util       = require('util'),
+      version    = '20191205-2158',
       getopt     = new Getopt(common.commonOptions.concat([
         ['P' , 'proxiesonly', 'Optional. Look for policies only within proxies.'],
         ['S' , 'sharedflowsonly', 'Optional. Look for policies only within sharedflows.'],
-        ['R' , 'regexp=ARG', 'Required. Look for policies that match a regexp.']
+        ['N' , 'policypattern=ARG', 'Required. a regular expression. Look for policies that match a regexp.'],
+        ['R' , 'proxypattern=ARG', 'Optional. a regular expression. Look only in proxies that match this regexp.'],
+        ['L' , 'latestrevisionnumber', 'Optional. only look in the latest revision number for each proxy.']
       ])).bindHelp();
 
 var regexp1;
-
 function getRegexp() {
   if ( ! regexp1) {
-    regexp1 = new RegExp(opt.options.regexp);
+    regexp1 = new RegExp(opt.options.policypattern);
   }
   return regexp1;
+}
+
+function isKeeper(opt) {
+  if (opt.options.proxypattern) {
+    common.logWrite('using regex match (%s)',opt.options.proxypattern);
+    let re1 = new RegExp(opt.options.proxypattern);
+    return function(name) {
+      return name.match(re1);
+    };
+  }
+  return () => true;
+}
+
+function getRevisionChecker(collection, collectionName, itemName) {
+  return revision =>
+    collection.getPoliciesForRevision({ name: itemName, revision })
+    .then( policyNames =>
+           policyNames
+           .filter( x => x.match(getRegexp()))
+           .map(elt => sprintf('%s/%s/revisions/%s/policies/%s', collectionName, itemName, revision, elt))
+         );
+}
+
+// a function that returns a revision reducer for the named proxy or sharedflow
+function makeRevisionReducer(check) {
+  return (promise, revision) =>
+    promise.then( accumulator =>
+                  check(revision)
+                  .then( policies =>
+                         policies.length ? [...accumulator, {revision, policies}] : accumulator ));
+}
+
+// expand from itemname to itemname and the list of revisions
+function getRevisions(collection) {
+  return (promise, itemname) =>
+    promise .then( accumulator =>
+                   collection.get({ name: itemname })
+                   .then( ({revision}) => {
+                     if (opt.options.latestrevisionnumber) {
+                       revision = [revision.pop()];
+                     }
+                     return [ ...accumulator, {itemname, revision} ];
+                   }));
+}
+
+function listChecker(collection, collectionName, typeName) {
+  return items => items
+    .sort()
+    .filter( isKeeper(opt) )
+    .reduce( getRevisions(collection), Promise.resolve([]))
+    .then( itemsAndRevisions => {
+      //common.logWrite('checking...' + JSON.stringify(itemsAndRevisions));
+      let itemReducer = (promise, nameAndRevisions) =>
+        promise.then( accumulator => {
+          let check = getRevisionChecker(collection, collectionName, nameAndRevisions.itemname);
+          return nameAndRevisions.revision.reduce(makeRevisionReducer(check), Promise.resolve([]))
+            .then( a => a.length? [...accumulator, {name: nameAndRevisions.itemname, type:typeName, found:a}] : accumulator);
+        });
+
+      return itemsAndRevisions.reduce(itemReducer, Promise.resolve([]));
+    });
 }
 
 // ========================================================
@@ -54,60 +116,9 @@ common.logWrite('start');
 // process.argv array starts with 'node' and 'scriptname.js'
 var opt = getopt.parse(process.argv.slice(2));
 
-function handleError(e) {
-    if (e) {
-      console.log(e);
-      console.log(e.stack);
-      process.exit(1);
-    }
-}
-
-function getOneRevision (org, collection, collectionName, assetName) {
-  return function (revision, callback) {
-    var options = {name:assetName, revision:revision};
-    collection.getPoliciesForRevision(options, function(e, result){
-      if (e) {
-        return callback(e, []);
-      }
-      var matchingPolicies = result
-        .filter( x => x.match(getRegexp()))
-        .map(function(elt){ return sprintf('%s/%s/revisions/%s/policies/%s', collectionName, assetName, revision, elt); });
-      callback(null, matchingPolicies);
-    });
-  };
-}
-
-function doneAllRevisions(assetName, collectionName, callback) {
-  return function(e, results) {
-    handleError(e);
-      // results is an array of arrays
-      var flattened = [].concat.apply([], results);
-      common.logWrite(collectionName.slice(0, -1) + ': ' + assetName + ' ' + JSON.stringify(flattened));
-      callback(null, flattened);
-  };
-}
-
-function doneAllAssets(collectionName) {
-  return function(e, results) {
-    handleError(e);
-  };
-}
-
-
-function analyzeOneAsset(org, collection, collectionName) {
-  return function(assetName, callback) {
-    collection.get({ name: assetName }, function(e, result) {
-      handleError(e);
-      async.mapSeries(result.revision, getOneRevision(org, collection, collectionName, assetName), doneAllRevisions(assetName, collectionName, callback));
-    });
-  };
-}
-
-// ========================================================================================
-
 common.verifyCommonRequiredParameters(opt.options, getopt);
-if ( ! opt.options.regexp) {
-  console.log('The regexp is required.');
+if ( ! opt.options.policypattern) {
+  console.log('The --policypattern option is required.');
   getopt.showHelp();
   process.exit(1);
 }
@@ -118,44 +129,25 @@ if (opt.options.proxiesonly && opt.options.sharedflowsonly) {
   process.exit(1);
 }
 
-apigeeEdge.connect(common.optToOptions(opt), function(e, org){
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    //console.log(e.stack);
-    process.exit(1);
-  }
+apigeeEdge.connect(common.optToOptions(opt))
+  .then( org => {
+    let p = Promise.resolve([]);
 
-  if (opt.options.proxiesonly) {
-    org.proxies.get({}, function(e, proxies) {
-      async.mapSeries(proxies, analyzeOneAsset(org, org.proxies, 'apis'), function (e, proxyResults) {
-            handleError(e);
-            var flattened = [].concat.apply([], proxyResults);
-            common.logWrite('occurrences within proxies: %s', JSON.stringify(flattened));
-      });
-    });
-  }
-  else if (opt.options.sharedflowsonly) {
-    org.sharedflows.get({}, function(e, sharedflows) {
-      async.mapSeries(sharedflows, analyzeOneAsset(org, org.sharedflows, 'sharedflows'), function(e, sharedFlowResults) {
-        handleError(e);
-        var flattened = [].concat.apply([], sharedFlowResults);
-        common.logWrite('occurrences within sharedflows: %s', JSON.stringify(flattened));
-      });
-    });
-  }
-  else {
-    org.proxies.get({}, function(e, proxies) {
-      async.mapSeries(proxies, analyzeOneAsset(org, org.proxies, 'apis'), function (e, proxyResults) {
-        org.sharedflows.get({}, function(e, sharedflows) {
-          async.mapSeries(sharedflows, analyzeOneAsset(org, org.sharedflows, 'sharedflows'), function(e, sharedFlowResults) {
-            handleError(e);
-            var flattened = [].concat.apply([], proxyResults);
-            common.logWrite('occurrences within proxies: %s', JSON.stringify(flattened));
-            flattened = [].concat.apply([], sharedFlowResults);
-            common.logWrite('occurrences within sharedflows: %s', JSON.stringify(flattened));
-          });
-        });
-      });
-    });
-  }
-});
+    if (opt.options.proxiesonly || !opt.options.sharedflowsonly) {
+      p = p.then( all => org.proxies.get({})
+                  .then( listChecker(org.proxies, 'apis', 'proxy'))
+                  .then( r => [...all, ...r] ) );
+    }
+
+    if (opt.options.sharedflowsonly || !opt.options.proxiesonly) {
+      p = p.then( all => org.sharedflows.get({})
+                  .then( listChecker(org.sharedflows, 'sharedflows', 'sharedflow'))
+                  .then( r => [...all, ...r] ) );
+    }
+
+    return p;
+  })
+
+  .then( r => console.log('' + JSON.stringify(r, null, 2)) )
+
+  .catch( e => console.log('while executing, error: ' + e.stack) );
