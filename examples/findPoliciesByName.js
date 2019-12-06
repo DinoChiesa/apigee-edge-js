@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2019-December-05 23:01:54>
+// last saved: <2019-December-05 23:04:55>
 
 const edgejs     = require('apigee-edge-js'),
       common     = edgejs.utility,
@@ -93,7 +93,6 @@ function listChecker(collection, collectionName, typeName) {
     .filter( isKeeper(opt) )
     .reduce( getRevisions(collection), Promise.resolve([]))
     .then( itemsAndRevisions => {
-      //common.logWrite('checking...' + JSON.stringify(itemsAndRevisions));
       let itemReducer = (promise, nameAndRevisions) =>
         promise.then( accumulator => {
           let check = getRevisionChecker(collection, collectionName, nameAndRevisions.itemname);
