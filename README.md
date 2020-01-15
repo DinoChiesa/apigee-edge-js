@@ -147,6 +147,11 @@ hash with various child members as functions:
 | audits               | get                                                              |
 | stats                | get                                                              |
 | specs                | get, getMeta, list, create, update, del                          |
+| company              | get, create (In future : update, del, setStatus )                |
+| companyapp           | get, create (In future : approve, revoke, update, del, setStatus)|
+| companydevelopers    | get ( In future : add/update, remove)                            |
+|(In future) developersappkeys|  create, addApiProductToKey, approveKey, revokeKey, updateScope, deleteKey, removeApiProduct, getKeyDetail |
+|(In future) companyappkeys|   approveKey, revokeKey, deleteKey, getKeyDetail, removeApiProduct, addApiProductToKey  |
 | maskconfigs          | get, set, add/update, remove                                     |
 
 Each child function gets invoked as a function returning a promise: `fn(options)`, or in old-school callback style: `fn(options, callback)` .
