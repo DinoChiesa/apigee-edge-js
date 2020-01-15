@@ -147,6 +147,9 @@ hash with various child members as functions:
 | audits               | get                                                              |
 | stats                | get                                                              |
 | specs                | get, getMeta, list, create, update, del                          |
+| companies            | get, create                                                      |
+| companyapps          | get, create                                                      |
+| companydevelopers    | get                                                              |
 | maskconfigs          | get, set, add/update, remove                                     |
 
 Each child function gets invoked as a function returning a promise: `fn(options)`, or in old-school callback style: `fn(options, callback)` .
@@ -154,7 +157,10 @@ Each child function gets invoked as a function returning a promise: `fn(options)
 
 ## What is possible here?
 
-As you can see from the function list above, pretty much all the basic stuff you want to do with Apigee Edge administration is here. There are some gaps but those are being filled in as need arises.
+As you can see from the function list above, pretty much all the basic stuff you
+want to do with Apigee Edge administration is here. There are some gaps (for
+example around companies and companyapps); we can
+fill those in as need arises. (Pull requests welcomed)
 
 You can examine [the examples directory](./examples) for some example code illustrating some practical possibilities. A few specific code examples are shown here.
 
