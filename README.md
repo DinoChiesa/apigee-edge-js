@@ -583,15 +583,17 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 
 1. Is this an official Google product?  Is it supported?
 
-   No, This library and the example tools included here are not an official Google product.
-   Support is available on a best-effort basis via github or community.apigee.com .
+   No, This library and the example tools included here are not an official
+   Google product.  Support is available on a best-effort basis via github or
+   community.apigee.com .
 
 2. What is this thing good for?
 
-   If your team builds nodejs scripts to perform administrative operations on your
-   Apigee Edge organization, you may want to use this library. It provides a wrapper of
-   basic operations to allow you to import and deploy proxies, create products or
-   developers or applications, populate KVMs, create caches, and so on.
+   If your team builds nodejs scripts to perform administrative operations on
+   your Apigee Edge organization, you may want to use this library. It provides
+   a wrapper of basic operations to allow you to import and deploy proxies,
+   create products or developers or applications, populate KVMs, create caches,
+   and so on.
 
 2. Does it have a wrapper for creating a virtualhost?
 
@@ -605,12 +607,19 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
    file, for future use. The library runtime automatically caches the token, and
    refreshes the token as necessary, even during a single long-running script.
 
+   By the way, you can use the cached token in other programs. For example, you
+   could use the ./refreshToken.js script (See the
+   [examples](https://github.com/DinoChiesa/apigee-edge-js-examples)) to obtain
+   a fresh token, then use a bash script to read that token cache and perform
+   some curl commands. Or just run refreshToken.js every morning and then any
+   other program you want to use could pull the token from the cache.
+
 
 
 
 ## License and Copyright
 
-This material is [Copyright (c) 2016-2019 Google LLC](NOTICE),
+This material is [Copyright (c) 2016-2020 Google LLC](NOTICE),
 and is licensed under [the Apache 2.0 source license](LICENSE).
 
 ## Bugs
@@ -619,6 +628,7 @@ and is licensed under [the Apache 2.0 source license](LICENSE).
 
 ## Related
 
-See also, [this Powershell module](https://github.com/DinoChiesa/Edge-Powershell-Admin)
+* [the example programs](https://github.com/DinoChiesa/apigee-edge-js-examples)
+* [the Powershell module that wraps Apigee Admin APIs](https://github.com/DinoChiesa/Edge-Powershell-Admin)
 
 
