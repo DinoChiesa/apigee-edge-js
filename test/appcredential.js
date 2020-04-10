@@ -3,7 +3,7 @@
 //
 // Tests for operations on App Credentials
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ describe('AppCredential', function() {
           firstName = faker.name.firstName(),
           lastName = faker.name.lastName(),
           developerEmail = `${firstName}.${lastName}@apigee-edge-js-test.org`,
-          credentialToAdd = faker.lorem.word() + faker.random.number(),
+          testCredential = faker.lorem.word() + '-' + faker.lorem.word() + '-' + faker.random.number(),
           createOptions = {
             developerEmail,
             lastName,
@@ -95,7 +95,7 @@ describe('AppCredential', function() {
                 developerEmail,
                 appName : entityName,
                 apiProducts : [apiProducts[0]],
-                consumerKey : credentialToAdd
+                consumerKey : testCredential
               };
         return edgeOrg.appcredentials.add(options)
           .then( result => {
@@ -127,15 +127,52 @@ describe('AppCredential', function() {
     });
 
 
+    describe('get', function() {
+
+      it('should get details for an existing credential', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : testCredential
+              };
+        return edgeOrg.appcredentials.get(options)
+          .then( result => {
+            //console.log(JSON.stringify(result, null, 2));
+            assert.equal(result.consumerKey, testCredential);
+            assert.isNotNull(result.apiProducts);
+            assert.equal(result.apiProducts[0].apiproduct, apiProducts[0]); // from test setup
+            assert.isNotNull(result.attributes);
+            assert.isNotNull(result.expiresAt);
+          });
+      });
+
+      it('should fail to get details for a non-existing credential', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : faker.lorem.word() + faker.random.number() // DNE
+              };
+        return edgeOrg.appcredentials.get(options)
+          .then( result => {
+            assert.fail('should not be reached');
+          })
+          .catch( error => {
+            assert.equal(error, 'Error: bad status: 404');
+          });
+      });
+
+    });
+
+
     describe('find', function() {
 
       it('should find a previously added credential', () => {
         const options = {
-                consumerKey : credentialToAdd
+                consumerKey : testCredential
               };
         return edgeOrg.appcredentials.find(options)
           .then( result => {
-            assert.equal(result.key, credentialToAdd);
+            assert.equal(result.key, testCredential);
           });
           // .catch( reason => {
           //   console.log(reason.error);
@@ -166,9 +203,156 @@ describe('AppCredential', function() {
             assert.equal(error, 'Error: missing key');
           });
       });
+    });
+
+
+    describe('products', function() {
+
+      // it('should list products on an existing credential?', () => {
+      //   const options = {
+      //           developerEmail,
+      //           consumerKey : testCredential
+      //         };
+      //   return edgeOrg.appcredentials.listProducts(options)
+      //     .then( result => {
+      //       assert.equal(result.key, testCredential);
+      //     });
+      //     // .catch( reason => {
+      //     //   console.log(reason.error);
+      //     //   assert.fail('should not be reached');
+      //     // });
+      // });
+
+      it('should add a product to an existing credential', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : testCredential,
+                product : apiProducts[1]
+              };
+        return edgeOrg.appcredentials.addProduct(options)
+          .then( result => {
+            //console.log(JSON.stringify(result, null, 2));
+            assert.equal(result.consumerKey, testCredential);
+            assert.equal(result.apiProducts.length, 2);
+            assert.equal(result.apiProducts[0].apiproduct, apiProducts[0]); // from test setup
+            assert.equal(result.apiProducts[1].apiproduct, apiProducts[1]);
+          });
+          // .catch( reason => {
+          //   console.log(reason.error);
+          //   assert.fail('should not be reached');
+          // });
+      });
+
+      it('should fail to add a product when credential does not exist', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : 'xxx-' + faker.lorem.word() + '-' + faker.random.number(), // DNE
+                product : apiProducts[1]
+              };
+        return edgeOrg.appcredentials.addProduct(options)
+          .then( result => {
+            assert.fail('should not be reached');
+          })
+          .catch( error => {
+            assert.equal(error, 'Error: bad status: 404');
+          });
+      });
+
+      it('should remove a product from a credential', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : testCredential,
+                product : apiProducts[1]
+              };
+        return edgeOrg.appcredentials.removeProduct(options)
+          .then( result => {
+            //console.log(JSON.stringify(result, null, 2));
+            assert.equal(result.consumerKey, testCredential);
+            assert.equal(result.apiProducts.length, 1);
+            assert.equal(result.apiProducts[0].apiproduct, apiProducts[0]); // from test setup
+          })
+          .catch( error => {
+            let util = require('util');
+            console.log(util.format(error));
+            assert.fail('should not be reached');
+          });
+      });
+
+      it('should fail to remove a product that is not currently on a credential', () => {
+        const options = {
+                developerEmail,
+                appName: entityName,
+                consumerKey : testCredential,
+                product : apiProducts[2]
+              };
+        return edgeOrg.appcredentials.removeProduct(options)
+          .then( result => {
+            console.log(JSON.stringify(result, null, 2));
+            assert.fail('should not be reached');
+          })
+          .catch( error => {
+            //let util = require('util');
+            //console.log(util.format(error));
+            assert.equal(error, 'Error: bad status: 500');
+            assert.equal(error.result.message, 'APIProduct is not associated with consumer key');
+          });
+      });
 
     });
 
+
+    describe('update', function() {
+
+      it('should update an existing credential', () => {
+        const attr1 = faker.lorem.word() + '-' + faker.lorem.word(),
+              attr2 = faker.lorem.word() + '-' + faker.lorem.word(),
+              options = {
+                developerEmail,
+                appName : entityName,
+                consumerKey : testCredential,
+                attributes: { attr1, attr2 }
+              };
+        return edgeOrg.appcredentials.update(options)
+          .then( result => {
+            //console.log(JSON.stringify(result));
+            assert.isNotNull(result.attributes);
+            assert.equal(result.attributes.length, 2);
+            assert.equal(result.attributes[0].value, attr1);
+            assert.equal(result.attributes[1].value, attr2);
+          })
+          .catch( error => {
+            var util = require('util');
+            console.log(util.format(error));
+            assert.fail('should not be reached');
+          });
+      });
+
+      it('should fail to update a non-existing credential', () => {
+        const attr1 = faker.lorem.word() + '-' + faker.lorem.word(),
+              attr2 = faker.lorem.word() + '-' + faker.lorem.word(),
+              fakeCredential = faker.lorem.word() + '-' + faker.lorem.word() + '-' + faker.random.number(), // DNE
+              options = {
+                developerEmail,
+                appName : entityName,
+                consumerKey : fakeCredential,
+                attributes: { attr1, attr2 }
+              };
+        return edgeOrg.appcredentials.update(options)
+          .then( result => {
+            console.log(JSON.stringify(result, null, 2));
+            assert.fail('should not be reached');
+          })
+          .catch( error => {
+            // let util = require('util');
+            // console.log(util.format(error));
+            assert.equal(error, 'Error: bad status: 404');
+            assert.equal(error.result.message, 'Invalid consumer key for Given App');
+          });
+      });
+    });
 
     describe('del', function() {
 
@@ -176,11 +360,12 @@ describe('AppCredential', function() {
         const options = {
                 developerEmail,
                 appName : entityName,
-                consumerKey : credentialToAdd
+                consumerKey : testCredential
               };
         return edgeOrg.appcredentials.del(options)
           .then( result => {
             //console.log(JSON.stringify(result));
+            assert.equal(result.consumerKey, testCredential);
           })
           .catch( error => {
             var util = require('util');
