@@ -143,7 +143,7 @@ hash with various child members as functions:
 | keystores            | get, create, del, import key and cert, create references         |
 | targetservers        | get, create, del, disable, enable, update                        |
 | developerapps        | get, create, del, revoke, approve, update                        |
-| appcredentials       | add, del, revoke, approve                                        |
+| appcredentials       | find, add, del, revoke, approve, add/remove product, update attrs |
 | audits               | get                                                              |
 | stats                | get                                                              |
 | specs                | get, getMeta, list, create, update, del                          |
