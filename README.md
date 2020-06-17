@@ -297,7 +297,7 @@ org.proxies.deploy(options)
 
 ```js
 org.proxies.getRevisions({name:'proxyname-here'})
-  then( (result) => {
+  then( result => {
     console.log('revisions: ' + JSON.stringify(result)); // eg, [ "1", "2", "3"]
     var latestRevision = result[result.length-1];
      ...
@@ -311,7 +311,7 @@ This uses an Array.reduce() with a series of promises, each of which appends an 
 
 ```js
 apigeeEdge.connect(options)
-  .then( (org) => {
+  .then( org => {
     common.logWrite('connected');
     org.proxies.get({})
       .then( items => {
@@ -335,7 +335,7 @@ Same approach as above.
 
 ```js
 apigeeEdge.connect(options)
-  .then( (org) => {
+  .then( org => {
     common.logWrite('connected');
     org.proxies.get({})
       .then( items => {
@@ -588,9 +588,9 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
 
 1. Is this an official Google product?  Is it supported?
 
-   No, This library and the example tools included here are not an official
-   Google product.  Support is available on a best-effort basis via github or
-   community.apigee.com .
+   No. Neither this library nor the related [example tools](https://github.com/DinoChiesa/apigee-edge-js-examples) are an official
+   Google product.  Support for either is available on a best-effort basis via
+   github or community.apigee.com .
 
 2. What is this thing good for?
 
@@ -618,7 +618,6 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
    a fresh token, then use a bash script to read that token cache and perform
    some curl commands. Or just run refreshToken.js every morning and then any
    other program you want to use could pull the token from the cache.
-
 
 2. Could I use this thing in my Angular or React-based webapp?
 
