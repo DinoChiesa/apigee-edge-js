@@ -173,11 +173,10 @@ One disclaimer:
   functioning at any point. Use it at your own risk!
 
 
-
 ## Pre-Requisites
 
-Nodejs v10.15.1 or later. The tests use Promise.finally and
-other recent node features are also used in the library and examples.
+Nodejs v10.15.1 or later. The library and tests use Promises,
+spread/rest operators, and other ES6+ things.
 
 ## Examples
 
@@ -621,6 +620,14 @@ node_modules/mocha/bin/mocha  --grep "^Cache.*"
    other program you want to use could pull the token from the cache.
 
 
+2. Could I use this thing in my Angular or React-based webapp?
+
+   No, I haven't built it for that use case. It relies on node's `fs` module, and
+   there are probably other dependencies that would prevent it from working
+   correctly in a browser / webpack environment.
+
+   If the community thinks this is important, let me know. I can take a look.
+
 
 
 ## License and Copyright
@@ -636,5 +643,3 @@ and is licensed under [the Apache 2.0 source license](LICENSE).
 
 * [the example programs](https://github.com/DinoChiesa/apigee-edge-js-examples)
 * [the Powershell module that wraps Apigee Admin APIs](https://github.com/DinoChiesa/Edge-Powershell-Admin)
-
-
