@@ -1,6 +1,6 @@
 # apigee-edge-js
 
-![Node](https://img.shields.io/node/v/apigee-edge-js.svg) ![Test](https://raw.githubusercontent.com/DinoChiesa/apigee-edge-js/master/test/badge.svg?sanitize=true) ![LastCommit](https://img.shields.io/github/last-commit/DinoChiesa/apigee-edge-js/master.svg) ![Downloads](https://img.shields.io/npm/dm/apigee-edge-js.svg)
+![Node](https://img.shields.io/node/v/apigee-edge-js.svg) ![Test](https://raw.githubusercontent.com/DinoChiesa/apigee-edge-js/main/test/badge.svg?sanitize=true) ![LastCommit](https://img.shields.io/github/last-commit/DinoChiesa/apigee-edge-js/main.svg) ![Downloads](https://img.shields.io/npm/dm/apigee-edge-js.svg)
 
 A library of functions for administering Apigee Edge from nodejs.
 
