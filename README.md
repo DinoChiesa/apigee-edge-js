@@ -136,7 +136,7 @@ hash with various child members as functions:
 | member               | functions                                                        |
 | -------------------- | ---------------------------------------------------------------- |
 | (self)               | get, getProperties, addProperties, removeProperties, setConsumerSecretLength, setConsumerKeyLength |
-| environments         | get, getVhosts                                                   |
+| environments         | get, getVhosts, getVhost, createVhost, deleteVhost               |
 | proxies              | get, del, deploy, undeploy, import, export, getRevisions, getDeployments, getResourcesForRevision, getPoliciesForRevision, getProxyEndpoints |
 | caches               | get, create, del                                                 |
 | kvms                 | get, create, put, del                                            |

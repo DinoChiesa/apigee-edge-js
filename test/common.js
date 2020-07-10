@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2019-March-06 16:26:29>
+// last saved: <2020-July-10 13:51:35>
 
 /* global exports, global */
 
@@ -47,7 +47,8 @@ var config = require('../testConfig.json');
 // }
 //
 // It can also have a verbosity flag. (truthy/falsy)
-//
+//...which you can override here:
+//config.verbosity = true;
 
 // export some global vars for all tests
 global.assert = assert;
