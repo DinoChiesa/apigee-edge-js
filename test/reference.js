@@ -3,7 +3,7 @@
 //
 // Tests for Reference operations.
 //
-// Copyright 2017-2019 Google LLC
+// Copyright 2017-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-October-04 14:50:06>
+// last saved: <2020-December-04 08:04:53>
 
 /* global describe, faker, it, before, after */
 
@@ -83,7 +83,7 @@ describe('Reference', function() {
 
     describe('create', function() {
       it('should create a reference', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -109,7 +109,7 @@ describe('Reference', function() {
       });
 
       it('should fail to create a reference, no refers', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : `apigee-edge-js-test-BAD-${word}-${num}`,
@@ -137,7 +137,7 @@ describe('Reference', function() {
       });
 
       it('should fail to create a reference (keystore DNE)', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -160,7 +160,7 @@ describe('Reference', function() {
     describe('get', function() {
 
       it('should get a list of references', (done) => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( environment => {
           refs.get({environment})
             .then( result => {
@@ -180,7 +180,7 @@ describe('Reference', function() {
         );
 
       it('should get a specific reference', (done) => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = { name : refnames[0], environment : e };
           refs.get(options)
@@ -195,7 +195,7 @@ describe('Reference', function() {
       });
 
       it('should fail to get a specific non-existing reference', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : `apigee-edge-js-test-NOTEXIST-${word}-${num}`,
@@ -218,7 +218,7 @@ describe('Reference', function() {
 
     describe('update', function() {
       it('should update a reference', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -247,7 +247,7 @@ describe('Reference', function() {
       });
 
       it('should fail to update a reference (no refers)', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -264,7 +264,7 @@ describe('Reference', function() {
       });
 
       it('should fail to update a reference (keystore DNE)', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -286,7 +286,7 @@ describe('Reference', function() {
       });
 
       it('should fail to update a reference (no name)', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   environment : e,
@@ -303,7 +303,7 @@ describe('Reference', function() {
       });
 
       it('should fail to update a non-existing reference', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : `apigee-edge-js-test-NOTEXIST-${word}-${num}`,
@@ -325,7 +325,7 @@ describe('Reference', function() {
     describe('createOrUpdate', function() {
 
       it('should createOrUpdate an existing reference', (done) => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[0],
@@ -343,7 +343,7 @@ describe('Reference', function() {
       });
 
       it('should createOrUpdate a non-existing reference', (done) => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[1],
@@ -361,7 +361,7 @@ describe('Reference', function() {
       });
 
       it('should fail to createOrUpdate a reference (keystore DNE)', (done) => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name : refnames[1],
@@ -392,7 +392,7 @@ describe('Reference', function() {
       });
 
       it('should delete a few references in each environment', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           // delete 2 refs in each environment
           [0, 1].forEach( refnum => {
@@ -414,7 +414,7 @@ describe('Reference', function() {
       });
 
       it('should fail to delete a reference because no name', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   environment : e
@@ -430,7 +430,7 @@ describe('Reference', function() {
       });
 
       it('should fail to delete a reference because DNE', function(done) {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach( e => {
           const options = {
                   name:refnames[2],

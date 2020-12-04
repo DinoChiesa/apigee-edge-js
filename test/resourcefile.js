@@ -71,8 +71,9 @@ describe('Resourcefile', function() {
     before(function(done) {
       edgeOrg.environments.get(function(e, result) {
         assert.isNull(e, "error listing: " + JSON.stringify(e));
-        environments = result;
+        environments = result.filter(e => e != 'portal');
         let numDone = 0, L = 0;
+
         const tick = function() { if (++numDone >= L) { done(); } };
         fs.readdir(path.resolve(resourceDir), function(e, items) {
           assert.isNull(e, "error getting resourcefile dirs: " + JSON.stringify(e));

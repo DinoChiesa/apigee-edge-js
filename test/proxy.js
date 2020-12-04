@@ -3,7 +3,7 @@
 //
 // Tests for API Proxy operations.
 //
-// Copyright 2017-2019 Google LLC
+// Copyright 2017-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-September-05 15:27:36>
+// last saved: <2020-December-04 09:10:18>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -26,6 +26,8 @@ const selectRandomValue = (a) => {
         var L1 = a.length, n = Math.floor(Math.random() * L1);
         return a[n];
       };
+
+const util = require('util');
 
 describe('Proxy', function() {
   const common = require('./common'),
@@ -42,11 +44,9 @@ describe('Proxy', function() {
 
   common.connectEdge(function(edgeOrg){
     let environments = [];
-
-    before(function(done) {
+    before(() =>
       edgeOrg.environments.get()
-        .then( (result) => { environments = result; return done(); });
-    });
+           .then( result => environments = result.filter(e => e != 'portal') ));
 
     describe('import-from-zip', function() {
       this.timeout(65000);
@@ -120,8 +120,8 @@ describe('Proxy', function() {
     });
 
     describe('get', function() {
-      var proxyList;
-      before(function(done){
+      let proxyList;
+      before(done => {
         edgeOrg.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(result.length, 1, "length of proxy list");
@@ -165,9 +165,9 @@ describe('Proxy', function() {
 
       it('should get the revisions for a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
-        function fn(item, ix, list){
+        function fn(item, ix, list) {
           return edgeOrg.proxies.getRevisions({name:item})
-            .then( (result) => {
+            .then( result => {
               assert.isTrue(Array.isArray(result), "revisions");
               assert.isAbove(result.length, 0, "revisions");
             });
@@ -200,6 +200,18 @@ describe('Proxy', function() {
         }
         common.selectNRandom(proxyList, 7, fn, done);
       });
+      });
+
+    describe('getDeployments', () => {
+      let proxyList;
+      before(done => {
+        edgeOrg.proxies.get({}, function(e, result){
+          assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
+          assert.isAbove(result.length, 1, "length of proxy list");
+          proxyList = result;
+          done();
+        });
+      });
 
       it('should get the deployments for a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
@@ -216,24 +228,51 @@ describe('Proxy', function() {
         common.selectNRandom(proxyList, 8, fn, done);
       });
 
+      it('should get the deployments for a few proxies in various environments', done => {
+        assert.isAbove(proxyList && proxyList.length, 0);
+
+        let fn = (name, ix, list) => {
+              const reducer = (p, env) =>
+            p.then( a => edgeOrg.proxies.getDeployments({name, env})
+                    .then( $ => {
+                      if ($.environment) {
+                        assert.isFalse(Array.isArray($.environment), "environment");
+                        assert.isTrue(Array.isArray($.revision), "revision");
+                      }
+                      else {
+                        assert.equal($.code, 'distribution.ApplicationNotDeployed');
+                        assert.isOk($.message);
+                      }
+                    })
+                    .catch( e => {
+                      console.log(util.format(e));
+                      assert.fail('should not be reached');
+                      done();
+                    } ));
+
+              return environments.reduce(reducer, Promise.resolve([]));
+            };
+        common.selectNRandom(proxyList, 8, fn, done);
+      });
+
       it('should get the deployments for specific revisions of a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
-        function fn(item) {
-          return edgeOrg.proxies.getRevisions({name:item})
-            .then( (revisions) => {
+        let fn = (item) => {
+              return edgeOrg.proxies.getRevisions({name:item})
+            .then( revisions => {
               let revision = revisions[Math.floor(Math.random() * revisions.length)];
               return edgeOrg.proxies.getDeployments({name:item, revision})
               // .then( (result) => {
               //   console.log(JSON.stringify(result));
               //   return result;
               // })
-                .then( ($) => {
+                .then( $ => {
                   assert.isTrue(Array.isArray($.environment), "deployments");
                   assert.equal(item, $.aPIProxy, "proxy name");
                   assert.equal(revision, $.name, "revision");
                 });
             });
-        }
+            };
         common.selectNRandom(proxyList, 7, fn, done);
       });
 
@@ -291,39 +330,47 @@ describe('Proxy', function() {
       let theChosenProxy = null, theDeployedEnvironment = null, aNonDeployedProxy = null;
       this.timeout(45000);
 
-      before(function(done){
+      before(done => {
         edgeOrg.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
-            let numDone = 0, L = proxies.length;
-            if (L<1) { return done(); }
-            const tick = function() { if (++numDone >= L) { done(); } };
-            proxies.forEach( (name) => {
-              edgeOrg.proxies.getDeployments({name})
-                .then( ($) => {
-                  assert.isTrue(Array.isArray($.environment), "environments");
-                  if ($.environment.length > 0) {
-                    // this is one that weas previously deployed
-                    theChosenProxy = name;
-                    theDeployedEnvironment = $.environment[0].name;
-                  }
-                  else {
-                    aNonDeployedProxy = name;
-                  }
-                  return tick();
-                })
-                .catch( e => {console.log(e.stack); return done();} );
-            });
+
+            if (proxies.length<1) { return done(); }
+
+            const reducer = (p, name) =>
+              p.then( a => edgeOrg.proxies.getDeployments({name})
+                      .then( $ => {
+                        assert.isTrue(Array.isArray($.environment), "environments");
+                        if ($.environment.length > 0) {
+                          // this is one that was previously deployed
+                          theChosenProxy = name;
+                          theDeployedEnvironment = $.environment[0].name;
+                        }
+                        else {
+                          aNonDeployedProxy = name;
+                        }
+                      })
+                      .catch( e => {
+                        console.log(util.format(e));
+                        assert.fail('should not be reached');
+                        done();
+                      } ));
+
+            return proxies
+              .reduce(reducer, Promise.resolve([]))
+              .then(done);
           });
       });
 
       it('should fail to undeploy a proxy from a non-existent environment', () => {
         let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
         edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
-          .then( () => assert.fail('should not be reached'))
+          .then( wut => {
+            //console.log('wut: ' + util.format(wut));
+            assert.isTrue(!wut || Object.keys(wut).length == 0);
+          })
           .catch( error => {
-            assert.exists(error);
-            assert.exists(error.stack);
+            //console.log('error: ' + util.format(error));
             assert.equal(error.message, 'bad status: 404');
           });
         return undefined;
@@ -365,37 +412,38 @@ describe('Proxy', function() {
     describe('delete', function() {
       this.timeout(45000);
 
-      it('should delete test proxies previously imported into this org', function(done) {
+      it('should delete test proxies previously imported into this org', done => {
 
         edgeOrg.proxies.get({}, function(e, proxies){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           proxies = proxies.filter(oneOfOurs);
-          let numDone = 0, L = proxies.length;
-          if (L<1) { return done(); }
-          const tick = function() { if (++numDone >= L) { done(); } };
-          proxies.forEach(function(proxy) {
-            edgeOrg.proxies.del({name:proxy}, function(e, proxies){
-              if (e) { console.log('error %s', JSON.stringify(proxies, null, 2)); }
-              assert.isNull(e, "error deleting proxy: " + JSON.stringify(e));
-              tick();
-            });
-          });
+          if (proxies.length<1) { return done(); }
+          const reducer = (p, name) =>
+            p.then( a => edgeOrg.proxies.del({name})
+                    .then(() => null)
+                    .catch( e => {
+                      console.log(util.format(e));
+                      assert.fail('should not be reached');
+                    }));
+          return proxies
+              .reduce(reducer, Promise.resolve([]))
+              .then(done);
         });
       });
 
-      it('should fail to delete non-existent proxies', function(done) {
+      it('should fail to delete non-existent proxies', done => {
         this.timeout(25000);
-        var numDone = 0, L = 3;
         let shouldNotBeReached = () => assert.fail('should not be reached') ;
         let shouldHaveReason = reason => assert.isNotNull( reason );
-        var tick = function() { if (++numDone >= L) { done(); } };
-        for (var i = 0; i<L; i++) {
-          let fakeName = 'a' + faker.random.alphaNumeric(22);
-          edgeOrg.proxies.del({name:fakeName})
-            .then( shouldNotBeReached )
-            .catch( shouldHaveReason )
-            .finally( tick );
-        }
+
+        const reducer = (p, fakeName) =>
+          p.then( a => edgeOrg.proxies.del({name:fakeName})
+                  .then( shouldNotBeReached )
+                  .catch( shouldHaveReason ));
+
+        Array.from({length: 3}, (x, i) => 'a' + faker.random.alphaNumeric(22))
+          .reduce(reducer, Promise.resolve([]))
+          .then(done);
       });
 
       it('should fail to delete when not spec ifying a name', function(done) {

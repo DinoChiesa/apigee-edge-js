@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2017-2019 Google LLC
+// Copyright 2017-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-September-05 15:19:44>
+// last saved: <2020-December-04 08:21:04>
 
 /* global describe, faker, it */
 
-var common = require('./common');
+const common = require('./common');
+const util = require('util');
 
 describe('Developer', function() {
   this.timeout(common.testTimeout);
@@ -68,23 +69,33 @@ describe('Developer', function() {
          })
         );
 
-      it('should get a few specific developers', (done) => {
+      it('should get a few specific developers', done => {
         devs.get({})
-          .then ( (result) => {
-            assert.notExists(result.error);
-            assert.exists(result.length);
-            assert.isAtLeast(result.length, 1);
-            let L = result.length, numDone = 0;
-            if (L>10) { L = 6;}
-            let tick = () => { if (++numDone >= L) { done(); }};
-            result.forEach( developerEmail => {
-              devs.get({developerEmail})
-                .then ( (result) => {
-                  assert.isFalse( !!result.error, "unexpected error");
-                  assert.equal(result.email, developerEmail, 'email');
-                  tick();
-                });
-            });
+          .then ( developers => {
+            assert.notExists(developers.error);
+            assert.exists(developers.length);
+            assert.isAtLeast(developers.length, 1);
+            let L = developers.length;
+            if (L>6) {
+              developers = developers.slice(0, 6);
+              L = developers.length;
+            }
+            const reducer = (p, developerEmail) =>
+              p.then( a =>
+                      devs.get({developerEmail})
+                      .then( result => {
+                        assert.isFalse( !!result.error, "unexpected error");
+                        assert.equal(result.email, developerEmail, 'email');
+                      })
+                      .catch( e => {
+                        console.log(util.format(e));
+                        assert.fail('should not be reached');
+                      }));
+
+
+            return developers
+              .reduce(reducer, Promise.resolve([]))
+              .then(done);
           });
       });
 

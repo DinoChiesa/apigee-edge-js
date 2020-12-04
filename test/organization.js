@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2018 Google LLC
+// Copyright 2018-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-September-05 15:20:56>
+// last saved: <2020-December-03 19:22:12>
 
 /* global describe, faker, it */
 
-var common = require('./common');
+const common = require('./common');
+const util = require('util');
 
 describe('Organization', function() {
   this.timeout(common.testTimeout);
@@ -88,7 +89,10 @@ describe('Organization', function() {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName1], 187);
           })
-          .catch( reason => assert.fail('should not be reached'));
+          .catch( reason => {
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
       });
 
       it('should set a new property on the org', () => {
@@ -100,7 +104,10 @@ describe('Organization', function() {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName2], "hello");
           })
-          .catch( reason => assert.fail('should not be reached'));
+          .catch( reason => {
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
       });
 
     });
@@ -117,7 +124,10 @@ describe('Organization', function() {
             assert.notExists(result[contrivedPropertyName1]);
             assert.notExists(result[contrivedPropertyName2]);
           })
-          .catch( reason => assert.fail('should not be reached'));
+          .catch( reason => {
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
       });
 
     });
@@ -127,22 +137,28 @@ describe('Organization', function() {
 
       it('should set the consumer key length for the org', () => {
         return edgeOrg.setConsumerKeyLength(42)
-          .then( (result) => {
+          .then( result => {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.key.length']);
             assert.equal(result['keymanagement.consumer.key.length'], "42");
           })
-          .catch( reason => assert.fail('should not be reached'));
+          .catch( reason => {
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
       });
 
       it('should set the consumer secret length for the org', () => {
         return edgeOrg.setConsumerSecretLength(48)
-          .then( (result) => {
+          .then( result => {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.secret.length']);
             assert.equal(result['keymanagement.consumer.secret.length'], "48");
           })
-          .catch( reason => assert.fail('should not be reached'));
+          .catch( reason => {
+            console.log(util.format(reason));
+            assert.fail('should not be reached');
+          });
       });
 
       it('should fail to set the consumer key length for the org', () => {
