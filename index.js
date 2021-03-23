@@ -3,7 +3,7 @@
 //
 // main entry point for apigee-edge-js
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@
 // limitations under the License.
 //
 // created: Thu Mar 23 14:34:12 2017
-// last saved: <2018-December-03 08:52:25>
+// last saved: <2021-March-22 17:12:08>
 
-const Edge = require('./lib/edge.js');
-
+const Apigee = require('./lib/apigee.js');
+const root = new Apigee();
 module.exports = {
-  edge : new Edge(),
+  edge : root,
+  apigee : root,
   utility : require('./lib/utility.js')
 };
