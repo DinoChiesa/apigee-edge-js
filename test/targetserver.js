@@ -24,20 +24,20 @@ var common = require('./common');
 
 describe('TargetServer', function() {
   let dateVal = new Date().valueOf(),
-      contrivedNameBasePrefix = 'apigee-edge-js-test-',
+      contrivedNameBasePrefix = 'apigee-js-test-',
       contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
 
-    //edgeOrg.conn.verbosity = 2;
+    //org.conn.verbosity = 2;
 
     describe('create', function() {
       var envlist = [];
       before(function(done){
-        edgeOrg.environments.get(function(e, result) {
+        org.environments.get(function(e, result) {
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           envlist = result;
           done();
@@ -46,7 +46,7 @@ describe('TargetServer', function() {
 
       it('should create a targetserver in each environment', function() {
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.create({
+                                            org.targetservers.create({
                                               environment : env,
                                               target : {
                                                 name : contrivedNamePrefix + '-target1',
@@ -71,7 +71,7 @@ describe('TargetServer', function() {
                 sSLInfo : { enabled : false }
               }
             };
-        edgeOrg.targetservers.create(badOptions, function(e, result){
+        org.targetservers.create(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -81,7 +81,7 @@ describe('TargetServer', function() {
     describe('get', function() {
       var envlist = [];
       before(function(done){
-        edgeOrg.environments.get(function(e, result) {
+        org.environments.get(function(e, result) {
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           envlist = result;
           done();
@@ -90,7 +90,7 @@ describe('TargetServer', function() {
 
       it('should get a list of targetservers', () => {
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.get({environment:env})
+                                            org.targetservers.get({environment:env})
                                             .then((result) => {
                                               assert.notExists(result.error);
                                               assert.exists(result.length);
@@ -103,7 +103,7 @@ describe('TargetServer', function() {
 
       it('should fail to get a non-existent targetserver', () => {
         const targetName = faker.random.alphaNumeric(22);
-        return edgeOrg.targetservers.get({environment: envlist[0], name:targetName})
+        return org.targetservers.get({environment: envlist[0], name:targetName})
           .then ( (r) => {
             assert.fail('should not be reached');
           })
@@ -119,10 +119,10 @@ describe('TargetServer', function() {
     });
 
     describe('enable', function() {
-      //edgeOrg.conn.verbosity = 2;
+      //org.conn.verbosity = 2;
       var envlist = [];
       before(function(done){
-        edgeOrg.environments.get(function(e, result) {
+        org.environments.get(function(e, result) {
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           envlist = result;
           done();
@@ -131,7 +131,7 @@ describe('TargetServer', function() {
 
       it('should enable a targetserver in each env', () => {
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.enable({environment:env, name : contrivedNamePrefix + '-target1'})
+                                            org.targetservers.enable({environment:env, name : contrivedNamePrefix + '-target1'})
                                             .then((result) => {
                                               assert.notExists(result.error);
                                               assert.isTrue(result.isEnabled);
@@ -144,7 +144,7 @@ describe('TargetServer', function() {
       it('should fail to enable a non-existent targetserver in each env', () => {
         const fakeName = faker.random.alphaNumeric(22);
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.enable({environment:env, name : fakeName})
+                                            org.targetservers.enable({environment:env, name : fakeName})
                                             .then((res) => {
                                               assert.fail('should not be reached');
                                             })
@@ -162,7 +162,7 @@ describe('TargetServer', function() {
       it('should disable a targetserver in each env', () => {
         const targetName = contrivedNamePrefix + '-target1';
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.disable({environment:env, name : targetName})
+                                            org.targetservers.disable({environment:env, name : targetName})
                                             .then((result) => {
                                               assert.notExists(result.error);
                                               assert.isFalse(result.isEnabled);
@@ -175,7 +175,7 @@ describe('TargetServer', function() {
       it('should fail to disable a non-existent targetserver in each env', () => {
         const fakeName = faker.random.alphaNumeric(22);
         const reducer = (p, env) => p.then( () =>
-                                            edgeOrg.targetservers.disable({environment:env, name : fakeName})
+                                            org.targetservers.disable({environment:env, name : fakeName})
                                             .then((res) => {
                                               assert.fail('should not be reached');
                                             })
@@ -196,7 +196,7 @@ describe('TargetServer', function() {
     describe('delete', function() {
       var envlist = [];
       before(function(done){
-        edgeOrg.environments.get(function(e, result) {
+        org.environments.get(function(e, result) {
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           envlist = result;
           done();
@@ -206,7 +206,7 @@ describe('TargetServer', function() {
       it('should delete a targetserver', function(done) {
         let numDoneEnv = 0;
         envlist.forEach( (env) => {
-          edgeOrg.targetservers.del({environment:env, name:contrivedNamePrefix + '-target1'}, function(e, result){
+          org.targetservers.del({environment:env, name:contrivedNamePrefix + '-target1'}, function(e, result){
             assert.isNull(e, "error deleting: " + JSON.stringify(e));
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
@@ -219,7 +219,7 @@ describe('TargetServer', function() {
       it('should fail to delete a targetserver because no name was specified', function(done) {
         let numDoneEnv = 0;
         envlist.forEach( (env) => {
-          edgeOrg.targetservers.del({environment:env}, function(e, result){
+          org.targetservers.del({environment:env}, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
@@ -232,7 +232,7 @@ describe('TargetServer', function() {
       it('should fail to delete a non-existent targetserver', function(done) {
         let numDoneEnv = 0;
         envlist.forEach( (env) => {
-          edgeOrg.targetservers.del({environment:env, name:faker.random.alphaNumeric(22)}, function(e, result){
+          org.targetservers.del({environment:env, name:faker.random.alphaNumeric(22)}, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {

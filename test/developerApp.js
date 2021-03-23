@@ -25,7 +25,7 @@ var common = require('./common');
 describe('DeveloperApp', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
 
     const entityName = "apigee-edge-js-test-" + faker.lorem.word() + faker.random.number(),
           firstName = faker.name.firstName(),
@@ -40,12 +40,12 @@ describe('DeveloperApp', function() {
     var apiProducts = [];
 
     before( () =>
-            edgeOrg.developers.create(createOptions)
-            .then ( () => edgeOrg.products.get() )
+            org.developers.create(createOptions)
+            .then ( () => org.products.get() )
             .then ( (result) => { apiProducts = result;} )
           );
 
-    after( () => edgeOrg.developers.del({developerEmail}) );
+    after( () => org.developers.del({developerEmail}) );
 
     describe('create', function() {
       it('should create a developer app', () => {
@@ -55,7 +55,7 @@ describe('DeveloperApp', function() {
                 apiProduct : apiProducts[0]
               };
 
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( result => {
             assert.exists(result.name);
             assert.exists(result.credentials);
@@ -75,7 +75,7 @@ describe('DeveloperApp', function() {
                 apiProduct : apiProducts[0]
               };
 
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error, "Error: bad status: 409");
@@ -91,7 +91,7 @@ describe('DeveloperApp', function() {
                 name : entityName + '-B',
                 apiProduct : fakeName
               };
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error, "Error: bad status: 400");
@@ -107,7 +107,7 @@ describe('DeveloperApp', function() {
                 apiProduct : faker.random.alphaNumeric(22)
               };
 
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error, 'Error: missing required input: appName');
@@ -120,7 +120,7 @@ describe('DeveloperApp', function() {
                 apiProduct : faker.random.alphaNumeric(22)
               };
 
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error, 'Error: missing required input: email');
@@ -133,7 +133,7 @@ describe('DeveloperApp', function() {
                 name : entityName + '-D'
               };
 
-        return edgeOrg.developerapps.create(options)
+        return org.developerapps.create(options)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error, 'Error: missing required input: apiProduct');
@@ -146,7 +146,7 @@ describe('DeveloperApp', function() {
     describe('get', function() {
 
       it('should get a list of developerapps', () =>
-         edgeOrg.developerapps
+         org.developerapps
          .get({developerEmail})
          .then ( result => {
            assert.notExists(result.error);
@@ -157,7 +157,7 @@ describe('DeveloperApp', function() {
         );
 
       it('should fail to get apps when supplying no identifier', () =>
-         edgeOrg.developerapps
+         org.developerapps
          .get({nothing:'useful'})
          .then ( () => assert.fail('should not be reached') )
          .catch( error => {
@@ -169,7 +169,7 @@ describe('DeveloperApp', function() {
 
       it('should fail to get a non-existent developerapp', () => {
         const nonExistentApp = faker.random.alphaNumeric(22);
-        return edgeOrg.developerapps.get({developerEmail, name:nonExistentApp})
+        return org.developerapps.get({developerEmail, name:nonExistentApp})
           .then( () => assert.fail('should not be reached'))
           .catch( reason => {
             assert.isNotNull(reason.error, "the expected error did not occur");
@@ -181,13 +181,13 @@ describe('DeveloperApp', function() {
 
       it('should fail to get apps under a non-existent developer', () => {
         const nonExistentDev = faker.random.alphaNumeric(22);
-        return edgeOrg.developerapps.get({developerEmail:nonExistentDev})
+        return org.developerapps.get({developerEmail:nonExistentDev})
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.isNotNull(error, "the expected error did not occur");
             assert.exists(error.result);
             assert.exists(error.result.message);
-            assert.equal(error.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${edgeOrg.conn.orgname}`);
+            assert.equal(error.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${org.conn.orgname}`);
           });
       });
 
@@ -198,8 +198,8 @@ describe('DeveloperApp', function() {
     describe('attributes', function() {
       var originalAttrCount = 0;
       it('should get the custom attributes on an existing developerapp', () => {
-        //edgeOrg.conn.verbosity = 1;
-        return edgeOrg.developerapps.get({ developerEmail, name : entityName })
+        //org.conn.verbosity = 1;
+        return org.developerapps.get({ developerEmail, name : entityName })
           .then ( result => {
             assert.exists(result.attributes);
             assert.isTrue(Array.isArray(result.attributes));
@@ -220,7 +220,7 @@ describe('DeveloperApp', function() {
                 updatedBy : 'apigee-edge-js-test',
                 updateDate: new Date().toISOString()
               };
-        return edgeOrg.developerapps.update({ developerEmail, name : entityName, attributes })
+        return org.developerapps.update({ developerEmail, name : entityName, attributes })
           .then ( result => {
             assert.exists(result.attributes);
             //console.log('attrs: ' + JSON.stringify(result.attributes));
@@ -232,7 +232,7 @@ describe('DeveloperApp', function() {
       });
 
       it('should read the custom attributes on an existing developerapp', () => {
-        return edgeOrg.developerapps.get({ developerEmail, name : entityName })
+        return org.developerapps.get({ developerEmail, name : entityName })
           .then ( result => {
             assert.exists(result.attributes);
             assert.equal(result.attributes.length, 2 + originalAttrCount);
@@ -244,7 +244,7 @@ describe('DeveloperApp', function() {
 
       it('should replace the custom attributes on an existing developerapp', () => {
         const attributes = {};
-        return edgeOrg.developerapps.update({ developerEmail, name : entityName, replace:true, attributes })
+        return org.developerapps.update({ developerEmail, name : entityName, replace:true, attributes })
           .then ( result => {
             assert.exists(result.attributes);
             assert.equal(result.attributes.length, 0);
@@ -259,7 +259,7 @@ describe('DeveloperApp', function() {
     describe('delete', function() {
 
       it('should delete a developerapp', () =>
-         edgeOrg.developerapps
+         org.developerapps
          .del({developerEmail, name : entityName})
          .catch( reason => {
             console.log(reason.error);
@@ -268,7 +268,7 @@ describe('DeveloperApp', function() {
         );
 
       it('should fail to delete a developerapp because no email', () =>
-         edgeOrg.developerapps
+         org.developerapps
          .del({name : entityName})
          .then( () => assert.fail('should not be reached'))
          .catch( error => {
@@ -276,7 +276,7 @@ describe('DeveloperApp', function() {
          }));
 
       it('should fail to delete a developerapp because no name', () =>
-         edgeOrg.developerapps
+         org.developerapps
          .del({developerEmail})
          .then( () => assert.fail('should not be reached'))
          .catch( error => {
@@ -285,7 +285,7 @@ describe('DeveloperApp', function() {
 
       it('should fail to delete a non-existent developerapp', () => {
         const fakeName = faker.random.alphaNumeric(22);
-        return edgeOrg.developerapps
+        return org.developerapps
           .del({developerEmail, name : fakeName})
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
@@ -299,13 +299,13 @@ describe('DeveloperApp', function() {
       it('should fail to delete an app under a non-existent developer', () => {
         const fakeName = faker.random.alphaNumeric(22);
         const fakeEmail = faker.random.alphaNumeric(22);
-        return edgeOrg.developerapps.del({developerEmail:fakeEmail, name : fakeName})
+        return org.developerapps.del({developerEmail:fakeEmail, name : fakeName})
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.equal(error,"Error: bad status: 404");
             assert.exists(error.result);
             assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(error.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+            assert.equal(error.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${org.conn.orgname}`);
           });
       });
 

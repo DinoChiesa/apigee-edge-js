@@ -25,14 +25,14 @@ var common = require('./common');
 describe('Cache', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
     const num = faker.random.number(),
           word = faker.lorem.word(),
           cacheName = `apigee-edge-js-test-${word}-${num}`;
       var environments = [];
 
       before(done => {
-       edgeOrg.environments.get(function(e, result) {
+       org.environments.get(function(e, result) {
          assert.isNull(e, "error listing: " + JSON.stringify(e));
          environments = result;
          done();
@@ -46,7 +46,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.create({cacheName, environment:env}, (e, result) => {
+          org.caches.create({cacheName, environment:env}, (e, result) => {
             assert.isNull(e, "error creating: " + JSON.stringify(e));
             tick();
           });
@@ -58,7 +58,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.create({environment:env}, (e, result) => {
+          org.caches.create({environment:env}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });
@@ -70,7 +70,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.create({cacheName:'', environment:env}, (e, result) => {
+          org.caches.create({cacheName:'', environment:env}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });
@@ -78,14 +78,14 @@ describe('Cache', function() {
       });
 
       it('should fail to create a cache with no env', done => {
-        edgeOrg.caches.create({cacheName}, (e, result) => {
+        org.caches.create({cacheName}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
 
       it('should fail to create a cache with an invalid env name', done => {
-        edgeOrg.kvms.create({cacheName, environment:faker.random.alphaNumeric(22)}, (e, result) => {
+        org.kvms.create({cacheName, environment:faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -100,7 +100,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.get({environment:env}, (e, result) => {
+          org.caches.get({environment:env}, (e, result) => {
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.isAtLeast(result.length, 1, "zero results");
             tick();
@@ -109,7 +109,7 @@ describe('Cache', function() {
       });
 
       it('should fail to get caches from a non-existent env', done => {
-        edgeOrg.caches.get({environment:faker.random.alphaNumeric(22)}, (e, result) => {
+        org.caches.get({environment:faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -120,7 +120,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.get({name:faker.random.alphaNumeric(22), environment:env}, (e, result) => {
+          org.caches.get({name:faker.random.alphaNumeric(22), environment:env}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });
@@ -136,7 +136,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.clear({cacheName, environment:env}, (e, result) => {
+          org.caches.clear({cacheName, environment:env}, (e, result) => {
             assert.isNull(e, "error clearing: " + JSON.stringify(e));
             //assert.isAtLeast(result.length, 1, "zero results");
             tick();
@@ -151,7 +151,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.clear({bogusCacheName, environment:env}, (e, result) => {
+          org.caches.clear({bogusCacheName, environment:env}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });
@@ -168,7 +168,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.del({cacheName, environment:env}, (e, result) => {
+          org.caches.del({cacheName, environment:env}, (e, result) => {
             assert.isNull(e, "error deleting: " + JSON.stringify(e));
             tick();
           });
@@ -176,14 +176,14 @@ describe('Cache', function() {
       });
 
       it('should fail to delete a cache because neither name nor env was specified', done => {
-        edgeOrg.caches.del({}, (e, result) => {
+        org.caches.del({}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
 
       it('should fail to delete a cache because no env was specified', done => {
-        edgeOrg.caches.del({cacheName: faker.random.alphaNumeric(22)}, (e, result) => {
+        org.caches.del({cacheName: faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -194,7 +194,7 @@ describe('Cache', function() {
         const tick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.caches.del({cacheName: faker.random.alphaNumeric(22), environment:env}, (e, result) => {
+          org.caches.del({cacheName: faker.random.alphaNumeric(22), environment:env}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });

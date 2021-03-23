@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2020-December-04 09:10:18>
+// last saved: <2021-March-22 18:33:12>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -34,7 +34,7 @@ describe('Proxy', function() {
         fs = require('fs'),
         resourceDir = "./test/resources/proxybundles",
         dateVal = new Date().valueOf(),
-        namePrefix = 'apigee-edge-js-test-' + dateVal,
+        namePrefix = 'apigee-js-test-' + dateVal,
         oneOfOurs = (proxyname) =>
             (proxyname.startsWith(namePrefix +'-fromzip-') ||
              proxyname.startsWith(namePrefix +'-fromdir-'));
@@ -42,10 +42,10 @@ describe('Proxy', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
     let environments = [];
     before(() =>
-      edgeOrg.environments.get()
+      org.environments.get()
            .then( result => environments = result.filter(e => e != 'portal') ));
 
     describe('import-from-zip', function() {
@@ -67,14 +67,14 @@ describe('Proxy', function() {
       it('should import proxy zips into an org', () => {
         var numDone = 0;
         let fn = (p, zip) =>
-          p.then( () => edgeOrg.proxies.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip}) );
+          p.then( () => org.proxies.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip}) );
         return zipFileList
           .reduce(fn, Promise.resolve());
       });
 
       it('should import proxy zips via the simple method', () => {
         let fn = (p, zip) =>
-          p.then( () => edgeOrg.proxies.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}));
+          p.then( () => org.proxies.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}));
 
         return zipFileList.reduce(fn, Promise.resolve());
       });
@@ -103,7 +103,7 @@ describe('Proxy', function() {
         this.timeout(65000);
         let fn = (p, dir) =>
           p.then( () =>
-                  edgeOrg.proxies.importFromDir({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
+                  org.proxies.importFromDir({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
 
         return apiproxyBundleDirList.reduce(fn, Promise.resolve());
       });
@@ -111,7 +111,7 @@ describe('Proxy', function() {
       it('should import exploded proxy dirs via the simple method', () => {
         let fn = (p, dir) =>
           p.then( () =>
-                  edgeOrg.proxies.import({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
+                  org.proxies.import({name:namePrefix + '-fromdir-' + faker.random.alphaNumeric(12), source:dir}));
 
         return apiproxyBundleDirList.reduce(fn, Promise.resolve());
       });
@@ -122,7 +122,7 @@ describe('Proxy', function() {
     describe('get', function() {
       let proxyList;
       before(done => {
-        edgeOrg.proxies.get({}, function(e, result){
+        org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(result.length, 1, "length of proxy list");
           proxyList = result;
@@ -131,7 +131,7 @@ describe('Proxy', function() {
       });
 
       it('should list all proxies for an org', function(done){
-        edgeOrg.proxies.get({}, function(e, result){
+        org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(result.length, 1, "length of proxy list");
           done();
@@ -141,7 +141,7 @@ describe('Proxy', function() {
       it('should get a few proxies', function(done){
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item, ix, list) =>
-          edgeOrg.proxies.get({name:item}) /* = proxyList[ix] */
+          org.proxies.get({name:item}) /* = proxyList[ix] */
           .then( (result) => assert.equal(result.name, item));
         common.selectNRandom(proxyList, 6, fn, done);
       });
@@ -149,7 +149,7 @@ describe('Proxy', function() {
       it('should export a few proxies', function(done){
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item, ix, list) =>
-          edgeOrg.proxies.export({name:item}) /* proxyList[ix] */
+          org.proxies.export({name:item}) /* proxyList[ix] */
           .then( (result) => assert.isTrue(result.filename.startsWith('apiproxy-'), "file name") );
 
         common.selectNRandom(proxyList, 4, fn, done);
@@ -157,7 +157,7 @@ describe('Proxy', function() {
 
       it('should fail to get a non-existent proxy', function(done){
         var fakeName = 'proxy-' + faker.random.alphaNumeric(23);
-        edgeOrg.proxies.get({name:fakeName}, function(e, result){
+        org.proxies.get({name:fakeName}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -166,7 +166,7 @@ describe('Proxy', function() {
       it('should get the revisions for a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
         function fn(item, ix, list) {
-          return edgeOrg.proxies.getRevisions({name:item})
+          return org.proxies.getRevisions({name:item})
             .then( result => {
               assert.isTrue(Array.isArray(result), "revisions");
               assert.isAbove(result.length, 0, "revisions");
@@ -178,10 +178,10 @@ describe('Proxy', function() {
       it('should get the policies for revisions of a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
         function fn(item) {
-          return edgeOrg.proxies.getRevisions({name:item})
+          return org.proxies.getRevisions({name:item})
             .then( (revisions) => {
               let revision = revisions[Math.floor(Math.random() * revisions.length)];
-              return edgeOrg.proxies.getPoliciesForRevision({name:item, revision})
+              return org.proxies.getPoliciesForRevision({name:item, revision})
                 .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
             });
         }
@@ -191,10 +191,10 @@ describe('Proxy', function() {
       it('should get the proxy endpoints for revisions of a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
         function fn(item) {
-          return edgeOrg.proxies.getRevisions({name:item})
+          return org.proxies.getRevisions({name:item})
             .then( (revisions) => {
               let revision = revisions[Math.floor(Math.random() * revisions.length)];
-              return edgeOrg.proxies.getProxyEndpoints({name:item, revision})
+              return org.proxies.getProxyEndpoints({name:item, revision})
                 .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
             });
         }
@@ -205,7 +205,7 @@ describe('Proxy', function() {
     describe('getDeployments', () => {
       let proxyList;
       before(done => {
-        edgeOrg.proxies.get({}, function(e, result){
+        org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           assert.isAbove(result.length, 1, "length of proxy list");
           proxyList = result;
@@ -216,7 +216,7 @@ describe('Proxy', function() {
       it('should get the deployments for a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item, ix, list) =>
-          edgeOrg.proxies.getDeployments({name:item})
+          org.proxies.getDeployments({name:item})
         // .then( (result) => {
         //   console.log(JSON.stringify(result));
         //   return result;
@@ -233,7 +233,7 @@ describe('Proxy', function() {
 
         let fn = (name, ix, list) => {
               const reducer = (p, env) =>
-            p.then( a => edgeOrg.proxies.getDeployments({name, env})
+            p.then( a => org.proxies.getDeployments({name, env})
                     .then( $ => {
                       if ($.environment) {
                         assert.isFalse(Array.isArray($.environment), "environment");
@@ -258,10 +258,10 @@ describe('Proxy', function() {
       it('should get the deployments for specific revisions of a few proxies', function(done) {
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item) => {
-              return edgeOrg.proxies.getRevisions({name:item})
+              return org.proxies.getRevisions({name:item})
             .then( revisions => {
               let revision = revisions[Math.floor(Math.random() * revisions.length)];
-              return edgeOrg.proxies.getDeployments({name:item, revision})
+              return org.proxies.getDeployments({name:item, revision})
               // .then( (result) => {
               //   console.log(JSON.stringify(result));
               //   return result;
@@ -282,13 +282,13 @@ describe('Proxy', function() {
       this.timeout(45000);
 
       it('should deploy one test proxy previously imported into this org', () => {
-        let p = edgeOrg.proxies.get({})
+        let p = org.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
             if (proxies.length<1) { return Promise.resolve({}); }
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
             let selectedEnv = selectRandomValue(environments);
-            return edgeOrg.proxies.deploy({name:selectedProxy, environment:selectedEnv});
+            return org.proxies.deploy({name:selectedProxy, environment:selectedEnv});
           });
         return assert.isFulfilled(p, "failed to deploy");
       });
@@ -296,7 +296,7 @@ describe('Proxy', function() {
       it('should fail to deploy a non-existent proxy', () => {
         let fakeProxyName = 'a' + faker.random.alphaNumeric(18);
         let selectedEnv = selectRandomValue(environments);
-        edgeOrg.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
+        org.proxies.deploy({name:fakeProxyName, environment: selectedEnv})
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.exists(error);
@@ -307,13 +307,13 @@ describe('Proxy', function() {
       });
 
       it('should fail to deploy a proxy to a non-existent environment', () => {
-        edgeOrg.proxies.get({})
+        org.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
             if (proxies.length<1) { return Promise.resolve({}); }
             let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
-            return edgeOrg.proxies.deploy({name:selectedProxy, environment: fakeEnvironment});
+            return org.proxies.deploy({name:selectedProxy, environment: fakeEnvironment});
           })
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
@@ -331,14 +331,14 @@ describe('Proxy', function() {
       this.timeout(45000);
 
       before(done => {
-        edgeOrg.proxies.get({})
+        org.proxies.get({})
           .then( proxies => {
             proxies = proxies.filter(oneOfOurs);
 
             if (proxies.length<1) { return done(); }
 
             const reducer = (p, name) =>
-              p.then( a => edgeOrg.proxies.getDeployments({name})
+              p.then( a => org.proxies.getDeployments({name})
                       .then( $ => {
                         assert.isTrue(Array.isArray($.environment), "environments");
                         if ($.environment.length > 0) {
@@ -364,7 +364,7 @@ describe('Proxy', function() {
 
       it('should fail to undeploy a proxy from a non-existent environment', () => {
         let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
-        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
+        org.proxies.undeploy({name:theChosenProxy, environment: fakeEnvironment})
           .then( wut => {
             //console.log('wut: ' + util.format(wut));
             assert.isTrue(!wut || Object.keys(wut).length == 0);
@@ -379,28 +379,28 @@ describe('Proxy', function() {
       it('should fail to undeploy a proxy from an env to which it is not deployed', function(done) {
         const selector = (src) => src[ ~~(Math.random() * src.length) ];
         let selectedEnvironment = selector( environments.filter( x => x != theDeployedEnvironment));
-        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: selectedEnvironment})
+        org.proxies.undeploy({name:theChosenProxy, environment: selectedEnvironment})
           .then( r => assert.isTrue(false, 'undeployment succeeded unexpectedly'))
           .catch( reason => assert.isNotNull(reason) )
           .finally(done);
       });
 
       it('should undeploy the one test proxy previously deployed', function(done) {
-        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
+        org.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
           .then( r => assert.isNotNull(r, 'undeployment response is empty') )
           .catch( e => assert.isNotNull(e) )
           .finally(() => setTimeout(done, 1400));
       });
 
       it('should fail to undeploy a test proxy that is not currently deployed', function(done) {
-        edgeOrg.proxies.undeploy({name:aNonDeployedProxy, environment: theDeployedEnvironment})
+        org.proxies.undeploy({name:aNonDeployedProxy, environment: theDeployedEnvironment})
           .then( r => assert.isTrue(false, 'undeployment unexpectedly succeeded') )
           .catch( e => assert.isNotNull(e) )
           .finally(done);
       });
 
       it('should fail to undeploy a test proxy that is already undeployed', function(done) {
-        edgeOrg.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
+        org.proxies.undeploy({name:theChosenProxy, environment: theDeployedEnvironment})
           .then( r => assert.isTrue(false, 'undeployment unexpectedly succeeded') )
           .catch( e => assert.isNotNull(e) )
           .finally( () => setTimeout(done, 1400));
@@ -414,12 +414,12 @@ describe('Proxy', function() {
 
       it('should delete test proxies previously imported into this org', done => {
 
-        edgeOrg.proxies.get({}, function(e, proxies){
+        org.proxies.get({}, function(e, proxies){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
           proxies = proxies.filter(oneOfOurs);
           if (proxies.length<1) { return done(); }
           const reducer = (p, name) =>
-            p.then( a => edgeOrg.proxies.del({name})
+            p.then( a => org.proxies.del({name})
                     .then(() => null)
                     .catch( e => {
                       console.log(util.format(e));
@@ -437,7 +437,7 @@ describe('Proxy', function() {
         let shouldHaveReason = reason => assert.isNotNull( reason );
 
         const reducer = (p, fakeName) =>
-          p.then( a => edgeOrg.proxies.del({name:fakeName})
+          p.then( a => org.proxies.del({name:fakeName})
                   .then( shouldNotBeReached )
                   .catch( shouldHaveReason ));
 
@@ -447,7 +447,7 @@ describe('Proxy', function() {
       });
 
       it('should fail to delete when not spec ifying a name', function(done) {
-        edgeOrg.proxies.del({})
+        org.proxies.del({})
           .then( (r) => assert.isTrue(false))  // should always throw
           .catch( (e) => assert.isNotNull(e, "expected error did not occur") )
           .finally( done );

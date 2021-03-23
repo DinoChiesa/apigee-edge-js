@@ -25,17 +25,17 @@ var common = require('./common');
 describe('Maskconfig', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg) {
+  common.connectApigee(function(org) {
     const num = faker.random.number(),
           word = faker.lorem.word();
     //Name = "apigee-edge-js-test-" + word + '-' + num;
     var originalDefaultMaskconfig = null;
 
     before(function(done) {
-      edgeOrg.maskconfigs.get({}, function(e, result){
+      org.maskconfigs.get({}, function(e, result){
         if (result.length == 0) { return done(); }
         if (result.indexOf('default') < 0) { return done(); }
-        edgeOrg.maskconfigs.get({name:'default'})
+        org.maskconfigs.get({name:'default'})
           .then( result => {
             originalDefaultMaskconfig = result;
             done();
@@ -45,15 +45,15 @@ describe('Maskconfig', function() {
 
     after(function(done) {
       const apply = () =>
-        edgeOrg.maskconfigs.set(originalDefaultMaskconfig)
+        org.maskconfigs.set(originalDefaultMaskconfig)
         .then( result => {
           done();
         });
       if ( ! originalDefaultMaskconfig) { return done(); }
-      edgeOrg.maskconfigs.get({}, function(e, result){
+      org.maskconfigs.get({}, function(e, result){
         if (result.length == 0) { return apply(); }
         if (result.indexOf('default') < 0) { return apply(); }
-        edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
+        org.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
           apply();
         });
@@ -63,11 +63,11 @@ describe('Maskconfig', function() {
 
     describe('reset', function() {
       it('should clear the default maskconfig from the org if necessary', function(done) {
-        edgeOrg.maskconfigs.get({}, function(e, result){
+        org.maskconfigs.get({}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           if (result.length == 0) { return done(); }
           if (result.indexOf('default') < 0) { return done(); }
-          edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
+          org.maskconfigs.del({name:'default'}, function(e, result){
             assert.isNull(e, "error deleting: " + JSON.stringify(e));
             done();
           });
@@ -75,7 +75,7 @@ describe('Maskconfig', function() {
       });
 
       it('should verify that there is no default maskconfig in the org', function(done) {
-        edgeOrg.maskconfigs.get({name:'default'})
+        org.maskconfigs.get({name:'default'})
           .then( () => assert.fail('should not be reached') )
           .catch( reason =>
                   assert.equal(reason.result.code, "distribution.DebugMaskConfigurationNotFound") )
@@ -96,14 +96,14 @@ describe('Maskconfig', function() {
           };
 
       it('should set a maskconfig for the org', function(done) {
-        edgeOrg.maskconfigs.set(desiredMaskConfig0, function(e, result){
+        org.maskconfigs.set(desiredMaskConfig0, function(e, result){
           assert.isNull(e, "error setting: " + JSON.stringify(e));
           done();
         });
       });
 
       it('should verify the desired maskconfig for the org', function(done) {
-        edgeOrg.maskconfigs.get({name:'default'}, function(e, result){
+        org.maskconfigs.get({name:'default'}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           assert.equal(JSON.stringify(result), JSON.stringify(desiredMaskConfig0));
           done();
@@ -123,9 +123,9 @@ describe('Maskconfig', function() {
           };
 
       it('should set a maskconfig for the org using shorthand xml', function(done) {
-        edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
+        org.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          edgeOrg.maskconfigs.set(shorthandXml, function(e, result){
+          org.maskconfigs.set(shorthandXml, function(e, result){
             assert.isNull(e, "error setting: " + JSON.stringify(e));
             done();
           });
@@ -144,7 +144,7 @@ describe('Maskconfig', function() {
           };
 
       it('should verify the desired maskconfig for the org', function(done) {
-        edgeOrg.maskconfigs.get({name:'default'}, function(e, result){
+        org.maskconfigs.get({name:'default'}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           assert.equal(JSON.stringify(result), JSON.stringify(shorthandXmlExpanded));
           done();
@@ -160,9 +160,9 @@ describe('Maskconfig', function() {
           };
 
       it('should set a maskconfig for the org using shorthand json', function(done) {
-        edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
+        org.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          edgeOrg.maskconfigs.set(shorthandJson, function(e, result){
+          org.maskconfigs.set(shorthandJson, function(e, result){
             assert.isNull(e, "error setting: " + JSON.stringify(e));
             done();
           });
@@ -177,7 +177,7 @@ describe('Maskconfig', function() {
           };
 
       it('should verify the desired maskconfig for the org', function(done) {
-        edgeOrg.maskconfigs.get({name:'default'}, function(e, result){
+        org.maskconfigs.get({name:'default'}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           assert.equal(JSON.stringify(result, Object.keys(result).sort()),
                        JSON.stringify(shorthandJsonExpanded, Object.keys(shorthandJsonExpanded).sort()));
@@ -194,9 +194,9 @@ describe('Maskconfig', function() {
           };
 
       it('should set a maskconfig for the org for variables', function(done) {
-        edgeOrg.maskconfigs.del({name:'default'}, function(e, result){
+        org.maskconfigs.del({name:'default'}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          edgeOrg.maskconfigs.set(variablesMask, function(e, result){
+          org.maskconfigs.set(variablesMask, function(e, result){
             assert.isNull(e, "error setting: " + JSON.stringify(e));
             done();
           });
@@ -204,7 +204,7 @@ describe('Maskconfig', function() {
       });
 
       it('should verify the desired maskconfig for the org', function(done) {
-        edgeOrg.maskconfigs.get({name:'default'}, function(e, result){
+        org.maskconfigs.get({name:'default'}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           assert.equal(JSON.stringify(result, Object.keys(result).sort()),
                        JSON.stringify(variablesMask, Object.keys(variablesMask).sort()));

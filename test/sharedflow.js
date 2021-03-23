@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-March-05 17:59:58>
+// last saved: <2021-March-22 17:33:58>
 
 /* global describe, faker, it, path, before */
 
@@ -31,7 +31,7 @@ describe('Sharedflow', function() {
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg) {
+  common.connectApigee(function(org) {
 
     describe('sf-import-from-zip-and-get', function() {
       var sharedFlowList;
@@ -45,7 +45,7 @@ describe('Sharedflow', function() {
           var re = new RegExp('^sharedflow-.+\.zip$');
           items = items.filter(function(item){ return item.match(re);});
           zipFileList = items.map(function(item){ return path.resolve( path.join(resourceDir, item));});
-          edgeOrg.environments.get(function(e, result) {
+          org.environments.get(function(e, result) {
             assert.isNull(e, "error listing: " + JSON.stringify(e));
             envList = result;
             done();
@@ -55,9 +55,9 @@ describe('Sharedflow', function() {
 
       it('should import sharedflow zips into an org', () => {
         this.timeout(15000);
-        //edgeOrg.conn.verbosity = 2;
+        //org.conn.verbosity = 2;
         let reducer = (p, zip) =>
-          p.then( () => edgeOrg.sharedflows.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip})
+          p.then( () => org.sharedflows.importFromZip({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), zipArchive:zip})
                   // .then ( (result) => console.log(JSON.stringify(result)))
                 );
 
@@ -69,7 +69,7 @@ describe('Sharedflow', function() {
       it('should import sharedflow zips via the simple method', () => {
         this.timeout(15000);
         let reducer = (p, zip) =>
-          p.then( () => edgeOrg.sharedflows.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}) );
+          p.then( () => org.sharedflows.import({name: namePrefix + '-fromzip-' + faker.random.alphaNumeric(12), source:zip}) );
 
         return zipFileList
           .reduce(reducer, Promise.resolve());
@@ -79,7 +79,7 @@ describe('Sharedflow', function() {
       // These tests need SFs to exist, and some orgs do not have them.
 
       it('should list all sharedflows for an org', function(done) {
-        edgeOrg.sharedflows.get({}, function(e, result){
+        org.sharedflows.get({}, function(e, result){
           assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
           assert.isDefined(result.length, "sharedflow list");
           assert.isAbove(result.length, 1, "length of sharedflow list");
@@ -91,7 +91,7 @@ describe('Sharedflow', function() {
       it('should get a few randomly-selected sharedFlows', function(done) {
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
         let fn = (item, ix, list) =>
-          edgeOrg.sharedflows.get({name:item})
+          org.sharedflows.get({name:item})
           .then(($) => assert.equal(item, $.name, "sharedflow name"));
         common.selectNRandom(sharedFlowList, 4, fn, done);
       });
@@ -99,21 +99,21 @@ describe('Sharedflow', function() {
       it('should export a few sharedflows', function(done) {
         assert.isTrue(sharedFlowList && sharedFlowList.length>0);
         let fn = (item, ix, list) =>
-          edgeOrg.sharedflows.export({name:item})
+          org.sharedflows.export({name:item})
           .then(($) => assert.isTrue($.filename.startsWith('sharedflow-'), "file name"));
         common.selectNRandom(sharedFlowList, 4, fn, done);
       });
 
       it('should fail to get a non-existent sharedflow', function(done) {
         var fakeName = 'sharedflow-' + faker.random.alphaNumeric(23);
-        edgeOrg.sharedflows.get({name:fakeName}, function(e, result){
+        org.sharedflows.get({name:fakeName}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
 
       it('should delete test sharedflows previously imported into this org', function(done) {
-        edgeOrg.sharedflows.get({}, function(e, sharedflows) {
+        org.sharedflows.get({}, function(e, sharedflows) {
           var numDone = 0, L = 0;
           let tick = function() { if (++numDone >= L) { done(); } };
 
@@ -122,7 +122,7 @@ describe('Sharedflow', function() {
           L = sharedflows.length;
           sharedflows.forEach(function(sf) {
             if (sf.startsWith(namePrefix + '-fromzip-')) {
-              edgeOrg.sharedflows.del({name:sf}, function(e, proxies) {
+              org.sharedflows.del({name:sf}, function(e, proxies) {
                 assert.isNull(e, "error deleting sharedflow: " + JSON.stringify(e));
                 tick();
               });
@@ -137,7 +137,7 @@ describe('Sharedflow', function() {
     // describe('get', function() {
     //
     //   before(function(done){
-    //     edgeOrg.sharedflows.get({}, function(e, result){
+    //     org.sharedflows.get({}, function(e, result){
     //       assert.isNull(e, "error getting sharedflows: " + JSON.stringify(e));
     //       assert.isDefined(result.length, "sharedflow list");
     //       assert.isAbove(result.length, 1, "length of sharedflow list");

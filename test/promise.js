@@ -37,8 +37,8 @@ describe('Promise', function() {
   var environments = [];
 
   before(function(done) {
-    common.connectEdge(function(edgeOrg) {
-      edgeOrg.environments.get(function(e, result) {
+    common.connectApigee(function(org) {
+      org.environments.get(function(e, result) {
         assert.isNull(e, "error listing: " + JSON.stringify(e));
         environments = result;
         done();
@@ -49,53 +49,53 @@ describe('Promise', function() {
   describe('get', function() {
 
     it('should connect and get the environments', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.environments.get({}) )
        .then ( (result) => assert.isAtLeast(result.length, 1) )
       );
 
     it('should connect and get one environment', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.environments.get({ env: environments[0] }) ) );
 
     it('should connect and get developers', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.developers.get() )
        .then ( (result) => assert.isAtLeast(result.length, 1) )
       );
 
     it('should connect and get proxies', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.proxies.get() )
        .then ( (result) => assert.isAtLeast(result.length, 1) )
       );
 
     it('should connect and get kvms', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.kvms.get() )
        .then ( (result) => assert(Array.isArray(result) ) )
       );
 
     it('should connect and get kvms in an environment', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.kvms.get({ env: environments[0]}) )
        .then ( (result) => assert(Array.isArray(result) ) )
       );
 
     it('should connect and get sharedflows', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.sharedflows.get() )
        .then ( (result) => assert(Array.isArray(result) ) )
       );
 
     it('should connect and get flowhooks in an environment', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.flowhooks.get({ env: environments[0]}) )
        .then ( (result) => assert(Array.isArray(result) ) )
       );
 
     it('should connect and fail to get flowhooks (no environment)', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( (org) => org.flowhooks.get() )
        .then( () => assert.fail('should not be reached'))
        .catch( error => {
@@ -105,7 +105,7 @@ describe('Promise', function() {
       );
 
     it('should connect and get a few things successfully via promises', function(done) {
-      common.connectEdge()
+      common.connectApigee()
         .then ( (org) => {
           org.environments.get()
             .then( result => org.environments.getVhosts({ env: environments[0] }) )
@@ -138,7 +138,7 @@ describe('Promise', function() {
   describe('cache', function() {
 
     it('should create a cache in an env via promises', () =>
-       common.connectEdge()
+       common.connectApigee()
        .then ( (org) => {
          //org.conn.verbosity = 1;
          return org.caches.create({cacheName, environment:environments[0]})
@@ -148,7 +148,7 @@ describe('Promise', function() {
       );
 
     it('should return proper error on failure to create a cache', () =>
-       common.connectEdge()
+       common.connectApigee()
        .then( org => org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)}) )
        .then( () => assert.fail('should not be reached'))
        .catch( error => {
@@ -157,7 +157,7 @@ describe('Promise', function() {
        }));
 
     it('should delete a cache in an env via promises', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( org =>
                org.caches.del({cacheName, environment:environments[0]}) )
        .then( result => assert.equal(result.name, cacheName) )
@@ -165,7 +165,7 @@ describe('Promise', function() {
       );
 
     it('should return proper errors when failing to delete non-existent cache', () =>
-      common.connectEdge()
+      common.connectApigee()
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
         )
@@ -177,7 +177,7 @@ describe('Promise', function() {
       );
 
     it('should fail properly when on delete from non-existent env', () =>
-      common.connectEdge()
+      common.connectApigee()
         .then ( (org) =>
           org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
         )
@@ -189,7 +189,7 @@ describe('Promise', function() {
       );
 
     it('should fail properly on delete when name is unspecified', () =>
-      common.connectEdge()
+      common.connectApigee()
         .then ( (org) =>
           org.caches.del({environment:faker.random.alphaNumeric(22)})
         )
@@ -205,7 +205,7 @@ describe('Promise', function() {
   describe('developer', function() {
 
     it('should create a developer via promises', () =>
-       common.connectEdge()
+       common.connectApigee()
        .then ( org => {
          //org.conn.verbosity = 1;
          let devOptions = {
@@ -224,7 +224,7 @@ describe('Promise', function() {
       );
 
     it('should return proper error on failure to create a developer', () =>
-       common.connectEdge()
+       common.connectApigee()
         .then( org => org.developers.create({ lastName, firstName, userName : entityName + '-developer' }) )
        .then( () => assert.fail('should not be reached'))
        .catch( error => {
@@ -232,7 +232,7 @@ describe('Promise', function() {
        }));
 
     it('should get developers via promises', () =>
-       common.connectEdge()
+       common.connectApigee()
        .then ( org => {
          //org.conn.verbosity = 1;
          return org.developers.get()
@@ -242,7 +242,7 @@ describe('Promise', function() {
       );
 
     it('should delete a developer via promises', () =>
-      common.connectEdge()
+      common.connectApigee()
        .then ( org => {
          //org.conn.verbosity = 1;
          return org.developers.del({developerEmail})

@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2020-December-03 19:22:12>
+// last saved: <2021-March-22 17:24:01>
 
 /* global describe, faker, it */
 
@@ -28,14 +28,14 @@ const util = require('util');
 describe('Organization', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
     const contrivedPropertyName1 = faker.random.alphaNumeric(22),
           contrivedPropertyName2 = faker.random.alphaNumeric(22);
 
     describe('getProps', function() {
 
       it('should get properties of the org', () =>
-         edgeOrg.getProperties()
+         org.getProperties()
          .then( (result) => {
            assert.equal(typeof result, "object");
            assert.isAtLeast(Object.keys(result).length, 2);
@@ -53,7 +53,7 @@ describe('Organization', function() {
         var propertyHash = {};
         propertyHash[contrivedPropertyName1] = 42;
 
-        return edgeOrg.addProperties(propertyHash)
+        return org.addProperties(propertyHash)
           .then( (result) => {
             assert.equal(typeof result, "object");
             if (result.error) {
@@ -67,7 +67,7 @@ describe('Organization', function() {
         var propertyHash = {};
         propertyHash[contrivedPropertyName1] = 928;
 
-        return edgeOrg.addProperties(propertyHash)
+        return org.addProperties(propertyHash)
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName1], 42);
@@ -84,7 +84,7 @@ describe('Organization', function() {
         var propertyHash = {};
         propertyHash[contrivedPropertyName1] = 187;
 
-        return edgeOrg.setProperties(propertyHash)
+        return org.setProperties(propertyHash)
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName1], 187);
@@ -99,7 +99,7 @@ describe('Organization', function() {
         var propertyHash = {};
         propertyHash[contrivedPropertyName2] = "hello";
 
-        return edgeOrg.setProperties(propertyHash)
+        return org.setProperties(propertyHash)
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.equal(result[contrivedPropertyName2], "hello");
@@ -118,7 +118,7 @@ describe('Organization', function() {
       it('should remove two existing properties on the org', () => {
         var propertyArray = [contrivedPropertyName1, contrivedPropertyName2];
 
-        return edgeOrg.removeProperties(propertyArray)
+        return org.removeProperties(propertyArray)
           .then( (result) => {
             assert.equal(typeof result, "object");
             assert.notExists(result[contrivedPropertyName1]);
@@ -136,7 +136,7 @@ describe('Organization', function() {
     describe('setLengths', function() {
 
       it('should set the consumer key length for the org', () => {
-        return edgeOrg.setConsumerKeyLength(42)
+        return org.setConsumerKeyLength(42)
           .then( result => {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.key.length']);
@@ -149,7 +149,7 @@ describe('Organization', function() {
       });
 
       it('should set the consumer secret length for the org', () => {
-        return edgeOrg.setConsumerSecretLength(48)
+        return org.setConsumerSecretLength(48)
           .then( result => {
             assert.equal(typeof result, "object");
             assert.exists(result['keymanagement.consumer.secret.length']);
@@ -162,7 +162,7 @@ describe('Organization', function() {
       });
 
       it('should fail to set the consumer key length for the org', () => {
-        return edgeOrg.setConsumerKeyLength(101010)
+        return org.setConsumerKeyLength(101010)
           .then( r => assert.fail('should not be reached'))
           .catch( error => {
             assert.exists(error);
@@ -172,7 +172,7 @@ describe('Organization', function() {
       });
 
       it('should fail to set the consumer secret length for the org', () => {
-        return edgeOrg.setConsumerSecretLength(179238)
+        return org.setConsumerSecretLength(179238)
           .then( () => assert.fail('should not be reached'))
           .catch( error => {
             assert.exists(error);

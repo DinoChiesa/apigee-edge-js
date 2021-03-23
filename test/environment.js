@@ -3,7 +3,7 @@
 //
 // Tests for environment operations.
 //
-// Copyright 2018-2020 Google LLC.
+// Copyright 2018-2021 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ describe('Environment', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
     let environments = [];
 
     before(done => {
-       edgeOrg.environments.get(function(e, result) {
+       org.environments.get(function(e, result) {
          assert.isNull(e, "error listing: " + JSON.stringify(e));
-         environments = result;
+         environments = result.filter(item => item != "portal");
          done();
        });
     });
@@ -46,7 +46,7 @@ describe('Environment', function() {
     describe('get', function() {
 
       it('should get the list of environments', done => {
-        edgeOrg.environments.get({}, function(e, result){
+        org.environments.get({}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
           assert.isAtLeast(result.length, 1, "zero results");
           done();
@@ -56,7 +56,7 @@ describe('Environment', function() {
       it('should get details for each env', done => {
        let numDoneEnv = 0;
         environments.forEach(env => {
-          edgeOrg.environments.get({environment:env}, (e, result) => {
+          org.environments.get({environment:env}, (e, result) => {
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.equal(result.name, env );
             numDoneEnv++;
@@ -68,7 +68,7 @@ describe('Environment', function() {
       });
 
       it('should fail to get details from a non-existent env', done => {
-        edgeOrg.environments.get({environment:faker.random.alphaNumeric(22)}, (e, result) => {
+        org.environments.get({environment:faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -85,7 +85,7 @@ describe('Environment', function() {
         let numDone = 0;
         const tick = () => { if (++numDone == environments.length) { done(); } };
         environments.forEach(function(env) {
-          edgeOrg.environments.getVhosts({environment:env}, (e, result) => {
+          org.environments.getVhosts({environment:env}, (e, result) => {
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.isAtLeast(result.length, 1, "zero results");
             tick();
@@ -94,7 +94,7 @@ describe('Environment', function() {
       });
 
       it('should fail to get vhosts from a non-existent env', function(done) {
-        edgeOrg.environments.getVhosts({environment:faker.random.alphaNumeric(22)}, function(e, result){
+        org.environments.getVhosts({environment:faker.random.alphaNumeric(22)}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -105,13 +105,13 @@ describe('Environment', function() {
         const outerTick = () => { if (++numDone == environments.length) { done(); } };
 
         environments.forEach(env => {
-          edgeOrg.environments.getVhosts({env}, (e, vhosts) => {
+          org.environments.getVhosts({env}, (e, vhosts) => {
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.isAtLeast(vhosts.length, 1, "zero results");
             let numDoneVhosts = 0;
             const innerTick = () => { if (++numDoneVhosts == vhosts.length) { outerTick(); } };
             vhosts.forEach( vhost => {
-              edgeOrg.environments.getVhost({env,vhost}, (e, result) => {
+              org.environments.getVhost({env,vhost}, (e, result) => {
                 assert.isNull(e, "error getting: " + JSON.stringify(e));
                 innerTick();
               });
@@ -126,7 +126,7 @@ describe('Environment', function() {
 
         environments.forEach(env => {
           let fakeName = faker.random.alphaNumeric(22);
-          edgeOrg.environments.getVhost({env, vhost:fakeName}, (e, vhosts) => {
+          org.environments.getVhost({env, vhost:fakeName}, (e, vhosts) => {
             assert.isNotNull(e, "the expected error did not occur");
             tick();
           });
@@ -150,8 +150,8 @@ describe('Environment', function() {
 
       // Creation of vhosts works only with a Cert that has been signed by a commercial CA.
 
-      //const certFile = path.resolve( path.join(resourceDir, 'apigee-edge-js-wildcard.cert'));
-      const certFile = resolveHome( '~/dev/dinochiesa.net/keys/fullchain.pem');
+      const certFile = path.resolve( path.join(resourceDir, 'apigee-edge-js-wildcard.cert'));
+      //const certFile = resolveHome( '~/dev/dinochiesa.net/keys/fullchain.pem');
       //console.log('\n\n** certfile: ' + certFile + '\n');
 
       before(done => {
@@ -165,15 +165,20 @@ describe('Environment', function() {
               environment : selectedEnvironment,
               name : keyStoreName
             };
-        edgeOrg.keystores.create(options, (e, result) => {
+        org.keystores.create(options, (e, result) => {
           assert.isNull(e, "error creating keystore: " + util.format(e));
           options.certificateFile = certFile;
-          options.keyFile = certFile.replace(new RegExp('fullchain\\.'), 'privkey.');
+          //options.keyFile = certFile.replace(new RegExp('fullchain\\.'), 'privkey.');
+          options.keyFile = certFile.replace(new RegExp('\\.cert'), '.key');
           options.alias = keyAlias;
-          edgeOrg.keystores.importCert(options, (e, result) => {
-            assert.isNull(e, "error importing cert and key: " + util.format(e));
-            done();
-          });
+          org.keystores.importCert(options)
+            .then( _ => done() )
+            .catch(e => {
+              let util = require('util');
+              console.log('error: ' + util.format(e));
+              assert.isNull(e, "error importing cert and key: " + util.format(e));
+              done();
+            });
         });
       });
 
@@ -182,7 +187,7 @@ describe('Environment', function() {
               environment : selectedEnvironment,
               name : keyStoreName
             };
-        edgeOrg.keystores.del(options, (e, result) => {
+        org.keystores.del(options, (e, result) => {
           assert.isNull(e, "error deleting: " + util.format(e));
           done();
         });
@@ -202,10 +207,14 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        edgeOrg.environments.createVhost(options, (e, result) => {
-          assert.isNull(e, "error creating: " + JSON.stringify(e));
-          done();
-        });
+        org.environments
+          .createVhost(options)
+          .then( _ => ({}) )
+          .catch (e => {
+            console.log('error: ' + util.format(e));
+            assert.isNull(e, "error creating vhost: " + util.format(e));
+          })
+          .finally( _ => done());
       });
 
       it('should create a vhost w/ no port', done => {
@@ -219,10 +228,13 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        edgeOrg.environments.createVhost(options, (e, result) => {
-          assert.isNull(e, "error creating: " + JSON.stringify(e));
-          done();
-        });
+        org.environments.createVhost(options)
+          .then( r => ({}))
+          .catch(e => {
+            console.log('unexpected error: ' + util.format(e));
+            assert.isNull(e, "error creating: " + JSON.stringify(e));
+          })
+          .finally( _ => done());
       });
 
       it('should fail to create a vhost with invalid port', done => {
@@ -238,12 +250,12 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        edgeOrg.environments.createVhost(options)
+        org.environments.createVhost(options)
           .then(r => assert.fail("expected an error while creating"))
           .catch(e => {
             assert.isNotNull(e, "expected an error while creating");
-            done();
-          });
+          })
+          .finally( _ => done());
       });
 
 
@@ -251,11 +263,11 @@ describe('Environment', function() {
         let env = selectedEnvironment;
         let fn = (p, vhost) =>
           p.then( (count) =>
-                  edgeOrg.environments
+                  org.environments
                   .deleteVhost({vhost, env})
                   .then( () => count+1 )
                 );
-        return edgeOrg.environments.getVhosts({env})
+        return org.environments.getVhosts({env})
           .then( vhosts =>
                  vhosts
                  .filter(item => item.match(new RegExp('^apigee-edge-js-test-.*')) )

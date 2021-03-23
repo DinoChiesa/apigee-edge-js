@@ -25,7 +25,7 @@ var common = require('./common');
 describe('AppCredential', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
 
     const entityName = "apigee-edge-js-test-" + faker.lorem.word() + faker.random.number(),
           firstName = faker.name.firstName(),
@@ -41,8 +41,8 @@ describe('AppCredential', function() {
     var apiProducts = [];
 
     before( () =>
-            edgeOrg.developers.create(createOptions)
-            .then ( () => edgeOrg.products.get() )
+            org.developers.create(createOptions)
+            .then ( () => org.products.get() )
             .then ( result => { apiProducts = result; } )
             .then ( () => {
               const appCreateOptions = {
@@ -50,11 +50,11 @@ describe('AppCredential', function() {
                       name : entityName,
                       apiProduct : apiProducts[0]
                     };
-              return edgeOrg.developerapps.create(appCreateOptions);
+              return org.developerapps.create(appCreateOptions);
             })
           );
 
-    after( () => edgeOrg.developers.del({developerEmail}) );
+    after( () => org.developers.del({developerEmail}) );
 
     describe('add', function() {
       it('should add a generated credential with expiry', () => {
@@ -64,7 +64,7 @@ describe('AppCredential', function() {
                 expiry: '60m',
                 apiProducts : [apiProducts[0]]
               };
-        return edgeOrg.appcredentials.add(options)
+        return org.appcredentials.add(options)
           .then( result => {
             //console.log(JSON.stringify(result));
           })
@@ -80,7 +80,7 @@ describe('AppCredential', function() {
                 appName : entityName,
                 apiProducts : [apiProducts[0]]
               };
-        return edgeOrg.appcredentials.add(options)
+        return org.appcredentials.add(options)
           .then( result => {
             //console.log(JSON.stringify(result));
           })
@@ -97,7 +97,7 @@ describe('AppCredential', function() {
                 apiProducts : [apiProducts[0]],
                 consumerKey : testCredential
               };
-        return edgeOrg.appcredentials.add(options)
+        return org.appcredentials.add(options)
           .then( result => {
             //console.log(JSON.stringify(result));
           })
@@ -114,7 +114,7 @@ describe('AppCredential', function() {
                 apiProducts : [apiProducts[0]],
                 consumerKey : faker.lorem.word() + faker.random.number()
               };
-        return edgeOrg.appcredentials.add(options)
+        return org.appcredentials.add(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -135,7 +135,7 @@ describe('AppCredential', function() {
                 appName: entityName,
                 consumerKey : testCredential
               };
-        return edgeOrg.appcredentials.get(options)
+        return org.appcredentials.get(options)
           .then( result => {
             //console.log(JSON.stringify(result, null, 2));
             assert.equal(result.consumerKey, testCredential);
@@ -152,7 +152,7 @@ describe('AppCredential', function() {
                 appName: entityName,
                 consumerKey : faker.lorem.word() + faker.random.number() // DNE
               };
-        return edgeOrg.appcredentials.get(options)
+        return org.appcredentials.get(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -170,7 +170,7 @@ describe('AppCredential', function() {
         const options = {
                 consumerKey : testCredential
               };
-        return edgeOrg.appcredentials.find(options)
+        return org.appcredentials.find(options)
           .then( result => {
             assert.equal(result.key, testCredential);
           });
@@ -184,7 +184,7 @@ describe('AppCredential', function() {
         const options = {
                 consumerKey : faker.lorem.word() + faker.random.number()
               };
-        return edgeOrg.appcredentials.find(options)
+        return org.appcredentials.find(options)
           .then( result => {
             assert.equal(typeof result, 'undefined');
           })
@@ -195,7 +195,7 @@ describe('AppCredential', function() {
 
       it('should fail to find when no key specified', () => {
         const options = { something: 'nothing' };
-        return edgeOrg.appcredentials.find(options)
+        return org.appcredentials.find(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -213,7 +213,7 @@ describe('AppCredential', function() {
       //           developerEmail,
       //           consumerKey : testCredential
       //         };
-      //   return edgeOrg.appcredentials.listProducts(options)
+      //   return org.appcredentials.listProducts(options)
       //     .then( result => {
       //       assert.equal(result.key, testCredential);
       //     });
@@ -230,7 +230,7 @@ describe('AppCredential', function() {
                 consumerKey : testCredential,
                 product : apiProducts[1]
               };
-        return edgeOrg.appcredentials.addProduct(options)
+        return org.appcredentials.addProduct(options)
           .then( result => {
             //console.log(JSON.stringify(result, null, 2));
             assert.equal(result.consumerKey, testCredential);
@@ -251,7 +251,7 @@ describe('AppCredential', function() {
                 consumerKey : 'xxx-' + faker.lorem.word() + '-' + faker.random.number(), // DNE
                 product : apiProducts[1]
               };
-        return edgeOrg.appcredentials.addProduct(options)
+        return org.appcredentials.addProduct(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -267,7 +267,7 @@ describe('AppCredential', function() {
                 consumerKey : testCredential,
                 product : apiProducts[1]
               };
-        return edgeOrg.appcredentials.removeProduct(options)
+        return org.appcredentials.removeProduct(options)
           .then( result => {
             //console.log(JSON.stringify(result, null, 2));
             assert.equal(result.consumerKey, testCredential);
@@ -288,7 +288,7 @@ describe('AppCredential', function() {
                 consumerKey : testCredential,
                 product : apiProducts[2]
               };
-        return edgeOrg.appcredentials.removeProduct(options)
+        return org.appcredentials.removeProduct(options)
           .then( result => {
             console.log(JSON.stringify(result, null, 2));
             assert.fail('should not be reached');
@@ -315,7 +315,7 @@ describe('AppCredential', function() {
                 consumerKey : testCredential,
                 attributes: { attr1, attr2 }
               };
-        return edgeOrg.appcredentials.update(options)
+        return org.appcredentials.update(options)
           .then( result => {
             //console.log(JSON.stringify(result));
             assert.isNotNull(result.attributes);
@@ -340,7 +340,7 @@ describe('AppCredential', function() {
                 consumerKey : fakeCredential,
                 attributes: { attr1, attr2 }
               };
-        return edgeOrg.appcredentials.update(options)
+        return org.appcredentials.update(options)
           .then( result => {
             console.log(JSON.stringify(result, null, 2));
             assert.fail('should not be reached');
@@ -362,7 +362,7 @@ describe('AppCredential', function() {
                 appName : entityName,
                 consumerKey : testCredential
               };
-        return edgeOrg.appcredentials.del(options)
+        return org.appcredentials.del(options)
           .then( result => {
             //console.log(JSON.stringify(result));
             assert.equal(result.consumerKey, testCredential);
@@ -380,7 +380,7 @@ describe('AppCredential', function() {
                 appName : entityName
                 //consumerKey : faker.lorem.word() + faker.random.number()
               };
-        return edgeOrg.appcredentials.del(options)
+        return org.appcredentials.del(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -395,7 +395,7 @@ describe('AppCredential', function() {
                 appName : entityName,
                 consumerKey : faker.lorem.word() + faker.random.number()
               };
-        return edgeOrg.appcredentials.del(options)
+        return org.appcredentials.del(options)
           .then( result => {
             assert.fail('should not be reached');
           })
@@ -411,7 +411,7 @@ describe('AppCredential', function() {
                 appName : faker.lorem.word(),
                 consumerKey : faker.lorem.word() + faker.random.number()
               };
-        return edgeOrg.appcredentials.del(options)
+        return org.appcredentials.del(options)
           .then( result => {
             assert.fail('should not be reached');
           })

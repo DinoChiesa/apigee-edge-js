@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2020-December-04 08:04:53>
+// last saved: <2021-March-22 17:24:00>
 
 /* global describe, faker, it, before, after */
 
@@ -29,8 +29,8 @@ describe('Reference', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg) {
-    const refs = edgeOrg.references,
+  common.connectApigee(function(org) {
+    const refs = org.references,
           num = faker.random.number(),
           word = faker.lorem.word(),
           refnames = [0, 1, 2].map( n => `apigee-edge-js-test-REF-${word}-${num}-${n}`),
@@ -39,7 +39,7 @@ describe('Reference', function() {
     let envlist = [];
 
     before(function(done) {
-      edgeOrg.environments.get((e, result) => {
+      org.environments.get((e, result) => {
         assert.isNull(e, "error listing: " + util.format(e));
         envlist = result;
         let numDone = 0;
@@ -47,7 +47,7 @@ describe('Reference', function() {
           let options = { environment : env };
           ksnames.slice(0, 2).forEach( (ksname, ix) => {
             options.name = ksname;
-            edgeOrg.keystores.create(options, (e, result) => {
+            org.keystores.create(options, (e, result) => {
               assert.isNull(e, "error creating: " + util.format(e));
                 numDone++;
                 if (numDone == envlist.length) {
@@ -66,7 +66,7 @@ describe('Reference', function() {
         ksnames.slice(0, 2).forEach( (ksname, ix) => {
           options.name = ksname;
           //console.log('deleting keystore:%s from env:%s', ksname, env);
-          edgeOrg.keystores.del(options, (e, result) => {
+          org.keystores.del(options, (e, result) => {
             assert.isNull(e, "error deleting keystore:" +ksname + ' from env:' +env + ': ' + util.format(e));
             //console.log('deleted keystore:%s from env:%s', ksname, env);
             if (ix == 1) { // delete only 2 of the 3

@@ -25,14 +25,14 @@ var common = require('./common');
 describe('KVM', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg) {
+  common.connectApigee(function(org) {
     const num = faker.random.number(),
           word = faker.lorem.word(),
           kvmName = "apigee-edge-js-test-" + word + '-' + num;
     var environments = [];
 
     before(function(done) {
-      edgeOrg.environments.get(function(e, result) {
+      org.environments.get(function(e, result) {
         assert.isNull(e, "error listing: " + JSON.stringify(e));
         environments = result;
         done();
@@ -44,7 +44,7 @@ describe('KVM', function() {
       it('should create a kvm in each env', function(done) {
         var numDoneEnv = 0;
         environments.forEach(function(env) {
-          edgeOrg.kvms.create({name:kvmName, environment:env}, function(e, result){
+          org.kvms.create({name:kvmName, environment:env}, function(e, result){
             assert.isNull(e, "error creating: " + JSON.stringify(e));
             numDoneEnv++;
             if (numDoneEnv == environments.length) {
@@ -57,7 +57,7 @@ describe('KVM', function() {
       it('should fail to create an env-scoped KVM with no name', function(done) {
         var numDoneEnv = 0;
         environments.forEach(function(env) {
-          edgeOrg.kvms.create({environment:env}, function(e, result){
+          org.kvms.create({environment:env}, function(e, result){
             //if (e) { console.log(JSON.stringify(e, null, 2) + '\n'); }
             assert.isNotNull(e, "the expected error did not occur");
             numDoneEnv++;
@@ -69,21 +69,21 @@ describe('KVM', function() {
       });
 
       it('should create an org-scoped kvm', function(done) {
-        edgeOrg.kvms.create({name:kvmName}, function(e, result){
+        org.kvms.create({name:kvmName}, function(e, result){
           assert.isNull(e, "error creating: " + JSON.stringify(e));
           done();
         });
       });
 
       it('should fail to create an org-scoped KVM with no name', function(done) {
-        edgeOrg.kvms.create({}, function(e, result){
+        org.kvms.create({}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
 
       it('should fail to create an org-scoped KVM with an empty name', function(done) {
-        edgeOrg.kvms.create({name:''}, function(e, result){
+        org.kvms.create({name:''}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
@@ -91,7 +91,7 @@ describe('KVM', function() {
 
       // FIXME: b/120421482
       // it('should fail to create a KVM with an invalid env name', function(done) {
-      //   edgeOrg.kvms.create({name:kvmName, env:faker.random.alphaNumeric(22)}, function(e, result){
+      //   org.kvms.create({name:kvmName, env:faker.random.alphaNumeric(22)}, function(e, result){
       //     console.log(JSON.stringify(result, null, 2) + '\n');
       //     if (e) { console.log(JSON.stringify(e, null, 2) + '\n'); }
       //     assert.isNotNull(e, "the expected error did not occur");
@@ -107,7 +107,7 @@ describe('KVM', function() {
       it('should get KVMs from each env', function(done) {
         var numDoneEnv = 0;
         environments.forEach(function(env) {
-          edgeOrg.kvms.get({environment:env}, function(e, result){
+          org.kvms.get({environment:env}, function(e, result){
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.isAtLeast(result.length, 1, "zero results");
             numDoneEnv++;
@@ -120,7 +120,7 @@ describe('KVM', function() {
 
       // FIXME: b/120421482
       // it('should fail to get KVMs from a non-existent env', function(done) {
-      //   edgeOrg.kvms.get({environment:faker.random.alphaNumeric(22)}, function(e, result){
+      //   org.kvms.get({environment:faker.random.alphaNumeric(22)}, function(e, result){
       //     console.log(JSON.stringify(result, null, 2) + '\n');
       //     assert.isNotNull(e, "the expected error did not occur");
       //     done();
@@ -134,7 +134,7 @@ describe('KVM', function() {
       it('should delete a kvm from each env', function(done) {
         var numDoneEnv = 0;
         environments.forEach(function(env) {
-          edgeOrg.kvms.del({name:kvmName, environment:env}, function(e, result){
+          org.kvms.del({name:kvmName, environment:env}, function(e, result){
             assert.isNull(e, "error deleting: " + JSON.stringify(e));
             numDoneEnv++;
             if (numDoneEnv == environments.length) {
@@ -147,7 +147,7 @@ describe('KVM', function() {
       it('should fail to delete an invalid kvm from each env', function(done) {
         var numDoneEnv = 0;
         environments.forEach(function(env) {
-          edgeOrg.kvms.del({name: faker.random.alphaNumeric(22), environment:env}, function(e, result){
+          org.kvms.del({name: faker.random.alphaNumeric(22), environment:env}, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
             numDoneEnv++;
             if (numDoneEnv == environments.length) {
@@ -158,21 +158,21 @@ describe('KVM', function() {
       });
 
       it('should delete an org-scoped kvm', function(done) {
-        edgeOrg.kvms.del({name:kvmName}, function(e, result){
+        org.kvms.del({name:kvmName}, function(e, result){
           assert.isNull(e, "error deleting: " + JSON.stringify(e));
           done();
         });
       });
 
       it('should fail to delete a KVM from org-scope because no name was specified', function(done) {
-        edgeOrg.kvms.del({}, function(e, result){
+        org.kvms.del({}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
 
       it('should fail to delete a non-existent KVM from org-scope', function(done) {
-        edgeOrg.kvms.del({name: faker.random.alphaNumeric(22)}, function(e, result){
+        org.kvms.del({name: faker.random.alphaNumeric(22)}, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });

@@ -16,14 +16,14 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2020-July-10 13:51:35>
+// last saved: <2021-March-22 18:53:37>
 
 /* global exports, global */
 
 const chai = require('chai');
 const assert = chai.assert;
 const path   = require('path');
-const apigee = require('../index.js');
+const apigeejs = require('../index.js');
 const faker  = require('faker');
 //var sprintf = require('sprintf-js').sprintf;
 const chaiAsPromised = require("chai-as-promised");
@@ -34,14 +34,14 @@ var config = require('../testConfig.json');
 //
 // {
 //   "mgmtServer" : "https://api.enterprise.apigee.com",
-//   "org"        : "my-edge-org-name",
+//   "org"        : "my-apigee-org-name",
 //   "netrc"      : true
 // }
 //
 // or
 // {
 //   "mgmtServer" : "https://api.enterprise.apigee.com",
-//   "org"        : "my-edge-org-name",
+//   "org"        : "my-apigee-org-name",
 //   "user"       : "Dchiesa@google.com"
 //   "password"   : "Secret-BB208846F523"
 // }
@@ -53,23 +53,23 @@ var config = require('../testConfig.json');
 // export some global vars for all tests
 global.assert = assert;
 global.path = path;
-global.aej = apigee;
+global.aej = apigeejs;
 global.config = config;
 global.faker = faker;
 //global.sprintf = sprintf;
-global.apigee = apigee;
+global.apigeejs = apigeejs;
 
-function connectEdge(cb) {
+function connectApigee(cb) {
   let options = Object.assign({}, config);
   //options.verbosity = 1;
   if (cb) {
-    return apigee.edge.connect(options, function(e, org){
+    return apigeejs.apigee.connect(options, function(e, org){
       assert.isNull(e, JSON.stringify(e));
       cb(org);
     });
   }
   else {
-    return apigee.edge.connect(options);
+    return apigeejs.apigee.connect(options);
   }
 }
 
@@ -84,6 +84,6 @@ function selectNRandom(list, N, promiseFn, done) {
 
 
 exports.selectNRandom = selectNRandom;
-exports.connectEdge = connectEdge;
+exports.connectApigee = connectApigee;
 exports.testTimeout = config.timeout || 35000;
 exports.slowThreshold = config.slowThreshold || 5000;

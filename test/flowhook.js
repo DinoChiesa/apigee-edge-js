@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-March-05 18:00:05>
+// last saved: <2021-March-22 17:24:02>
 
 /* global describe, faker, it, path, before */
 
@@ -29,11 +29,11 @@ describe('Flowhook', function() {
   this.timeout(common.testTimeout) ;
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg){
+  common.connectApigee(function(org){
 
     describe('fails', function() {
       it('should fail to list flowhooks', function(done) {
-        edgeOrg.flowhooks.get({}, function(e, result){
+        org.flowhooks.get({}, function(e, result){
           assert.isNotNull(e, "expected error is missing");
           assert.equal(e, "Error: missing required parameter: environment");
           done();
@@ -45,12 +45,12 @@ describe('Flowhook', function() {
      this.timeout(common.testTimeout);
      var combinations = [];
      before(function(done){
-       edgeOrg.environments.get(function(e, result) {
+       org.environments.get(function(e, result) {
          assert.isNull(e, "error listing: " + JSON.stringify(e));
          var envlist = result;
          var numDone = 0;
          result.forEach(function(env){
-           edgeOrg.flowhooks.get({environment:env}, function(e, result) {
+           org.flowhooks.get({environment:env}, function(e, result) {
              numDone++;
              combinations.push([env, result]);
              if (numDone == envlist.length) {
@@ -66,7 +66,7 @@ describe('Flowhook', function() {
        combinations.forEach(function(combo) {
          var env = combo[0];
          assert.isNotNull(env, "error");
-         edgeOrg.flowhooks.get({environment:env}, function(e, result) {
+         org.flowhooks.get({environment:env}, function(e, result) {
            assert.isNull(e, "error listing: " + JSON.stringify(e));
            assert.isNotNull(result, "result is empty");
            assert.equal(result.length, 4, "unexpected number of hooks");
@@ -85,7 +85,7 @@ describe('Flowhook', function() {
          assert.isNotNull(env, "error");
          var numDoneHooks = 0;
          hooks.forEach(function(hook) {
-           edgeOrg.flowhooks.get({environment:env, name:hook}, function(e, result) {
+           org.flowhooks.get({environment:env, name:hook}, function(e, result) {
              assert.isNull(e, "error: " + JSON.stringify(e));
              assert.isNotNull(result, "error");
              numDoneHooks++;

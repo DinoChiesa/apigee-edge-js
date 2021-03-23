@@ -61,15 +61,15 @@ describe('Resourcefile', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(function(edgeOrg) {
+  common.connectApigee(function(org) {
     let environments = [];
     let resourcefileDirs = {}; // hash of arrays
-    let rf = edgeOrg.resourcefiles;
+    let rf = org.resourcefiles;
 
-    //edgeOrg.conn.verbosity = 1;
+    //org.conn.verbosity = 1;
 
     before(function(done) {
-      edgeOrg.environments.get(function(e, result) {
+      org.environments.get(function(e, result) {
         assert.isNull(e, "error listing: " + JSON.stringify(e));
         environments = result.filter(e => e != 'portal');
         let numDone = 0, L = 0;

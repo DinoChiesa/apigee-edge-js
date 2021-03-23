@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2020-December-04 08:21:04>
+// last saved: <2021-March-22 17:26:04>
 
 /* global describe, faker, it */
 
@@ -28,12 +28,12 @@ const util = require('util');
 describe('Developer', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectEdge(function(edgeOrg){
-    const devs = edgeOrg.developers;
+  common.connectApigee(function(org){
+    const devs = org.developers;
     const firstName = faker.name.firstName(); // Rowan
     const lastName = faker.name.lastName(); // Nikolaus
     var options = {
-          developerEmail : lastName + '.' + firstName + "@apigee-edge-js-test.org",
+          developerEmail : lastName + '.' + firstName + "@apigee-js-test.org",
           lastName : lastName,
           firstName : firstName,
           userName : firstName + lastName,
@@ -107,7 +107,7 @@ describe('Developer', function() {
           })
           .catch(error => {
             assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(error.result.message, `DeveloperId ${developerEmail} does not exist in organization ${edgeOrg.conn.orgname}`);
+            assert.equal(error.result.message, `DeveloperId ${developerEmail} does not exist in organization ${org.conn.orgname}`);
 
           });
       });
@@ -134,7 +134,7 @@ describe('Developer', function() {
 
       it('should fail to delete a non-existent developer', function(done) {
         let badOptions = Object.assign({}, options);
-        badOptions.developerEmail = faker.random.alphaNumeric(22) + "@apigee-edge-js-test.org";
+        badOptions.developerEmail = faker.random.alphaNumeric(22) + "@apigee-js-test.org";
         devs.del(badOptions, function(e, result){
           assert.isNotNull(e, "the expected error did not occur");
           done();

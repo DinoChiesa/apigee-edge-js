@@ -1,7 +1,7 @@
 // connect.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google LLC
+// Copyright 2017-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 10:16:13 2017
-// last saved: <2018-December-05 16:34:18>
+// last saved: <2021-March-22 17:25:15>
 
 /* global describe, it, before, after, faker, path, config, apigee */
 
@@ -36,7 +36,7 @@ describe('Connect', function() {
       //       password: config.password
       //     };
 
-      apigee.edge.connect(options, function(e, org) {
+      apigeejs.apigee.connect(options, function(e, org) {
         assert.isNull(e, JSON.stringify(e));
         assert.equal(org.conn.orgname, config.org);
         done();
@@ -55,7 +55,7 @@ describe('Connect', function() {
             no_token : true
           };
 
-      apigee.edge.connect(options, function(e, conn) {
+      apigeejs.apigee.connect(options, function(e, conn) {
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });
@@ -70,7 +70,7 @@ describe('Connect', function() {
             no_token : true
           };
 
-      apigee.edge.connect(options, function(e, conn){
+      apigeejs.apigee.connect(options, function(e, conn){
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });
@@ -84,7 +84,7 @@ describe('Connect', function() {
             password: faker.random.alphaNumeric(16)
           };
 
-      apigee.edge.connect(options, function(e, conn){
+      apigeejs.apigee.connect(options, function(e, conn){
         assert.isNotNull(e, "the expected error did not occur");
         done(!e);
       });

@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2019-October-04 15:30:36>
+// last saved: <2021-March-22 18:55:22>
 
 /* global path, faker, describe, it, before, after */
 
@@ -35,13 +35,13 @@ describe('Keystore', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectEdge(edgeOrg => {
+  common.connectApigee(org => {
 
     let envlist = [];
       before(done => {
-        edgeOrg.environments.get((e, result) => {
+        org.environments.get((e, result) => {
           assert.isNull(e, "error listing: " + util.format(e));
-          envlist = result;
+          envlist = result.filter(item => item != "portal");
           done();
         });
       });
@@ -55,7 +55,7 @@ describe('Keystore', function() {
                 environment : env,
                 name : contrivedNamePrefix + '-ks1'
               };
-          edgeOrg.keystores.create(options, (e, result) => {
+          org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating: " + util.format(e));
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
@@ -72,7 +72,7 @@ describe('Keystore', function() {
                 environment : env,
                 name : contrivedNamePrefix + '-ks1'
               };
-          edgeOrg.keystores.create(options, (e, result) => {
+          org.keystores.create(options, (e, result) => {
             assert.isNotNull(e, "error creating: " + util.format(e));
             numDoneEnv++;
             if (numDoneEnv == envlist.length) {
@@ -86,13 +86,13 @@ describe('Keystore', function() {
 
 
     describe('get', () => {
-      let combinations = [];
+      let combinations = {};
       before(done => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach(env => {
-          edgeOrg.keystores.get({environment:env}, (e, result) => {
+          org.keystores.get({environment:env}, (e, result) => {
             numDone++;
-            combinations.push([env, result]);
+            combinations[env] = result;
             if (numDone == envlist.length) {
               done();
             }
@@ -101,9 +101,9 @@ describe('Keystore', function() {
       });
 
       it('should list all keystores for each environment', done => {
-        var numDoneEnv = 0;
+        let numDoneEnv = 0;
         envlist.forEach(environment => {
-          edgeOrg.keystores.get({ environment }, (e, result) => {
+          org.keystores.get({ environment }, (e, result) => {
             assert.isNull(e, "error listing: " + util.format(e));
             assert.isTrue(result.length > 0);
             numDoneEnv++;
@@ -115,19 +115,21 @@ describe('Keystore', function() {
       });
 
       it('should get details of each keystore', done => {
-        var numDone = 0;
-        combinations.forEach(combo => {
-          const options = { environment : combo[0] },
-                keystores = combo[1];
+        let numDone = 0;
+        //console.log('combos: ' + JSON.stringify(combinations, null, 2));
+        let keys = Object.keys(combinations);
+        keys.forEach(environment => {
+          const options = { environment },
+                keystores = combinations[environment];
           let numKeystoresDone = 0;
           keystores.forEach(keystore => {
             options.keystore = keystore;
-            edgeOrg.keystores.get(options, (e, result) => {
+            org.keystores.get(options, (e, result) => {
               assert.isNull(e, "error querying: " + util.format(e));
               numKeystoresDone++;
               if (numKeystoresDone == keystores.length) {
                 numDone++;
-                if (numDone == combinations.length) {
+                if (numDone == keys.length) {
                   done();
                 }
               }
@@ -143,7 +145,7 @@ describe('Keystore', function() {
                 environment : env,
                 name : 'keystore-' + faker.random.alphaNumeric(23)
               };
-          edgeOrg.keystores.get(options, function(e, result){
+          org.keystores.get(options, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
             numDone++;
             if (numDone == envlist.length) {
@@ -167,7 +169,7 @@ describe('Keystore', function() {
           certFileList = items
             .filter(item => item.match(re1) )
             .map(item => path.resolve( path.join(resourceDir, item)) );
-          edgeOrg.environments.get((e, result) => {
+          org.environments.get((e, result) => {
             assert.isNull(e, "error listing: " + util.format(e));
             envlist = result;
             done();
@@ -179,18 +181,18 @@ describe('Keystore', function() {
         this.timeout(65000);
         var numDone = 0;
         let tick = () => { if (++numDone == envlist.length) { done(); } };
-        //edgeOrg.conn.verbosity = 1;
+        //org.conn.verbosity = 1;
         envlist.forEach(environment => {
           var options = {
                 environment,
                 name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
               };
-          edgeOrg.keystores.create(options, (e, result) => {
+          org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
             options.certificateFile = certFileList[0];
             options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
-            edgeOrg.keystores.importCert(options, (e, result) => {
+            org.keystores.importCert(options, (e, result) => {
               assert.isNull(e, "error importing cert and key: " + util.format(e));
               tick();
             });
@@ -202,19 +204,19 @@ describe('Keystore', function() {
         this.timeout(65000);
         var numDone = 0;
         const tick = () => { if (++numDone == envlist.length) { done(); } };
-        //edgeOrg.conn.verbosity = 1;
+        //org.conn.verbosity = 1;
         envlist.forEach(environment =>{
           var options = {
                 environment,
                 name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
               };
-          edgeOrg.keystores.create(options, (e, result) => {
+          org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
             options.certificateFile = certFileList[0];
             options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
             delete options.name;
-            edgeOrg.keystores.importCert(options)
+            org.keystores.importCert(options)
               .then(r => assert.fail('should not be reached'))
               .catch(e => {
                 assert.isNotNull(e, "expected an error");
@@ -228,18 +230,18 @@ describe('Keystore', function() {
         this.timeout(65000);
         var numDone = 0;
         const tick = () => { if (++numDone == envlist.length) { done(); } };
-        //edgeOrg.conn.verbosity = 1;
+        //org.conn.verbosity = 1;
         envlist.forEach(environment => {
           var options = {
                 environment,
                 name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
               };
-          edgeOrg.keystores.create(options, (e, result) => {
+          org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
             //options.certificateFile = certFileList[0];
             options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
             options.alias = 'alias-' + faker.random.alphaNumeric(8);
-            edgeOrg.keystores.importCert(options)
+            org.keystores.importCert(options)
               .then(r => assert.fail('should not be reached'))
               .catch(e => {
                 assert.isNotNull(e, "expected an error");
@@ -258,7 +260,7 @@ describe('Keystore', function() {
       before(done => {
         var numDone = 0;
         envlist.forEach(environment => {
-          edgeOrg.keystores.get({environment}, (e, result) => {
+          org.keystores.get({environment}, (e, result) => {
             numDone++;
             combinations.push([environment, result]);
             if (numDone == envlist.length) {
@@ -288,7 +290,7 @@ describe('Keystore', function() {
           var numDoneKeystores = 0;
           keystores.forEach(keystore => {
             var options = { environment, keystore };
-            edgeOrg.keystores.getAlias(options, (e, result) => {
+            org.keystores.getAlias(options, (e, result) => {
               assert.isNull(e, "error: " + util.format(e));
               assert.isNotNull(result, "error");
               var numDoneAliases = 0;
@@ -300,7 +302,7 @@ describe('Keystore', function() {
               else {
                 aliases.forEach(alias => {
                   options.alias = alias;
-                  edgeOrg.keystores.getAlias(options, (e, result) => {
+                  org.keystores.getAlias(options, (e, result) => {
                     assert.isNull(e, "error: " + util.format(e));
                     assert.isNotNull(result, "error");
                     numDoneAliases++;
@@ -320,13 +322,15 @@ describe('Keystore', function() {
 
 
     describe('delete', () => {
-      var combinations = [];
+      let combinations = {};
       before( done => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach(environment => {
-          edgeOrg.keystores.get({environment}, (e, result) => {
+          org.keystores.get({environment}, (e, result) => {
             numDone++;
-            combinations.push([environment, result.filter(name => name.startsWith(contrivedNameBasePrefix)) ]);
+            if ( ! e) {
+              combinations[environment] = result.filter(name => name.startsWith(contrivedNameBasePrefix));
+            }
             if (numDone == envlist.length) {
               done();
             }
@@ -335,21 +339,23 @@ describe('Keystore', function() {
       });
 
       it('should delete the temporary keystores', done => {
-        var numDone = 0;
+        let numDone = 0;
 
-        combinations.forEach(combo => {
-          const options = { environment : combo[0] },
-                keystores = combo[1];
+        //console.log('deleting: ' + JSON.stringify(combinations, null, 2));
+        let keys = Object.keys(combinations);
+        keys.forEach(environment => {
+          const options = { environment },
+                keystores = combinations[environment];
           let numDoneKeystores = 0;
           keystores.forEach(keystore => {
             options.keystore = keystore;
             //console.log('  delete: %s/%s', env, keystore);
-            edgeOrg.keystores.del(options, (e, result) => {
+            org.keystores.del(options, (e, result) => {
               assert.isNull(e, "error deleting: " + util.format(e));
               numDoneKeystores++;
               if (numDoneKeystores == keystores.length) {
                 numDone++;
-                if (numDone == combinations.length) {
+                if (numDone == keys.length) {
                   done();
                 }
               }
@@ -359,13 +365,13 @@ describe('Keystore', function() {
       });
 
       it('should fail to delete non-existent keystores', done => {
-        var numDone = 0;
+        let numDone = 0;
         envlist.forEach(env => {
           const options = {
                 environment : env,
-                name : 'keystore-' + faker.random.alphaNumeric(23)
+                name : 'non-existent-keystore-' + faker.random.alphaNumeric(23)
               };
-          edgeOrg.keystores.del(options)
+          org.keystores.del(options)
             .then(r => assert.fail('expected an error'))
             .catch(e => {
               assert.isNotNull(e, "the expected error did not occur");
