@@ -77,21 +77,21 @@ describe('Environment', function() {
     });
 
 
-
-
     describe('get vhosts', function() {
 
-      it('should get the vhosts for each environment', done => {
-        let numDone = 0;
-        const tick = () => { if (++numDone == environments.length) { done(); } };
-        environments.forEach(function(env) {
-          org.environments.getVhosts({environment:env}, (e, result) => {
-            assert.isNull(e, "error getting: " + JSON.stringify(e));
-            assert.isAtLeast(result.length, 1, "zero results");
-            tick();
-          });
-        });
+      it('should get the vhosts for each environment', () => {
+        let fn = (p, env) =>
+          p.then( count =>
+                  org.environments
+                  .getVhosts({environment:env})
+                  .then( result => {
+                    assert.isAtLeast(result.length, 1, "zero results");
+                  })
+                  .then( () => count+1 )
+                );
+        return environments.reduce(fn, Promise.resolve(0));
       });
+
 
       it('should fail to get vhosts from a non-existent env', function(done) {
         org.environments.getVhosts({environment:faker.random.alphaNumeric(22)}, function(e, result){
@@ -100,25 +100,28 @@ describe('Environment', function() {
         });
       });
 
-      it('should inquire each vhost in each environment', done => {
-        let numDone = 0;
-        const outerTick = () => { if (++numDone == environments.length) { done(); } };
+      it('should inquire each vhost in each environment', () => {
+        let fn2 = (env) =>
+        (p, vhost) =>
+        p.then( count =>
+                org.environments
+                .getVhost({env,vhost})
+                .then( () => count+1 ));
 
-        environments.forEach(env => {
-          org.environments.getVhosts({env}, (e, vhosts) => {
-            assert.isNull(e, "error getting: " + JSON.stringify(e));
-            assert.isAtLeast(vhosts.length, 1, "zero results");
-            let numDoneVhosts = 0;
-            const innerTick = () => { if (++numDoneVhosts == vhosts.length) { outerTick(); } };
-            vhosts.forEach( vhost => {
-              org.environments.getVhost({env,vhost}, (e, result) => {
-                assert.isNull(e, "error getting: " + JSON.stringify(e));
-                innerTick();
-              });
-            });
-          });
-        });
+        let fn1 = (p, env) =>
+        p.then( count =>
+                org.environments
+                .getVhosts({environment:env})
+                .then( vhosts => {
+                  assert.isAtLeast(vhosts.length, 1, "zero results");
+                  return vhosts.reduce(fn2(env), Promise.resolve(0));
+                })
+                .then( () => count+1 )
+              );
+
+        return environments.reduce(fn1, Promise.resolve(0));
       });
+
 
       it('should fail to inquire a non-existent vhost in each environment', done => {
         let numDone = 0;
@@ -154,7 +157,7 @@ describe('Environment', function() {
       //const certFile = resolveHome( '~/dev/dinochiesa.net/keys/fullchain.pem');
       //console.log('\n\n** certfile: ' + certFile + '\n');
 
-      before(done => {
+      before( () => {
         // select one environment
         do {
           let ix = Math.floor(Math.random() * environments.length);
@@ -165,35 +168,31 @@ describe('Environment', function() {
               environment : selectedEnvironment,
               name : keyStoreName
             };
-        org.keystores.create(options, (e, result) => {
-          assert.isNull(e, "error creating keystore: " + util.format(e));
-          options.certificateFile = certFile;
-          //options.keyFile = certFile.replace(new RegExp('fullchain\\.'), 'privkey.');
-          options.keyFile = certFile.replace(new RegExp('\\.cert'), '.key');
-          options.alias = keyAlias;
-          org.keystores.importCert(options)
-            .then( _ => done() )
-            .catch(e => {
-              let util = require('util');
-              console.log('error: ' + util.format(e));
-              assert.isNull(e, "error importing cert and key: " + util.format(e));
-              done();
-            });
-        });
+        return org.keystores.create(options)
+          .then( r => {
+            options.certificateFile = certFile;
+            //options.keyFile = certFile.replace(new RegExp('fullchain\\.'), 'privkey.');
+            options.keyFile = certFile.replace(new RegExp('\\.cert'), '.key');
+            options.alias = keyAlias;
+            return org.keystores.importCert(options)
+              .catch(e => {
+                console.log('in before all, error: ' + util.format(e));
+                throw e;
+              });
+          });
       });
 
-      after( done => {
-        let options = {
+      after( () =>
+             org.keystores.del({
               environment : selectedEnvironment,
               name : keyStoreName
-            };
-        org.keystores.del(options, (e, result) => {
-          assert.isNull(e, "error deleting: " + util.format(e));
-          done();
-        });
-      });
+            })
+             .catch( e => {
+               console.log('in after all, error: ' + util.format(e));
+               throw e;
+             }));
 
-      it('should create a vhost w/ explicit port', done => {
+      it('should create a vhost w/ explicit port', () => {
         const port = 443;
         // must end in www.dinochiesa.net ?
         //const hostalias = faker.lorem.word() + '-' + faker.random.number() + '.apigee-edge-js.net';
@@ -207,20 +206,17 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        org.environments
+        return org.environments
           .createVhost(options)
-          .then( _ => ({}) )
-          .catch (e => {
-            console.log('error: ' + util.format(e));
-            assert.isNull(e, "error creating vhost: " + util.format(e));
-          })
-          .finally( _ => done());
+          .catch( e => {
+            console.log('w/ explicit port, error: ' + util.format(e.result));
+            throw e;
+          });
       });
 
-      it('should create a vhost w/ no port', done => {
+      it('should create a vhost w/ no port', () => {
         //const hostalias = faker.lorem.word() + '-' + faker.random.number() + '.apigee-edge-js.net';
-        const hostalias = 'www.dinochiesa.net';
-
+        const hostalias = 'apigee-js-test.dinochiesa.net';
         const options = {
                 env: selectedEnvironment,
                 vhost: contrivedNamePrefix + '-' + faker.random.alphaNumeric(8),
@@ -228,16 +224,15 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        org.environments.createVhost(options)
-          .then( r => ({}))
-          .catch(e => {
-            console.log('unexpected error: ' + util.format(e));
-            assert.isNull(e, "error creating: " + JSON.stringify(e));
-          })
-          .finally( _ => done());
+        return org.environments
+          .createVhost(options)
+          .catch( e => {
+            console.log('w/ no port, error: ' + util.format(e.result));
+            throw e;
+          });
       });
 
-      it('should fail to create a vhost with invalid port', done => {
+      it('should fail to create a vhost with invalid port', async () => {
         const minPort = 4000, maxPort = 8000;
         const port = Math.floor(Math.random() * maxPort - minPort) + minPort;
         const vhostName = 'apigee-edge-js-test-' + faker.lorem.word() + '-' + faker.random.number();
@@ -250,19 +245,21 @@ describe('Environment', function() {
                 keyStore : keyStoreName,
                 keyAlias
               };
-        org.environments.createVhost(options)
-          .then(r => assert.fail("expected an error while creating"))
-          .catch(e => {
-            assert.isNotNull(e, "expected an error while creating");
-          })
-          .finally( _ => done());
+        try {
+          await org.environments.createVhost(options);
+        }
+        catch (e) {
+          assert.isNotNull(e, "expected an error while creating");
+          return;
+        }
+        assert.isOk(false, 'createVhost must throw');
       });
 
 
       it('should delete previously created vhosts', () => {
         let env = selectedEnvironment;
         let fn = (p, vhost) =>
-          p.then( (count) =>
+          p.then( count =>
                   org.environments
                   .deleteVhost({vhost, env})
                   .then( () => count+1 )

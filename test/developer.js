@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2017-2020 Google LLC
+// Copyright 2017-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 17:26:04>
+// last saved: <2021-March-23 08:33:00>
 
 /* global describe, faker, it */
 
@@ -28,7 +28,8 @@ const util = require('util');
 describe('Developer', function() {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectApigee(function(org){
+
+  common.connectApigee(org => {
     const devs = org.developers;
     const firstName = faker.name.firstName(); // Rowan
     const lastName = faker.name.lastName(); // Nikolaus
@@ -41,12 +42,8 @@ describe('Developer', function() {
         };
 
     describe('create', function() {
-      it('should create a developer', function(done) {
-        devs.create(options, function(e, result){
-          assert.isNull(e, "error creating: " + JSON.stringify(e));
-          done();
-        });
-      });
+
+      it('should create a developer', () => devs.create(options));
 
       it('should fail to create a developer', function(done) {
         let badOptions = Object.assign({}, options);
@@ -62,14 +59,14 @@ describe('Developer', function() {
 
       it('should get a list of developers', () =>
          devs.get({})
-         .then ( (result) => {
+         .then ( result => {
            assert.notExists(result.error);
            assert.exists(result.length);
            assert.isAtLeast(result.length, 1);
          })
         );
 
-      it('should get a few specific developers', done => {
+      it('should get a few specific developers', () =>
         devs.get({})
           .then ( developers => {
             assert.notExists(developers.error);
@@ -92,12 +89,10 @@ describe('Developer', function() {
                         assert.fail('should not be reached');
                       }));
 
-
             return developers
-              .reduce(reducer, Promise.resolve([]))
-              .then(done);
-          });
-      });
+              .reduce(reducer, Promise.resolve([]));
+          }));
+
 
       it('should fail to get a non-existent developer', () => {
         const developerEmail = faker.random.alphaNumeric(22);
@@ -116,12 +111,14 @@ describe('Developer', function() {
 
 
     describe('delete', function() {
-      it('should delete a developer', function(done) {
-        devs.del({developerEmail:options.developerEmail}, function(e, result){
-          assert.isNull(e, "error deleting: " + JSON.stringify(e));
-          done();
-        });
-      });
+
+      it('should delete a developer', () =>
+         devs.del({developerEmail:options.developerEmail})
+             .catch( e => {
+               console.log('error deleting: ' + util.format(e));
+               throw e;
+             }));
+
 
       it('should fail to delete a developer because no email was specified', function(done) {
         let badOptions = Object.assign({}, options);
