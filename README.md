@@ -7,9 +7,9 @@
 ![CommitActivity](https://img.shields.io/github/commit-activity/4w/DinoChiesa/apigee-edge-js)
 ![Downloads](https://img.shields.io/npm/dm/apigee-edge-js.svg)
 
-A library of functions for administering Apigee Edge from nodejs.
+A library of functions for administering Apigee from nodejs.
 
-Do you want to automate the administration or management of Apigee Edge from Nodejs?
+Do you want to automate the administration or management of Apigee from Nodejs?
 This library helps you do that.
 
 Example:
@@ -114,6 +114,13 @@ apigee.connect(options, function(e, org){
 This library and the example tools included here are not an official Google product.
 Support is available on a best-effort basis via github or community.apigee.com .
 Pull requests are welcomed.
+
+## Using th Library
+
+You do not need to clone this repo in order to use the library.  Youc an just get the module via npm install:
+```
+npm install apigee-edge-js
+```
 
 
 ## The Object Model
