@@ -1,9 +1,11 @@
 apigee-edge-js-*.zip
 notes--DO-NOT-COMMIT.txt
 testDeveloper.js
-todo.txt
+*.txt
 zipup.sh
 testConfig.json
+.jshintrc
+.gitignore
 
 **/*.*~
 **/#*.*#

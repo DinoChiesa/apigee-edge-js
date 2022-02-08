@@ -1,7 +1,7 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.4.29",
-  "description": "nodejs library for the administration API for Apigee Edge.",
+  "version": "0.4.30",
+  "description": "nodejs library for the administration API for Apigee (Edge and X and hybrid).",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/mocha/bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
