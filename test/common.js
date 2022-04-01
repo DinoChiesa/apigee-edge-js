@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Sun Apr 30 19:30:27 2017
-// last saved: <2021-March-22 18:53:37>
+// last saved: <2022-April-01 13:57:27>
 
 /* global exports, global */
 
@@ -61,6 +61,7 @@ global.apigeejs = apigeejs;
 
 function connectApigee(cb) {
   let options = Object.assign({}, config);
+  // for verbose logging, uncomment the following.
   //options.verbosity = 1;
   if (cb) {
     return apigeejs.apigee.connect(options, function(e, org){

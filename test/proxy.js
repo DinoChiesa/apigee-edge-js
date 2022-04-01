@@ -3,7 +3,7 @@
 //
 // Tests for API Proxy operations.
 //
-// Copyright 2017-2020 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 18:33:12>
+// last saved: <2022-April-01 13:29:50>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -446,7 +446,7 @@ describe('Proxy', function() {
           .then(done);
       });
 
-      it('should fail to delete when not spec ifying a name', function(done) {
+      it('should fail to delete when not specifying a name', function(done) {
         org.proxies.del({})
           .then( (r) => assert.isTrue(false))  // should always throw
           .catch( (e) => assert.isNotNull(e, "expected error did not occur") )

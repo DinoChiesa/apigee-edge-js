@@ -1,9 +1,9 @@
 // keystore.js
 // ------------------------------------------------------------------
 //
-// Tests for API Proxy operations.
+// Tests for Keystore / Truststore operations.
 //
-// Copyright 2017-2018 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 18:55:22>
+// last saved: <2022-April-01 13:57:42>
 
 /* global path, faker, describe, it, before, after */
 
@@ -65,7 +65,7 @@ describe('Keystore', function() {
         });
       });
 
-      it('should fail create a keystore in each environment (duplicate)', done => {
+      it('should fail to create a keystore in each environment (duplicate)', done => {
         var numDoneEnv = 0;
         envlist.forEach(env => {
           const options = {
@@ -154,13 +154,10 @@ describe('Keystore', function() {
           });
         });
       });
-
     });
 
-
     describe('import cert', () => {
-      var certFileList;
-      var envlist = [];
+      let certFileList;
       before(done => {
         var actualPath = path.resolve(resourceDir);
         fs.readdir(actualPath, (e, items) => {
@@ -169,11 +166,7 @@ describe('Keystore', function() {
           certFileList = items
             .filter(item => item.match(re1) )
             .map(item => path.resolve( path.join(resourceDir, item)) );
-          org.environments.get((e, result) => {
-            assert.isNull(e, "error listing: " + util.format(e));
-            envlist = result;
-            done();
-          });
+          done();
         });
       });
 
@@ -251,7 +244,6 @@ describe('Keystore', function() {
         });
       });
 
-
     });
 
 
@@ -290,7 +282,7 @@ describe('Keystore', function() {
           var numDoneKeystores = 0;
           keystores.forEach(keystore => {
             var options = { environment, keystore };
-            org.keystores.getAlias(options, (e, result) => {
+            org.keystores.getAliases(options, (e, result) => {
               assert.isNull(e, "error: " + util.format(e));
               assert.isNotNull(result, "error");
               var numDoneAliases = 0;
