@@ -108,6 +108,10 @@ apigee.connect(options, function(e, org){
 });
 ```
 
+## Many more examples
+
+There are numerous working examples at a companion repo: [apigee-edge-js-examples](https://github.com/DinoChiesa/apigee-edge-js-examples).
+
 
 ## This is not an official Google product
 
@@ -115,7 +119,7 @@ This library and the example tools included here are not an official Google prod
 Support is available on a best-effort basis via github or community.apigee.com .
 Pull requests are welcomed.
 
-## Using th Library
+## Using the Library
 
 You do not need to clone this repo in order to use the library.  Youc an just get the module via npm install:
 ```
