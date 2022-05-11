@@ -11,6 +11,7 @@ Icon
 **/*.jar
 **/*.class
 
+**/*--DO-NOT-COMMIT.*
 **/*.*~
 **/#*.*#
 
