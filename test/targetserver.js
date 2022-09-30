@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2017-2019 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,10 +109,14 @@ describe('TargetServer', function() {
           })
           .catch((e)  => {
             assert.exists(e);
-            //console.log(JSON.stringify(e.result));
-            //console.log('error:' + e);
-            assert.exists(e.result.message);
-            assert.equal(e.result.message, `Target server ${targetName} does not exist in environment ${envlist[0]}`);
+            //console.log(e.result);
+            if (config.apigeex) {
+              assert.equal(e.result.error.code, 404);
+            }
+            else {
+              assert.exists(e.result.message);
+              assert.equal(e.result.message, `Target server ${targetName} does not exist in environment ${envlist[0]}`);
+            }
           });
       });
 
@@ -150,9 +154,14 @@ describe('TargetServer', function() {
                                             })
                                             .catch(error => {
                                               assert.exists(error.result);
-                                              assert.exists(error.result.code);
-                                              assert.exists(error.result.message);
-                                              assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                              if (config.apigeex) {
+                                                assert.exists(error.result.error.code, 404);
+                                              }
+                                              else {
+                                                assert.exists(error.result.code);
+                                                assert.exists(error.result.message);
+                                                assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                              }
                                             })
                                           );
 
@@ -181,9 +190,14 @@ describe('TargetServer', function() {
                                             })
                                             .catch(error => {
                                               assert.exists(error.result);
-                                              assert.exists(error.result.code);
-                                              assert.exists(error.result.message);
-                                              assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                              if (config.apigeex) {
+                                                assert.exists(error.result.error.code, 404);
+                                              }
+                                              else {
+                                                assert.exists(error.result.code);
+                                                assert.exists(error.result.message);
+                                                assert.equal(error.result.message, `Target server ${fakeName} does not exist in environment ${env}`);
+                                              }
                                             })
                                           );
 

@@ -3,7 +3,7 @@
 //
 // Tests for Resourcefile operations.
 //
-// Copyright 2019 Google LLC.
+// Copyright 2019-2022 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 /* global describe, faker, it, path, before */
 
+const util = require('util');
 
 function selectRandomValue (a) {
   var L1 = a.length, n = Math.floor(Math.random() * L1);
@@ -121,41 +122,202 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('delete any pre-existing org-scoped test resourcefiles', function(done) {
-        rf.get({}, function(e, result) {
-          assert.isNull(e, "error getting: " + JSON.stringify(e));
-          let numDone = 0, L = result.resourceFile.length;
-          let tick = () => { if (++numDone == L) { done(); } };
-          if (L == 0) { done(); }
-          else {
-            result.resourceFile.forEach( item => {
-              if (item.name.startsWith(specialPrefix)) {
-                rf.del(item, function(e, result) {
-                  assert.isNull(e, "error deleting: " + JSON.stringify(e));
+      if ( ! config.apigeex) {
+
+        // org-scoped resource files are not supported in Apigee X
+        it('delete any pre-existing org-scoped test resourcefiles', function(done) {
+          rf.get({}, function(e, result) {
+            assert.isNull(e, "error getting: " + JSON.stringify(e));
+            let numDone = 0, L = result.resourceFile.length;
+            let tick = () => { if (++numDone == L) { done(); } };
+            if (L == 0) { done(); }
+            else {
+              result.resourceFile.forEach( item => {
+                if (item.name.startsWith(specialPrefix)) {
+                  rf.del(item, function(e, result) {
+                    assert.isNull(e, "error deleting: " + JSON.stringify(e));
+                    tick();
+                  });
+                }
+                else {
                   tick();
-                });
-              }
-              else {
-                tick();
-              }
-            });
-          }
+                }
+              });
+            }
+          });
         });
-      });
+      }
 
     });
 
 
     describe('create', function() {
 
-      it('create some resourcefiles in each env', function(done) {
-        let numDone = 0;
-        let bong = () => { if (++numDone == environments.length) { done(); } };
+      it('create some resourcefiles in each env', () => {
+        let dirs = Object.keys(resourcefileDirs);
 
-        environments.forEach(function(environment) {
+        let fileReducer = (environment, fqdirpath) => (p, rsrcfile) =>
+        p.then( a =>
+                rf.create({filename: path.resolve( fqdirpath, rsrcfile), environment})
+                .then( $ => {
+                  //console.log(JSON.stringify($));
+                  assert.isOk($);
+                  return [...a, rsrcfile];
+                }))
+          .catch(e => {
+            console.log(util.format(e));
+            assert.fail('should not be reached A');
+          });
+
+        let dirReducer = environment => (p, shortdir) =>
+        p.then(async a => {
+          let fqdirpath = path.resolve(resourceDir, shortdir);
+          let files = resourcefileDirs[shortdir];
+          //console.log(`found ${files.length} ${shortdir} files...`);
+          return [...a, await files.reduce(fileReducer(environment, fqdirpath), Promise.resolve([]))];
+        });
+
+        let envReducer = (p, environment) =>
+        p.then( async a =>
+                ([...a, await dirs.reduce(dirReducer(environment), Promise.resolve([]))]));
+
+        return environments.reduce(envReducer, Promise.resolve([]))
+          .catch(e => {
+            console.log(util.format(e));
+            assert.fail('should not be reached B');
+          });
+      });
+
+      it('fail to create some env-scoped resourcefiles b/c file not exist', function(done) {
+
+        let envReducer = (p, environment) =>
+        p.then( a => {
+          // select a random resourc file. Need this to get a valid resourcefile type.
+          let key = selectRandomValue(Object.keys(resourcefileDirs));
+          let filename = path.resolve(resourceDir, key, faker.lorem.word(), resourcefileDirs[key][0]); // NOEXIST
+
+          return rf.create({filename, environment})
+            .then( () => assert.fail('should not be reached'))
+            .catch( error => {
+              assert.exists(error);
+              assert.exists(error.stack);
+              assert.equal(error.message, (config.apigeex)? 'The resourcefile does not exist':'bad status: 404');
+              return [...a, environment];
+            });
+
+        });
+
+        environments.reduce(envReducer, Promise.resolve([]))
+          .catch(e => {
+            console.log(util.format(e));
+            assert.fail('should not be reached B');
+          })
+          .finally( $ => done());
+
+      });
+
+
+      it('fail to create an env-scoped resourcefile with no filename', () => {
+        let envReducer = (p, environment) =>
+        p.then( a => {
+          return rf.create({/* name:badName,*/ environment})
+            .then( () => assert.fail('should not be reached A'))
+            .catch( error => {
+              assert.exists(error);
+              assert.exists(error.stack);
+              assert.equal(error.message, (config.apigeex)? 'Missing filename':'bad status: 404');
+              return [...a, environment];
+            });
+
+        });
+
+        return environments.reduce(envReducer, Promise.resolve([]))
+          .then( r => assert.equal(r.length, environments.length))
+          .catch(e => {
+            console.log(util.format(e));
+            assert.fail('should not be reached B');
+          });
+
+      });
+
+
+      it('fail to create an env-scoped resourcefile b/c it already exists', () => {
+
+        let envReducer = (p, environment) =>
+        p.then( a => {
+          return rf.get({environment})
+            .then( r => {
+              //console.log(util.format(r));
+              assert.isAbove(r.resourceFile.length, 0);
+              let selected = selectRandomValue(r.resourceFile); // select one that already exists
+              let typ = selectRandomValue(Object.keys(resourcefileDirs));
+              let rsrc = selectRandomValue(resourcefileDirs[typ]);
+              let filename = path.resolve(resourceDir, typ, rsrc);
+              return rf.create({...selected, ...{filename}, ...{environment}})
+                .then( () => assert.fail('should not be reached A'))
+                .catch( error => {
+                  assert.exists(error);
+                  assert.exists(error.stack);
+                  //assert.equal(error.message, (config.apigeex)? 'Missing filename':'bad status: 404');
+                  return [...a, environment];
+                });
+            });
+        });
+
+        return environments.reduce(envReducer, Promise.resolve([]))
+          .then( r => {
+            assert.isOk(r);
+            assert.isOk(r.length);
+            assert.equal(r.length, environments.length);
+          })
+          .catch(e => {
+            console.log(util.format(e));
+            assert.fail('should not be reached B');
+          });
+      });
+
+
+
+      if ( config.apigeex) {
+        // Only Apigee X validates the type of resource.
+        it('fail to create an env-scoped resourcefile of invalid type', () => {
+          let envReducer = (p, environment) =>
+          p.then( a => {
+            let typ = selectRandomValue(Object.keys(resourcefileDirs));
+            let rsrc = selectRandomValue(resourcefileDirs[typ]);
+            let filename = path.resolve(resourceDir, typ, rsrc);
+            let badType = faker.lorem.word() +'1';
+
+            return rf.create({environment, type:badType, filename})
+              .then( () => assert.fail('should not be reached A'))
+              .catch( error => {
+                assert.exists(error);
+                assert.exists(error.stack);
+                return [...a, environment];
+              });
+          });
+
+          return environments.reduce(envReducer, Promise.resolve([]))
+            .then( r => {
+              assert.isOk(r);
+              assert.isOk(r.length);
+              assert.equal(r.length, environments.length);
+            })
+            .catch(e => {
+              console.log(util.format(e));
+              assert.fail('should not be reached B');
+            });
+        });
+      }
+
+      if ( ! config.apigeex) {
+
+        // org-scoped resource files are not supported in Apigee X/hybrid
+
+        it('create some org-scoped resourcefiles', function(done) {
           let keys = Object.keys(resourcefileDirs);
           let numDone = 0;
-          let tock = () => { if (++numDone == keys.length) { bong(); } };
+          let tock = () => { if (++numDone == keys.length) { done(); } };
 
           keys.forEach(function (shortdir) {
             let fqdirpath = path.resolve(resourceDir, shortdir);
@@ -163,156 +325,72 @@ describe('Resourcefile', function() {
             let tick = () => { if (++numDone == L) { tock(); } };
             resourcefileDirs[shortdir].forEach( rsrcfile => {
               let filename = path.resolve(fqdirpath, rsrcfile);
-              rf.create({filename, environment}, function(e, result) {
+              rf.create({filename}, function(e, result) {
                 assert.isNull(e, sprintf("error creating (%s): ", rsrcfile) + JSON.stringify(e));
                 tick();
               });
             });
           });
         });
-      });
 
-      it('create some org-scoped resourcefiles', function(done) {
-        let keys = Object.keys(resourcefileDirs);
-        let numDone = 0;
-        let tock = () => { if (++numDone == keys.length) { done(); } };
+        it('fail to create org-scoped resourcefiles b/c file not exist', function(done) {
+          let keys = Object.keys(resourcefileDirs);
+          let numDone = 0;
+          let tock = () => { if (++numDone == keys.length) { done(); } };
 
-        keys.forEach(function (shortdir) {
-          let fqdirpath = path.resolve(resourceDir, shortdir);
-          let L = resourcefileDirs[shortdir].length, numDone = 0;
-          let tick = () => { if (++numDone == L) { tock(); } };
-          resourcefileDirs[shortdir].forEach( rsrcfile => {
-            let filename = path.resolve(fqdirpath, rsrcfile);
-            rf.create({filename}, function(e, result) {
-              assert.isNull(e, sprintf("error creating (%s): ", rsrcfile) + JSON.stringify(e));
-              tick();
+          keys.forEach(function (shortdir) {
+            let fqdirpath = path.resolve(resourceDir, shortdir);
+            let L = resourcefileDirs[shortdir].length, numDone = 0;
+            let tick = () => { if (++numDone == L) { tock(); } };
+            resourcefileDirs[shortdir].forEach( rsrcfile => {
+              let filename = path.resolve(fqdirpath, faker.lorem.word(), rsrcfile); // NOEXIST
+              rf.create({filename}, function(e, result) {
+                assert.isNotNull(e, sprintf("error creating (%s): ", filename) + JSON.stringify(e));
+                tick();
+              });
             });
           });
         });
-      });
 
-      it('fail to create some env-scoped resourcefiles b/c file not exist', function(done) {
-        let numDone = 0;
-        let bong = () => { if (++numDone == environments.length) { done(); } };
-
-        environments.forEach(function(environment) {
-          let key = selectRandomValue(Object.keys(resourcefileDirs));
-          let filename = path.resolve(resourceDir, key, faker.lorem.word(), resourcefileDirs[key][0]); // NOEXIST
-          rf.create({filename, environment}, function(e, result) {
-            assert.isNotNull(e, sprintf("error creating (%s): ", filename) + JSON.stringify(e));
-            bong();
-          });
-        });
-      });
-
-      it('fail to create org-scoped resourcefiles b/c file not exist', function(done) {
-        let keys = Object.keys(resourcefileDirs);
-        let numDone = 0;
-        let tock = () => { if (++numDone == keys.length) { done(); } };
-
-        keys.forEach(function (shortdir) {
-          let fqdirpath = path.resolve(resourceDir, shortdir);
-          let L = resourcefileDirs[shortdir].length, numDone = 0;
-          let tick = () => { if (++numDone == L) { tock(); } };
-          resourcefileDirs[shortdir].forEach( rsrcfile => {
-            let filename = path.resolve(fqdirpath, faker.lorem.word(), rsrcfile); // NOEXIST
-            rf.create({filename}, function(e, result) {
-              assert.isNotNull(e, sprintf("error creating (%s): ", filename) + JSON.stringify(e));
-              tick();
-            });
-          });
-        });
-      });
-
-      it('fail to create an env-scoped resourcefile with no filename', function(done) {
-        let numDone = 0;
-        let bong = () => { if (++numDone == environments.length) { done(); } };
-        let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        //let typ = selectRandomValue(Object.keys(resourcefileDirs));
-        //let rsrc = selectRandomValue(resourcefileDirs[typ]);
-        //let filename = path.resolve(resourceDir, typ, rsrc);
-        environments.forEach(function(environment) {
-          rf.create({environment, name:badName}, function(e, result){
+        it('fail to create an org-scoped resourcefile with no filename', function(done) {
+          let badName = faker.lorem.word() +'1' + selectRandomValidType();
+          //let key = selectRandomValue(Object.keys(resourcefileDirs));
+          //let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
+          rf.create({name:badName}, function(e, result){
             assert.isNotNull(e, "the expected error did not occur");
-            bong();
+            done();
           });
         });
-      });
 
-      it('fail to create an org-scoped resourcefile with no filename', function(done) {
-        let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        //let key = selectRandomValue(Object.keys(resourcefileDirs));
-        //let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
-        rf.create({name:badName}, function(e, result){
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
-        });
-      });
 
-      it('fail to create an env-scoped resourcefile b/c it already exists', function(done) {
-        let numDone = 0;
-        let tick = () => { if (++numDone == environments.length) { done(); } };
-
-        environments.forEach(function(environment) {
-          rf.get({environment}, function(e, result) {
+        it('fail to create an org-scoped resourcefile b/c it already exists', function(done) {
+          rf.get({}, function(e, result) {
             assert.isNull(e, "error getting: " + JSON.stringify(e));
             assert.isAbove(result.resourceFile.length, 0);
             let selected = selectRandomValue(result.resourceFile); // select one that already exists
             let typ = selectRandomValue(Object.keys(resourcefileDirs));
             let rsrc = selectRandomValue(resourcefileDirs[typ]);
             let filename = path.resolve(resourceDir, typ, rsrc);
-            rf.create({...selected, ...{filename}, ...{environment}}, function(e, result) {
+            rf.create({...selected, ...{filename}}, function(e, result) {
               assert.isNotNull(e, "unexpected success while creating");
-              tick();
+              done();
             });
           });
         });
-      });
 
-      it('fail to create an org-scoped resourcefile b/c it already exists', function(done) {
-        rf.get({}, function(e, result) {
-          assert.isNull(e, "error getting: " + JSON.stringify(e));
-          assert.isAbove(result.resourceFile.length, 0);
-          let selected = selectRandomValue(result.resourceFile); // select one that already exists
-          let typ = selectRandomValue(Object.keys(resourcefileDirs));
-          let rsrc = selectRandomValue(resourcefileDirs[typ]);
-          let filename = path.resolve(resourceDir, typ, rsrc);
-          rf.create({...selected, ...{filename}}, function(e, result) {
-            assert.isNotNull(e, "unexpected success while creating");
-            done();
-          });
-        });
-      });
-
-      // Apparently, there is no such thing as an invalid type of resource.
-      // it('fail to create an env-scoped resourcefile of invalid type', function(done) {
-      //   let numDone = 0;
-      //   let bong = () => { if (++numDone == environments.length) { done(); } };
-      //   let badType = faker.lorem.word() +'1';
-      //   let key = selectRandomValue(Object.keys(resourcefileDirs));
-      //   console.log('selected key: ' + key);
-      //   let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
-      //   environments.forEach(function(env) {
-      //     rf.create({environment:env, type:badType, filename}, function(e, result){
-      //       console.log(e.stack);
-      //       assert.isNotNull(e, "the expected error did not occur");
-      //       bong();
-      //     });
-      //   });
-      // });
-
-      // Apparently, there is no such thing as an invalid type of resource.
-      // it('fail to create an org-scoped resourcefile of invalid type', function(done) {
-      //   let badType = faker.lorem.word() +'1';
-      //   let key = selectRandomValue(Object.keys(resourcefileDirs));
-      //   console.log('selected key: ' + key);
-      //   let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
-      //   rf.create({type:badType, filename}, function(e, result){
-      //       console.log(e.stack);
-      //     assert.isNotNull(e, "the expected error did not occur");
-      //     done();
-      //   });
-      // });
+        // In Edge, there is no such thing as an invalid type of resource.
+        // it('fail to create an org-scoped resourcefile of invalid type', function(done) {
+        //   let badType = faker.lorem.word() +'1';
+        //   let key = selectRandomValue(Object.keys(resourcefileDirs));
+        //   console.log('selected key: ' + key);
+        //   let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
+        //   rf.create({type:badType, filename}, function(e, result){
+        //       console.log(e.stack);
+        //     assert.isNotNull(e, "the expected error did not occur");
+        //     done();
+        //   });
+        // });
+      }
 
     });
 
@@ -369,6 +447,9 @@ describe('Resourcefile', function() {
         });
       });
 
+      if ( ! config.apigeex) {
+        // org-scoped resource files not supported in X/hybrid
+
       it('list resourcefiles for the org', function(done) {
         rf.get({}, function(e, result){
           assert.isNull(e, "error getting: " + JSON.stringify(e));
@@ -400,19 +481,20 @@ describe('Resourcefile', function() {
           });
         });
       });
-
-      it('fail to get an environment-scoped resourcefile b/c not exist', function(done) {
-        let environment = selectRandomValue(environments);
+      it('fail to get a org-scoped resourcefile b/c not exist', function(done) {
         let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        rf.get({environment, name: badName}, function(e, result){
+        rf.get({name:badName}, function(e, result){
           assert.isNotNull(e, "error getting: " + JSON.stringify(e));
           done();
         });
       });
 
-      it('fail to get a org-scoped resourcefile b/c not exist', function(done) {
+      }
+
+      it('fail to get an environment-scoped resourcefile b/c not exist', function(done) {
+        let environment = selectRandomValue(environments);
         let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        rf.get({name:badName}, function(e, result){
+        rf.get({environment, name: badName}, function(e, result){
           assert.isNotNull(e, "error getting: " + JSON.stringify(e));
           done();
         });
@@ -456,25 +538,6 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('update some org-scoped resourcefiles', function(done) {
-        let keys = Object.keys(resourcefileDirs);
-        let numDone = 0;
-        let tock = () => { if (++numDone == keys.length) { done(); } };
-
-        keys.forEach(function (shortdir) {
-          let fqdirpath = path.resolve(resourceDir, shortdir);
-          let L = resourcefileDirs[shortdir].length, numDone = 0;
-          let tick = () => { if (++numDone == L) { tock(); } };
-          resourcefileDirs[shortdir].forEach( rsrcfile => {
-            let filename = path.resolve(fqdirpath, rsrcfile);
-            rf.update({filename}, function(e, result) {
-              assert.isNull(e, sprintf("error updating (%s): ", rsrcfile) + JSON.stringify(e));
-              tick();
-            });
-          });
-        });
-      });
-
       it('fail to update a non-existent environment-scoped resourcefile', function(done) {
         let environment = selectRandomValue(environments);
         let typ = selectRandomValue(Object.keys(resourcefileDirs));
@@ -482,16 +545,6 @@ describe('Resourcefile', function() {
         let filename = path.resolve(resourceDir, typ, rsrc); // is valid
         rf.update({...{environment, name:faker.lorem.word(), type:selectRandomValidType()}, ...{filename}}, function(e, result) {
           assert.isNotNull(e, "unexpected success while updating: " + JSON.stringify(e));
-          done();
-        });
-      });
-
-      it('fail to update a non-existent org-scoped resourcefile', function(done) {
-        let typ = selectRandomValue(Object.keys(resourcefileDirs));
-        let rsrc = selectRandomValue(resourcefileDirs[typ]);
-        let filename = path.resolve(resourceDir, typ, rsrc); // is valid
-        rf.update({...{name:faker.lorem.word(), type:selectRandomValidType()}, ...{filename}}, function(e, result) {
-          assert.isNotNull(e, "unexpected success while updating");
           done();
         });
       });
@@ -511,16 +564,6 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('fail to update an org-scoped resourcefile with no filename', function(done) {
-        let badName = faker.lorem.word() +'1' + selectRandomValidType();
-        let key = selectRandomValue(Object.keys(resourcefileDirs));
-        let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
-        rf.update({name:badName}, function(e, result){
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
-        });
-      });
-
       it('fail to update some env-scoped resourcefiles b/c file not exist', function(done) {
         let numDone = 0;
         let bong = () => { if (++numDone == environments.length) { done(); } };
@@ -535,15 +578,58 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('fail to update org-scoped resourcefile b/c file not exist', function(done) {
-        let key = selectRandomValue(Object.keys(resourcefileDirs));
-        let filename = path.resolve(resourceDir, key, faker.lorem.word(), resourcefileDirs[key][0]); // NOEXIST
 
-        rf.update({filename}, function(e, result) {
-          assert.isNotNull(e, sprintf("error updating (%s): ", filename) + JSON.stringify(e));
-          done();
+      if ( ! config.apigeex) {
+        it('update some org-scoped resourcefiles', function(done) {
+          let keys = Object.keys(resourcefileDirs);
+          let numDone = 0;
+          let tock = () => { if (++numDone == keys.length) { done(); } };
+
+          keys.forEach(function (shortdir) {
+            let fqdirpath = path.resolve(resourceDir, shortdir);
+            let L = resourcefileDirs[shortdir].length, numDone = 0;
+            let tick = () => { if (++numDone == L) { tock(); } };
+            resourcefileDirs[shortdir].forEach( rsrcfile => {
+              let filename = path.resolve(fqdirpath, rsrcfile);
+              rf.update({filename}, function(e, result) {
+                assert.isNull(e, sprintf("error updating (%s): ", rsrcfile) + JSON.stringify(e));
+                tick();
+              });
+            });
+          });
         });
-      });
+
+        it('fail to update a non-existent org-scoped resourcefile', function(done) {
+          let typ = selectRandomValue(Object.keys(resourcefileDirs));
+          let rsrc = selectRandomValue(resourcefileDirs[typ]);
+          let filename = path.resolve(resourceDir, typ, rsrc); // is valid
+          rf.update({...{name:faker.lorem.word(), type:selectRandomValidType()}, ...{filename}}, function(e, result) {
+            assert.isNotNull(e, "unexpected success while updating");
+            done();
+          });
+        });
+
+        it('fail to update an org-scoped resourcefile with no filename', function(done) {
+          let badName = faker.lorem.word() +'1' + selectRandomValidType();
+          let key = selectRandomValue(Object.keys(resourcefileDirs));
+          let filename = path.resolve(resourceDir, key, resourcefileDirs[key][0]);
+          rf.update({name:badName}, function(e, result){
+            assert.isNotNull(e, "the expected error did not occur");
+            done();
+          });
+        });
+
+        it('fail to update org-scoped resourcefile b/c file not exist', function(done) {
+          let key = selectRandomValue(Object.keys(resourcefileDirs));
+          let filename = path.resolve(resourceDir, key, faker.lorem.word(), resourcefileDirs[key][0]); // NOEXIST
+
+          rf.update({filename}, function(e, result) {
+            assert.isNotNull(e, sprintf("error updating (%s): ", filename) + JSON.stringify(e));
+            done();
+          });
+        });
+
+      }
 
     });
 
@@ -571,27 +657,6 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('delete org-scoped test resourcefiles', function(done) {
-        rf.get({}, function(e, result){
-          assert.isNull(e, "error getting: " + JSON.stringify(e));
-          assert.isAbove(result.resourceFile.length, -1);
-          let numDone = 0, L = result.resourceFile.length;
-          if (L == 0) { return done(); }
-          let tick = () => { if (++numDone == L) { done(); } };
-          result.resourceFile.forEach( item => {
-            if (item.name.startsWith(specialPrefix)) {
-              rf.del(item, function(e, result) {
-                assert.isNull(e, "error deleting: " + JSON.stringify(e));
-                tick();
-              });
-            }
-            else {
-              tick();
-            }
-          });
-        });
-      });
-
       it('fail to delete non-existing resourcefiles from each env', function(done) {
         let numDone = 0;
         let bong = () => { if (++numDone == environments.length) { done(); } };
@@ -614,23 +679,6 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('fail to delete non-existing org-scoped resourcefiles', function(done) {
-        let keys = Object.keys(resourcefileDirs);
-        let numDone = 0;
-        let tock = () => { if (++numDone == keys.length) { done(); } };
-        keys.forEach(function (shortdir) {
-          let L = resourcefileDirs[shortdir].length, numDone = 0;
-          let tick = () => { if (++numDone == L) { tock(); } };
-          resourcefileDirs[shortdir].forEach( rsrcfile => {
-            let name = faker.lorem.word() + selectRandomValidType();
-            rf.del({name}, function(e, result){
-              assert.isNotNull(e, 'expected error deleting ' + name + ' ' + JSON.stringify(e));
-              tick();
-            });
-          });
-        });
-      });
-
       it('fail to delete an env-scoped resourcefiles because no name was specified', function(done) {
         let numDone = 0;
         let bong = () => { if (++numDone == environments.length) { done(); } };
@@ -642,14 +690,55 @@ describe('Resourcefile', function() {
         });
       });
 
-      it('fail to delete an org-scoped resourcefile because no name was specified', function(done) {
-        rf.del({}, function(e, result){
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
+      if ( ! config.apigeex) {
+        it('delete org-scoped test resourcefiles', function(done) {
+          rf.get({}, function(e, result){
+            assert.isNull(e, "error getting: " + JSON.stringify(e));
+            assert.isAbove(result.resourceFile.length, -1);
+            let numDone = 0, L = result.resourceFile.length;
+            if (L == 0) { return done(); }
+            let tick = () => { if (++numDone == L) { done(); } };
+            result.resourceFile.forEach( item => {
+              if (item.name.startsWith(specialPrefix)) {
+                rf.del(item, function(e, result) {
+                  assert.isNull(e, "error deleting: " + JSON.stringify(e));
+                  tick();
+                });
+              }
+              else {
+                tick();
+              }
+            });
+          });
         });
-      });
 
+        it('fail to delete non-existing org-scoped resourcefiles', function(done) {
+          let keys = Object.keys(resourcefileDirs);
+          let numDone = 0;
+          let tock = () => { if (++numDone == keys.length) { done(); } };
+          keys.forEach(function (shortdir) {
+            let L = resourcefileDirs[shortdir].length, numDone = 0;
+            let tick = () => { if (++numDone == L) { tock(); } };
+            resourcefileDirs[shortdir].forEach( rsrcfile => {
+              let name = faker.lorem.word() + selectRandomValidType();
+              rf.del({name}, function(e, result){
+                assert.isNotNull(e, 'expected error deleting ' + name + ' ' + JSON.stringify(e));
+                tick();
+              });
+            });
+          });
+        });
+
+        it('fail to delete an org-scoped resourcefile because no name was specified', function(done) {
+          rf.del({}, function(e, result){
+            assert.isNotNull(e, "the expected error did not occur");
+            done();
+          });
+        });
+
+      }
     });
+
 
   });
 

@@ -3,7 +3,7 @@
 //
 // Tests for operations on Developer apps.
 //
-// Copyright 2017-2019 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,12 +37,15 @@ describe('DeveloperApp', function() {
             firstName,
             userName : firstName + lastName
           };
-    var apiProducts = [];
+    let apiProducts = [];
 
     before( () =>
             org.developers.create(createOptions)
             .then ( () => org.products.get() )
-            .then ( (result) => { apiProducts = result;} )
+            .then ( (result) => {
+              apiProducts = (result.apiProduct) ?result.apiProduct.map(p => p.name)
+                : result;
+            } )
           );
 
     after( () => org.developers.del({developerEmail}) );
@@ -80,7 +83,13 @@ describe('DeveloperApp', function() {
           .catch( error => {
             assert.equal(error, "Error: bad status: 409");
             assert.exists(error.result);
-            assert.equal(error.result.message, `App with name ${entityName} already exists`);
+            if (config.apigeex) {
+              //console.log(error.result);
+              assert.equal(error.result.error.code, 409);
+            }
+            else {
+              assert.equal(error.result.message, `App with name ${entityName} already exists`);
+            }
           });
       });
 
@@ -96,7 +105,13 @@ describe('DeveloperApp', function() {
           .catch( error => {
             assert.equal(error, "Error: bad status: 400");
             assert.exists(error.result);
-            assert.isTrue(error.result.message.startsWith(`API Product [${fakeName}] does not exist`));
+            if (config.apigeex) {
+              assert.equal(error.result.error.code, 400);
+              assert.isOk(error.result.error.message.indexOf('does not exist '));
+            }
+            else {
+              assert.isTrue(error.result.message.startsWith(`API Product [${fakeName}] does not exist`));
+            }
           } );
 
       });
@@ -149,11 +164,16 @@ describe('DeveloperApp', function() {
          org.developerapps
          .get({developerEmail})
          .then ( result => {
-           assert.notExists(result.error);
+           if (config.apigeex) {
+             result = result.app;
+           }
            assert.exists(result.length);
            assert.isAtLeast(result.length, 1);
          })
-         .catch(reason => assert.fail('should not be reached'))
+         .catch(reason => {
+           console.log(reason);
+           assert.fail('should not be reached');
+         })
         );
 
       it('should fail to get apps when supplying no identifier', () =>
@@ -174,8 +194,14 @@ describe('DeveloperApp', function() {
           .catch( reason => {
             assert.isNotNull(reason.error, "the expected error did not occur");
             assert.exists(reason.result);
+            if (config.apigeex) {
+              assert.equal(reason.result.error.code, 404);
+              assert.isOk(reason.result.error.message.indexOf('does not exist '));
+            }
+            else {
             assert.exists(reason.result.message);
-            assert.equal(reason.result.message, `App named ${nonExistentApp} does not exist under ${developerEmail}`);
+              assert.equal(reason.result.message, `App named ${nonExistentApp} does not exist under ${developerEmail}`);
+            }
           });
       });
 
@@ -186,8 +212,14 @@ describe('DeveloperApp', function() {
           .catch( error => {
             assert.isNotNull(error, "the expected error did not occur");
             assert.exists(error.result);
-            assert.exists(error.result.message);
-            assert.equal(error.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${org.conn.orgname}`);
+            if (config.apigeex) {
+              assert.equal(error.result.error.code, 404);
+              assert.isOk(error.result.error.message.indexOf('does not exist '));
+            }
+            else {
+              assert.exists(error.result.message);
+              assert.equal(error.result.message,`DeveloperId ${nonExistentDev} does not exist in organization ${org.conn.orgname}`);
+            }
           });
       });
 
@@ -242,14 +274,21 @@ describe('DeveloperApp', function() {
         // .catch(reason => assert.fail('should not be reached'));
       });
 
-      it('should replace the custom attributes on an existing developerapp', () => {
+      it('should remove the custom attributes on an existing developerapp', () => {
         const attributes = {};
         return org.developerapps.update({ developerEmail, name : entityName, replace:true, attributes })
           .then ( result => {
-            assert.exists(result.attributes);
-            assert.equal(result.attributes.length, 0);
+            if (config.apigeex) {
+              assert.notExists(result.attributes);
+            }
+            else {
+              assert.exists(result.attributes);
+              assert.equal(result.attributes.length, 0);
+            }
           })
-          .catch(reason => assert.fail('should not be reached'));
+          .catch(reason => {
+            assert.fail('should not be reached');
+          });
       });
 
 
@@ -291,8 +330,14 @@ describe('DeveloperApp', function() {
           .catch( error => {
             assert.equal(error,"Error: bad status: 404");
             assert.exists(error.result);
-            assert.equal(error.result.code,"developer.service.AppDoesNotExist");
-            assert.equal(error.result.message,`App named ${fakeName} does not exist under ${developerEmail}`);
+            if (config.apigeex) {
+              assert.equal(error.result.error.code, 404);
+              assert.isOk(error.result.error.message.indexOf('does not exist '));
+            }
+            else {
+              assert.equal(error.result.code,"developer.service.AppDoesNotExist");
+              assert.equal(error.result.message,`App named ${fakeName} does not exist under ${developerEmail}`);
+            }
           });
       });
 
@@ -304,8 +349,14 @@ describe('DeveloperApp', function() {
           .catch( error => {
             assert.equal(error,"Error: bad status: 404");
             assert.exists(error.result);
-            assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(error.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${org.conn.orgname}`);
+            if (config.apigeex) {
+              assert.equal(error.result.error.code, 404);
+              assert.isOk(error.result.error.message.indexOf('does not exist '));
+            }
+            else {
+              assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
+              assert.equal(error.result.message,`DeveloperId ${fakeEmail} does not exist in organization ${org.conn.orgname}`);
+            }
           });
       });
 

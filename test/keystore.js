@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2022-April-01 13:57:42>
+// last saved: <2022-December-20 17:25:20>
 
 /* global path, faker, describe, it, before, after */
 
@@ -341,7 +341,7 @@ describe('Keystore', function() {
           let numDoneKeystores = 0;
           keystores.forEach(keystore => {
             options.keystore = keystore;
-            //console.log('  delete: %s/%s', env, keystore);
+            //console.log('  delete: %s/%s', environment, keystore);
             org.keystores.del(options, (e, result) => {
               assert.isNull(e, "error deleting: " + util.format(e));
               numDoneKeystores++;
@@ -358,9 +358,9 @@ describe('Keystore', function() {
 
       it('should fail to delete non-existent keystores', done => {
         let numDone = 0;
-        envlist.forEach(env => {
+        envlist.forEach(environment => {
           const options = {
-                environment : env,
+                environment,
                 name : 'non-existent-keystore-' + faker.random.alphaNumeric(23)
               };
           org.keystores.del(options)

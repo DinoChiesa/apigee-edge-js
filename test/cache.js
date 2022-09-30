@@ -3,7 +3,7 @@
 //
 // Tests for cache operations.
 //
-// Copyright 2018-2020 Google LLC.
+// Copyright 2018-2022 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,37 +53,38 @@ describe('Cache', function() {
         });
       });
 
-      it('should fail to create a cache with no name', done => {
-        let numDone = 0;
-        const tick = () => { if (++numDone == environments.length) { done(); } };
+      if ( ! config.apigeex) {
+        it('should fail to create a cache with no name', done => {
+          let numDone = 0;
+          const tick = () => { if (++numDone == environments.length) { done(); } };
 
-        environments.forEach(env => {
-          org.caches.create({environment:env}, (e, result) => {
-            assert.isNotNull(e, "the expected error did not occur");
-            tick();
+          environments.forEach(env => {
+            org.caches.create({environment:env}, (e, result) => {
+              assert.isNotNull(e, "the expected error did not occur");
+              tick();
+            });
           });
         });
-      });
 
-      it('should fail to create a cache with an empty name', done => {
-        let numDone = 0;
-        const tick = () => { if (++numDone == environments.length) { done(); } };
+        it('should fail to create a cache with an empty name', done => {
+          let numDone = 0;
+          const tick = () => { if (++numDone == environments.length) { done(); } };
 
-        environments.forEach(env => {
-          org.caches.create({cacheName:'', environment:env}, (e, result) => {
-            assert.isNotNull(e, "the expected error did not occur");
-            tick();
+          environments.forEach(env => {
+            org.caches.create({cacheName:'', environment:env}, (e, result) => {
+              assert.isNotNull(e, "the expected error did not occur");
+              tick();
+            });
           });
         });
-      });
 
-      it('should fail to create a cache with no env', done => {
-        org.caches.create({cacheName}, (e, result) => {
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
+        it('should fail to create a cache with no env', done => {
+          org.caches.create({cacheName}, (e, result) => {
+            assert.isNotNull(e, "the expected error did not occur");
+            done();
+          });
         });
-      });
-
+      }
       it('should fail to create a cache with an invalid env name', done => {
         org.kvms.create({cacheName, environment:faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
@@ -108,13 +109,14 @@ describe('Cache', function() {
         });
       });
 
+      if ( ! config.apigeex) {
       it('should fail to get caches from a non-existent env', done => {
         org.caches.get({environment:faker.random.alphaNumeric(22)}, (e, result) => {
           assert.isNotNull(e, "the expected error did not occur");
           done();
         });
       });
-
+      }
       it('should fail to get non-existent cache from an env', done => {
         let numDone = 0;
         const tick = () => { if (++numDone == environments.length) { done(); } };
@@ -131,18 +133,20 @@ describe('Cache', function() {
 
     describe('clear', function() {
 
-      it('should clear a cache from each env', done => {
-        let numDone = 0;
-        const tick = () => { if (++numDone == environments.length) { done(); } };
+      if ( ! config.apigeex) {
+        it('should clear a cache from each env', done => {
+          let numDone = 0;
+          const tick = () => { if (++numDone == environments.length) { done(); } };
 
-        environments.forEach(env => {
-          org.caches.clear({cacheName, environment:env}, (e, result) => {
-            assert.isNull(e, "error clearing: " + JSON.stringify(e));
-            //assert.isAtLeast(result.length, 1, "zero results");
-            tick();
+          environments.forEach(env => {
+            org.caches.clear({cacheName, environment:env}, (e, result) => {
+              assert.isNull(e, "error clearing: " + JSON.stringify(e));
+              //assert.isAtLeast(result.length, 1, "zero results");
+              tick();
+            });
           });
         });
-      });
+      }
 
       it('should fail to clear a non-existent cache from each env', done => {
         const bogusCacheName = 'bogus-' +
@@ -157,7 +161,6 @@ describe('Cache', function() {
           });
         });
       });
-
 
     });
 
@@ -175,31 +178,33 @@ describe('Cache', function() {
         });
       });
 
-      it('should fail to delete a cache because neither name nor env was specified', done => {
-        org.caches.del({}, (e, result) => {
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
-        });
-      });
-
-      it('should fail to delete a cache because no env was specified', done => {
-        org.caches.del({cacheName: faker.random.alphaNumeric(22)}, (e, result) => {
-          assert.isNotNull(e, "the expected error did not occur");
-          done();
-        });
-      });
-
-      it('should fail to delete a non-existent cache from each env', done => {
-        let numDone = 0;
-        const tick = () => { if (++numDone == environments.length) { done(); } };
-
-        environments.forEach(env => {
-          org.caches.del({cacheName: faker.random.alphaNumeric(22), environment:env}, (e, result) => {
+      if ( ! config.apigeex) {
+        it('should fail to delete a cache because neither name nor env was specified', done => {
+          org.caches.del({}, (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
-            tick();
+            done();
           });
         });
-      });
+
+        it('should fail to delete a cache because no env was specified', done => {
+          org.caches.del({cacheName: faker.random.alphaNumeric(22)}, (e, result) => {
+            assert.isNotNull(e, "the expected error did not occur");
+            done();
+          });
+        });
+
+        it('should fail to delete a non-existent cache from each env', done => {
+          let numDone = 0;
+          const tick = () => { if (++numDone == environments.length) { done(); } };
+
+          environments.forEach(env => {
+            org.caches.del({cacheName: faker.random.alphaNumeric(22), environment:env}, (e, result) => {
+              assert.isNotNull(e, "the expected error did not occur");
+              tick();
+            });
+          });
+        });
+      }
 
     });
 

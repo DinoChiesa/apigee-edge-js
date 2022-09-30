@@ -3,7 +3,7 @@
 //
 // Tests for promise wrappers.
 //
-// Copyright 2018-2019 Google LLC.
+// Copyright 2018-2022 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,14 +60,24 @@ describe('Promise', function() {
 
     it('should connect and get developers', () =>
       common.connectApigee()
-       .then ( (org) => org.developers.get() )
-       .then ( (result) => assert.isAtLeast(result.length, 1) )
+       .then ( org => org.developers.get() )
+       .then ( result => {
+         if (config.apigeex) {
+           result = result.developer;
+         }
+         assert.isAtLeast(result.length, 1);
+       })
       );
 
     it('should connect and get proxies', () =>
       common.connectApigee()
-       .then ( (org) => org.proxies.get() )
-       .then ( (result) => assert.isAtLeast(result.length, 1) )
+       .then ( org => org.proxies.get() )
+       .then ( result => {
+         if (config.apigeex) {
+           result = result.proxies;
+         }
+         assert.isAtLeast(result.length, 1);
+       })
       );
 
     it('should connect and get kvms', () =>
@@ -84,8 +94,13 @@ describe('Promise', function() {
 
     it('should connect and get sharedflows', () =>
       common.connectApigee()
-       .then ( (org) => org.sharedflows.get() )
-       .then ( (result) => assert(Array.isArray(result) ) )
+       .then ( org => org.sharedflows.get() )
+       .then ( result => {
+         if (config.apigeex) {
+           result = result.sharedFlows;
+         }
+         assert(Array.isArray(result) );
+       })
       );
 
     it('should connect and get flowhooks in an environment', () =>
@@ -142,62 +157,75 @@ describe('Promise', function() {
        .then ( (org) => {
          //org.conn.verbosity = 1;
          return org.caches.create({cacheName, environment:environments[0]})
-           .then( result => assert.equal(result.name, cacheName) )
-           .catch(reason => assert.fail('should not be reached'));
+           .then( result => {
+             //console.log(result);
+             if (config.apigeex) {
+               assert.isOk(result);
+             }
+             else {
+               assert.equal(result.name, cacheName);
+             }
+           })
+           .catch(reason => {
+             console.log(reason);
+             assert.fail('should not be reached');
+           });
        } )
       );
 
-    it('should return proper error on failure to create a cache', () =>
-       common.connectApigee()
-       .then( org => org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)}) )
-       .then( () => assert.fail('should not be reached'))
-       .catch( error => {
-         assert.equal(error, "Error: bad status: 404");
-         assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
-       }));
+    if ( ! config.apigeex) {
+      it('should return proper error on failure to create a cache', () =>
+         common.connectApigee()
+         .then( org => org.caches.create({cacheName, environment:faker.random.alphaNumeric(22)}) )
+         .then( () => assert.fail('should not be reached'))
+         .catch( error => {
+           assert.equal(error, "Error: bad status: 404");
+           assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+         }));
 
-    it('should delete a cache in an env via promises', () =>
-      common.connectApigee()
-       .then ( org =>
-               org.caches.del({cacheName, environment:environments[0]}) )
-       .then( result => assert.equal(result.name, cacheName) )
-       .catch(reason => assert.fail('should not be reached'))
-      );
+      it('should delete a cache in an env via promises', () =>
+         common.connectApigee()
+         .then ( org =>
+                 org.caches.del({cacheName, environment:environments[0]}) )
+         .then( result => assert.equal(result.name, cacheName) )
+         .catch(reason => assert.fail('should not be reached'))
+        );
 
-    it('should return proper errors when failing to delete non-existent cache', () =>
-      common.connectApigee()
-        .then ( (org) =>
-          org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
-        )
-       .then( () => assert.fail('should not be reached'))
-       .catch( error => {
-         assert.equal(error, "Error: bad status: 404");
-         assert.equal(error.result.code, "messaging.config.beans.CacheDoesNotExist");
-       })
-      );
+      it('should return proper errors when failing to delete non-existent cache', () =>
+         common.connectApigee()
+         .then ( (org) =>
+                 org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:environments[0]})
+               )
+         .then( () => assert.fail('should not be reached'))
+         .catch( error => {
+           assert.equal(error, "Error: bad status: 404");
+           assert.equal(error.result.code, "messaging.config.beans.CacheDoesNotExist");
+         })
+        );
 
-    it('should fail properly when on delete from non-existent env', () =>
-      common.connectApigee()
-        .then ( (org) =>
-          org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
-        )
-       .then( () => assert.fail('should not be reached'))
-       .catch( error => {
-         assert.equal(error, "Error: bad status: 404");
-         assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
-       })
-      );
+      it('should fail properly when on delete from non-existent env', () =>
+         common.connectApigee()
+         .then ( (org) =>
+                 org.caches.del({cacheName:faker.random.alphaNumeric(22), environment:faker.random.alphaNumeric(22)})
+               )
+         .then( () => assert.fail('should not be reached'))
+         .catch( error => {
+           assert.equal(error, "Error: bad status: 404");
+           assert.equal(error.result.code, "messaging.config.beans.EnvironmentDoesNotExist");
+         })
+        );
 
-    it('should fail properly on delete when name is unspecified', () =>
-      common.connectApigee()
-        .then ( (org) =>
-          org.caches.del({environment:faker.random.alphaNumeric(22)})
-        )
-       .then( () => assert.fail('should not be reached'))
-       .catch( error => {
-         assert.equal(error, "Error: missing name for cache");
-       })
-      );
+      it('should fail properly on cache delete when name is unspecified', () =>
+         common.connectApigee()
+         .then ( (org) =>
+                 org.caches.del({environment:faker.random.alphaNumeric(22)})
+               )
+         .then( () => assert.fail('should not be reached'))
+         .catch( error => {
+           assert.equal(error, "Error: missing name for cache");
+         })
+        );
+    }
 
   });
 
@@ -236,7 +264,12 @@ describe('Promise', function() {
        .then ( org => {
          //org.conn.verbosity = 1;
          return org.developers.get()
-           .then( result => assert.isTrue(Array.isArray(result)))
+           .then( result => {
+             if (config.apigeex) {
+               result = result.developer;
+             }
+             assert.isTrue(Array.isArray(result));
+           })
            .catch( reason => assert.fail('should not be reached'));
        })
       );
@@ -246,7 +279,15 @@ describe('Promise', function() {
        .then ( org => {
          //org.conn.verbosity = 1;
          return org.developers.del({developerEmail})
-           .then( result => assert.equal(result.email, developerEmail) )
+           .then( result => {
+             if (config.apigeex) {
+               //console.log(result);
+               assert.equal(result.email, developerEmail.toLowerCase());
+             }
+             else {
+               assert.equal(result.email, developerEmail);
+             }
+           })
            .catch(reason => assert.fail('should not be reached'));
        })
       );

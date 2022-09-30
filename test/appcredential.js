@@ -3,7 +3,7 @@
 //
 // Tests for operations on App Credentials
 //
-// Copyright 2019-2020 Google LLC
+// Copyright 2019-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ describe('AppCredential', function() {
     const entityName = "apigee-edge-js-test-" + faker.lorem.word() + faker.random.number(),
           firstName = faker.name.firstName(),
           lastName = faker.name.lastName(),
-          developerEmail = `${firstName}.${lastName}@apigee-edge-js-test.org`,
+          developerEmail = `${firstName}.${lastName}@apigee-edge-js-test.org`.toLowerCase(),
           testCredential = faker.lorem.word() + '-' + faker.lorem.word() + '-' + faker.random.number(),
           createOptions = {
             developerEmail,
@@ -42,8 +42,14 @@ describe('AppCredential', function() {
 
     before( () =>
             org.developers.create(createOptions)
-            .then ( () => org.products.get() )
-            .then ( result => { apiProducts = result; } )
+            //.then( result => console.log(result) )
+            .then( () => org.products.get() )
+            .then( result => {
+              if (config.apigeex) {
+                result = result.apiProduct.map(p => p.name);
+              }
+              apiProducts = result;
+            } )
             .then ( () => {
               const appCreateOptions = {
                       developerEmail,
@@ -52,12 +58,15 @@ describe('AppCredential', function() {
                     };
               return org.developerapps.create(appCreateOptions);
             })
+            .catch(e => console.log(e))
           );
 
     after( () => org.developers.del({developerEmail}) );
 
     describe('add', function() {
       it('should add a generated credential with expiry', () => {
+        assert.isOk(apiProducts);
+        assert.isTrue(apiProducts.length>0);
         const options = {
                 developerEmail,
                 appName : entityName,
@@ -69,7 +78,7 @@ describe('AppCredential', function() {
             //console.log(JSON.stringify(result));
           })
           .catch( reason => {
-            console.log(reason.error);
+            console.log(reason);
             assert.fail('should not be reached');
           });
       });
@@ -293,11 +302,17 @@ describe('AppCredential', function() {
             console.log(JSON.stringify(result, null, 2));
             assert.fail('should not be reached');
           })
-          .catch( error => {
+          .catch( e => {
             //let util = require('util');
-            //console.log(util.format(error));
-            assert.equal(error, 'Error: bad status: 500');
-            assert.equal(error.result.message, 'APIProduct is not associated with consumer key');
+            //console.log(util.format(e));
+            if (config.apigeex) {
+              assert.equal(e.result.error.code, 400);
+              assert.equal(e.result.error.message, 'APIProduct is not associated with consumer key');
+            }
+            else {
+              assert.equal(e, 'Error: bad status: 500');
+              assert.equal(e.result.message, 'APIProduct is not associated with consumer key');
+            }
           });
       });
 
@@ -345,11 +360,17 @@ describe('AppCredential', function() {
             console.log(JSON.stringify(result, null, 2));
             assert.fail('should not be reached');
           })
-          .catch( error => {
+          .catch( e => {
             // let util = require('util');
-            // console.log(util.format(error));
-            assert.equal(error, 'Error: bad status: 404');
-            assert.equal(error.result.message, 'Invalid consumer key for Given App');
+            // console.log(util.format(e));
+            if (config.apigeex) {
+              assert.equal(e.result.error.code, 404);
+              assert.equal(e.result.error.message, 'Invalid consumer key for Given App');
+            }
+            else {
+              assert.equal(e, 'Error: bad status: 404');
+              assert.equal(e.result.message, 'Invalid consumer key for Given App');
+            }
           });
       });
     });
@@ -399,9 +420,15 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( error => {
-            assert.equal(error, 'Error: bad status: 404');
-            assert.equal(error.result.code, "keymanagement.service.InvalidClientIdForGivenApp");
+          .catch( e => {
+            if (config.apigeex) {
+              assert.equal(e.result.error.code, 404);
+              assert.equal(e.result.error.message, 'Invalid consumer key for Given App');
+            }
+            else {
+              assert.equal(e, 'Error: bad status: 404');
+              assert.equal(e.result.code, "keymanagement.service.InvalidClientIdForGivenApp");
+            }
           });
       });
 
@@ -415,9 +442,15 @@ describe('AppCredential', function() {
           .then( result => {
             assert.fail('should not be reached');
           })
-          .catch( error => {
-            assert.equal(error, 'Error: bad status: 404');
-            assert.equal(error.result.code, "developer.service.AppDoesNotExist");
+          .catch( e => {
+            if (config.apigeex) {
+              assert.equal(e.result.error.code, 404);
+              assert.equal(e.result.error.message, `App named ${options.appName} does not exist under ${developerEmail}`);
+            }
+            else {
+            assert.equal(e, 'Error: bad status: 404');
+              assert.equal(e.result.code, "developer.service.AppDoesNotExist");
+            }
           });
       });
 

@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 17:24:00>
+// last saved: <2022-December-20 17:24:49>
 
 /* global describe, faker, it, before, after */
 
@@ -196,9 +196,10 @@ describe('Reference', function() {
 
       it('should fail to get a specific non-existing reference', function(done) {
         let numDone = 0;
+
         envlist.forEach( e => {
           const options = {
-                  name : `apigee-edge-js-test-NOTEXIST-${word}-${num}`,
+                  name : `apigee-edge-js-test-REF-NOTEXIST-${word}-${num}`,
                   environment : e
                 };
           refs.get(options)
@@ -206,7 +207,12 @@ describe('Reference', function() {
               assert.fail("should not be reached");
             })
             .catch(e => {
-              assert.equal(e.result.code,"messaging.config.beans.ResourceReferenceDoesNotExist");
+              if (config.apigeex) {
+                assert.equal(e.result.error.code,404);
+              }
+              else {
+                assert.equal(e.result.code,"messaging.config.beans.ResourceReferenceDoesNotExist");
+              }
               numDone++;
               if (numDone == envlist.length) {
                 done();
@@ -274,14 +280,21 @@ describe('Reference', function() {
           refs.update(options)
             .then(e => assert.fail('should not be reached'))
             .catch(e => {
-              let util = require('util');
+              //let util = require('util');
               assert.isNotNull(e, "expected error in update()");
-              assert.equal(e.result.code, "messaging.config.beans.InvalidKeyStoreReference");
+              if (config.apigeex) {
+                //console.log(e.result);
+                assert.equal(e.result.error.code, 400);
+              }
+              else {
+                assert.equal(e.result.code, "messaging.config.beans.InvalidKeyStoreReference");
+              }
               numDone++;
               if (numDone == envlist.length) {
                 done();
               }
-            });
+            })
+            .catch(e => done());
         });
       });
 

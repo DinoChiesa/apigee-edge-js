@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2022-April-01 13:29:50>
+// last saved: <2022-December-20 18:08:27>
 /* jshint esversion: 9 */
 /* global describe, faker, it, path, before */
 
@@ -34,10 +34,10 @@ describe('Proxy', function() {
         fs = require('fs'),
         resourceDir = "./test/resources/proxybundles",
         dateVal = new Date().valueOf(),
-        namePrefix = 'apigee-js-test-' + dateVal,
-        oneOfOurs = (proxyname) =>
-            (proxyname.startsWith(namePrefix +'-fromzip-') ||
-             proxyname.startsWith(namePrefix +'-fromdir-'));
+        constPrefix = 'apigee-js-test-',
+        namePrefix = constPrefix + dateVal;
+  const oneOfOurs = (proxyname) =>
+    (proxyname.startsWith(constPrefix) && (proxyname.indexOf('-fromzip-') || proxyname.indexOf('-fromdir-')));
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
@@ -115,8 +115,6 @@ describe('Proxy', function() {
 
         return apiproxyBundleDirList.reduce(fn, Promise.resolve());
       });
-
-
     });
 
     describe('get', function() {
@@ -124,6 +122,9 @@ describe('Proxy', function() {
       before(done => {
         org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
+          if (config.apigeex) {
+            result = result.proxies.map( p => p.name);
+          }
           assert.isAbove(result.length, 1, "length of proxy list");
           proxyList = result;
           done();
@@ -133,6 +134,10 @@ describe('Proxy', function() {
       it('should list all proxies for an org', function(done){
         org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
+          //console.log(result);
+          if (config.apigeex) {
+            result = result.proxies;
+          }
           assert.isAbove(result.length, 1, "length of proxy list");
           done();
         });
@@ -142,7 +147,8 @@ describe('Proxy', function() {
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item, ix, list) =>
           org.proxies.get({name:item}) /* = proxyList[ix] */
-          .then( (result) => assert.equal(result.name, item));
+          .then( (result) => assert.equal(result.name, item))
+          .catch( e => console.log(e));
         common.selectNRandom(proxyList, 6, fn, done);
       });
 
@@ -175,38 +181,46 @@ describe('Proxy', function() {
         common.selectNRandom(proxyList, 7, fn, done);
       });
 
-      it('should get the policies for revisions of a few proxies', function(done) {
-        assert.isAbove(proxyList && proxyList.length, 0);
-        function fn(item) {
-          return org.proxies.getRevisions({name:item})
-            .then( (revisions) => {
-              let revision = revisions[Math.floor(Math.random() * revisions.length)];
-              return org.proxies.getPoliciesForRevision({name:item, revision})
-                .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
-            });
-        }
-        common.selectNRandom(proxyList, 7, fn, done);
-      });
+      if ( ! config.apigeex) {
 
-      it('should get the proxy endpoints for revisions of a few proxies', function(done) {
-        assert.isAbove(proxyList && proxyList.length, 0);
-        function fn(item) {
-          return org.proxies.getRevisions({name:item})
-            .then( (revisions) => {
-              let revision = revisions[Math.floor(Math.random() * revisions.length)];
-              return org.proxies.getProxyEndpoints({name:item, revision})
-                .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
-            });
-        }
-        common.selectNRandom(proxyList, 7, fn, done);
-      });
-      });
+        it('should get the policies for revisions of a few proxies', function(done) {
+          assert.isAbove(proxyList && proxyList.length, 0);
+          function fn(item) {
+            return org.proxies.getRevisions({name:item})
+              .then( (revisions) => {
+                let revision = revisions[Math.floor(Math.random() * revisions.length)];
+                return org.proxies.getPoliciesForRevision({name:item, revision})
+                  .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") )
+                  .catch(e => console.log(e));
+              });
+          }
+          common.selectNRandom(proxyList, 7, fn, done);
+        });
+
+        it('should get the proxy endpoints for revisions of a few proxies', function(done) {
+          assert.isAbove(proxyList && proxyList.length, 0);
+          function fn(item) {
+            return org.proxies.getRevisions({name:item})
+              .then( (revisions) => {
+                let revision = revisions[Math.floor(Math.random() * revisions.length)];
+                return org.proxies.getProxyEndpoints({name:item, revision})
+                  .then( (policies) => assert.isTrue(Array.isArray(policies), "revisions") );
+              });
+          }
+          common.selectNRandom(proxyList, 7, fn, done);
+        });
+      }
+
+    });
 
     describe('getDeployments', () => {
       let proxyList;
       before(done => {
         org.proxies.get({}, function(e, result){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
+          if (config.apigeex) {
+            result = result.proxies.map(p => p.name);
+          }
           assert.isAbove(result.length, 1, "length of proxy list");
           proxyList = result;
           done();
@@ -217,14 +231,21 @@ describe('Proxy', function() {
         assert.isAbove(proxyList && proxyList.length, 0);
         let fn = (item, ix, list) =>
           org.proxies.getDeployments({name:item})
-        // .then( (result) => {
-        //   console.log(JSON.stringify(result));
-        //   return result;
-        // })
+          .then( result => {
+            if (config.apigeex) {
+              if (Object.keys(result).length == 0) {
+                result = [];
+              }
+            }
+            return result;
+          })
           .then( ($) => {
+            if ( ! config.apigeex) {
             assert.isTrue(Array.isArray($.environment), "environments");
-            assert.equal(item, $.name, "proxy name");
-          });
+              assert.equal(item, $.name, "proxy name");
+            }
+          })
+          .catch(e => console.log(e));
         common.selectNRandom(proxyList, 8, fn, done);
       });
 
@@ -235,13 +256,24 @@ describe('Proxy', function() {
               const reducer = (p, env) =>
             p.then( a => org.proxies.getDeployments({name, env})
                     .then( $ => {
-                      if ($.environment) {
-                        assert.isFalse(Array.isArray($.environment), "environment");
-                        assert.isTrue(Array.isArray($.revision), "revision");
+                      if (config.apigeex) {
+                        //console.log($);
+                        if ($.deployments) {
+                          assert.isTrue(Array.isArray($.deployments), "deployments");
+                        }
+                        else {
+                          assert.equal(Object.keys($).length, 0);
+                        }
                       }
                       else {
-                        assert.equal($.code, 'distribution.ApplicationNotDeployed');
-                        assert.isOk($.message);
+                        if ($.environment) {
+                          assert.isFalse(Array.isArray($.environment), "environment");
+                          assert.isTrue(Array.isArray($.revision), "revision");
+                        }
+                        else {
+                          assert.equal($.code, 'distribution.ApplicationNotDeployed');
+                          assert.isOk($.message);
+                        }
                       }
                     })
                     .catch( e => {
@@ -267,10 +299,22 @@ describe('Proxy', function() {
               //   return result;
               // })
                 .then( $ => {
-                  assert.isTrue(Array.isArray($.environment), "deployments");
-                  assert.equal(item, $.aPIProxy, "proxy name");
-                  assert.equal(revision, $.name, "revision");
-                });
+                  if (config.apigeex) {
+                    if ($.deployments) {
+                    assert.equal($.deployments[0].apiProxy, item, "proxy name");
+                    assert.equal($.deployments[0].revision, revision, "revision");
+                    }
+                    else {
+                      assert.equal(Object.keys($).length, 0);
+                    }
+                  }
+                  else {
+                    assert.isTrue(Array.isArray($.environment), "deployments");
+                    assert.equal(item, $.aPIProxy, "proxy name");
+                    assert.equal(revision, $.name, "revision");
+                  }
+                })
+                .catch(e => console.log(e));
             });
             };
         common.selectNRandom(proxyList, 7, fn, done);
@@ -284,6 +328,9 @@ describe('Proxy', function() {
       it('should deploy one test proxy previously imported into this org', () => {
         let p = org.proxies.get({})
           .then( proxies => {
+            if (config.apigeex) {
+              proxies = proxies.proxies.map(p => p.name);
+            }
             proxies = proxies.filter(oneOfOurs);
             if (proxies.length<1) { return Promise.resolve({}); }
             let selectedProxy = selectRandomValue(proxies); // none are currently deployed
@@ -309,6 +356,9 @@ describe('Proxy', function() {
       it('should fail to deploy a proxy to a non-existent environment', () => {
         org.proxies.get({})
           .then( proxies => {
+            if (config.apigeex) {
+              proxies = proxies.proxies.map(p => p.name);
+            }
             proxies = proxies.filter(oneOfOurs);
             if (proxies.length<1) { return Promise.resolve({}); }
             let fakeEnvironment = 'a' + faker.random.alphaNumeric(8);
@@ -333,6 +383,9 @@ describe('Proxy', function() {
       before(done => {
         org.proxies.get({})
           .then( proxies => {
+            if (config.apigeex) {
+              proxies = proxies.proxies.map(p => p.name);
+            }
             proxies = proxies.filter(oneOfOurs);
 
             if (proxies.length<1) { return done(); }
@@ -340,14 +393,29 @@ describe('Proxy', function() {
             const reducer = (p, name) =>
               p.then( a => org.proxies.getDeployments({name})
                       .then( $ => {
-                        assert.isTrue(Array.isArray($.environment), "environments");
-                        if ($.environment.length > 0) {
-                          // this is one that was previously deployed
-                          theChosenProxy = name;
-                          theDeployedEnvironment = $.environment[0].name;
+                        if (config.apigeex) {
+                          //console.log($);
+                          if ($.deployments) {
+                            theChosenProxy = name;
+                            theDeployedEnvironment = $.deployments[0].environment;
+                          }
+                          else {
+                            assert.equal(Object.keys($).length, 0);
+                            if ( ! aNonDeployedProxy) {
+                              aNonDeployedProxy = name;
+                            }
+                          }
                         }
                         else {
-                          aNonDeployedProxy = name;
+                          assert.isTrue(Array.isArray($.environment), "environments");
+                          if ($.environment.length > 0) {
+                            // this is one that was previously deployed
+                            theChosenProxy = name;
+                            theDeployedEnvironment = $.environment[0].name;
+                          }
+                          else {
+                            aNonDeployedProxy = name;
+                          }
                         }
                       })
                       .catch( e => {
@@ -416,6 +484,9 @@ describe('Proxy', function() {
 
         org.proxies.get({}, function(e, proxies){
           assert.isNull(e, "error getting proxies: " + JSON.stringify(e));
+            if (config.apigeex) {
+              proxies = proxies.proxies.map(p => p.name);
+            }
           proxies = proxies.filter(oneOfOurs);
           if (proxies.length<1) { return done(); }
           const reducer = (p, name) =>

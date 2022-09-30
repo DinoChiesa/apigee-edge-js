@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2017-2021 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-23 08:33:00>
+// last saved: <2022-December-20 16:20:39>
 
 /* global describe, faker, it */
 
@@ -61,6 +61,9 @@ describe('Developer', function() {
          devs.get({})
          .then ( result => {
            assert.notExists(result.error);
+          if (config.apigeex) {
+            result = result.developer;
+          }
            assert.exists(result.length);
            assert.isAtLeast(result.length, 1);
          })
@@ -70,6 +73,9 @@ describe('Developer', function() {
         devs.get({})
           .then ( developers => {
             assert.notExists(developers.error);
+            if (config.apigeex) {
+              developers = developers.developer.map(d => d.email);
+            }
             assert.exists(developers.length);
             assert.isAtLeast(developers.length, 1);
             let L = developers.length;
@@ -101,9 +107,15 @@ describe('Developer', function() {
             assert.fail('should not be reached');
           })
           .catch(error => {
-            assert.equal(error.result.code,"developer.service.DeveloperIdDoesNotExist");
-            assert.equal(error.result.message, `DeveloperId ${developerEmail} does not exist in organization ${org.conn.orgname}`);
-
+            if (config.apigeex) {
+              // console.log(error.result);
+              assert.equal(error.result.error.code, 404);
+              assert.isOk(error.result.error.message.startsWith(`DeveloperId ${developerEmail} does not exist`));
+            }
+            else {
+              assert.equal(error.result.code, "developer.service.DeveloperIdDoesNotExist");
+              assert.equal(error.result.message, `DeveloperId ${developerEmail} does not exist in organization ${org.conn.orgname}`);
+            }
           });
       });
 

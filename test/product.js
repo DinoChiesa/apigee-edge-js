@@ -3,7 +3,7 @@
 //
 // tests for API Product.
 //
-// Copyright 2017 Google LLC
+// Copyright 2017-2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 17:24:01>
+// last saved: <2022-December-20 16:13:55>
 
 /* global describe, faker, it, path, process */
 
@@ -62,6 +62,9 @@ describe('Product', function() {
         org.products.get({}, function(e, result){
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           assert.isNotNull(result, "result is empty");
+          if (config.apigeex) {
+            result = result.apiProduct;
+          }
           assert.isAtLeast(result.length, 1, "zero results.");
           done();
         });
@@ -71,6 +74,9 @@ describe('Product', function() {
         org.products.get(function(e, result){
           assert.isNull(e, "error listing: " + JSON.stringify(e));
           assert.isNotNull(result, "result is empty");
+          if (config.apigeex) {
+            result = result.apiProduct;
+          }
           assert.isAtLeast(result.length, 1, "zero results.");
           done();
         });
