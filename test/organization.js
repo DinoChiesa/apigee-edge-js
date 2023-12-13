@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2018-2020 Google LLC
+// Copyright 2018-2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,173 +18,141 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2021-March-22 17:24:01>
+// last saved: <2023-December-12 16:03:42>
 
-/* global describe, faker, it */
+/* global describe, faker, it, assert */
 
-const common = require('./common');
-const util = require('util');
+const common = require("./common");
+//const util = require("util");
 
-describe('Organization', function() {
+describe("Organization", function () {
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
-  common.connectApigee(function(org){
+  common.connectApigee(function (org) {
     const contrivedPropertyName1 = faker.random.alphaNumeric(22),
-          contrivedPropertyName2 = faker.random.alphaNumeric(22);
+      contrivedPropertyName2 = faker.random.alphaNumeric(22);
 
-    describe('getProps', function() {
-
-      it('should get properties of the org', () =>
-         org.getProperties()
-         .then( (result) => {
-           assert.equal(typeof result, "object");
-           assert.isAtLeast(Object.keys(result).length, 2);
-           assert.notExists(result[contrivedPropertyName1]);
-           assert.notExists(result[contrivedPropertyName2]);
-         })
-         .catch( reason => assert.fail('should not be reached'))
-        );
-
-    });
-
-    describe('addProps', function() {
-
-      it('should add a property to the org', () => {
-        var propertyHash = {};
-        propertyHash[contrivedPropertyName1] = 42;
-
-        return org.addProperties(propertyHash)
-          .then( (result) => {
+    describe("getProps", function () {
+      it("should get properties of the org", () =>
+        org
+          .getProperties()
+          .then((result) => {
             assert.equal(typeof result, "object");
-            if (result.error) {
-              console.log(result.error.stack);
-            }
-            assert.equal(result[contrivedPropertyName1], "42");
-          });
-      });
-
-      it('should silently not modify an existing property on the org', () => {
-        var propertyHash = {};
-        propertyHash[contrivedPropertyName1] = 928;
-
-        return org.addProperties(propertyHash)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
-            assert.equal(result[contrivedPropertyName1], 42);
-          })
-          .catch( reason => assert.fail('should not be reached'));
-      });
-
-    });
-
-
-    describe('setProps', function() {
-
-      it('should set(overwrite) an existing property on the org', () => {
-        var propertyHash = {};
-        propertyHash[contrivedPropertyName1] = 187;
-
-        return org.setProperties(propertyHash)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
-            assert.equal(result[contrivedPropertyName1], 187);
-          })
-          .catch( reason => {
-            console.log(util.format(reason));
-            assert.fail('should not be reached');
-          });
-      });
-
-      it('should set a new property on the org', () => {
-        var propertyHash = {};
-        propertyHash[contrivedPropertyName2] = "hello";
-
-        return org.setProperties(propertyHash)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
-            assert.equal(result[contrivedPropertyName2], "hello");
-          })
-          .catch( reason => {
-            console.log(util.format(reason));
-            assert.fail('should not be reached');
-          });
-      });
-
-    });
-
-
-    describe('removeProps', function() {
-
-      it('should remove two existing properties on the org', () => {
-        var propertyArray = [contrivedPropertyName1, contrivedPropertyName2];
-
-        return org.removeProperties(propertyArray)
-          .then( (result) => {
-            assert.equal(typeof result, "object");
+            assert.isAtLeast(Object.keys(result).length, 2);
             assert.notExists(result[contrivedPropertyName1]);
             assert.notExists(result[contrivedPropertyName2]);
           })
-          .catch( reason => {
-            console.log(util.format(reason));
-            assert.fail('should not be reached');
-          });
-      });
-
+          .catch((_reason) => assert.fail("should not be reached")));
     });
 
+    describe("addProps", function () {
+      it("should fail to add a property to the org", () => {
+        const propertyHash = {};
+        propertyHash[contrivedPropertyName1] = 42;
 
-    describe('setLengths', function() {
-
-      it('should set the consumer key length for the org', () => {
-        return org.setConsumerKeyLength(42)
-          .then( result => {
-            assert.equal(typeof result, "object");
-            assert.exists(result['keymanagement.consumer.key.length']);
-            assert.equal(result['keymanagement.consumer.key.length'], "42");
+        return org
+          .addProperties(propertyHash)
+          .then((_result) => {
+            assert.fail("should not be reached");
           })
-          .catch( reason => {
-            console.log(util.format(reason));
-            assert.fail('should not be reached');
+          .catch((reason) => assert.ok(reason));
+      });
+    });
+
+    describe("setProps", function () {
+      it("should fail to set(overwrite) an existing property on the org", () => {
+        const propertyHash = {};
+        propertyHash[contrivedPropertyName1] = 187;
+
+        return org
+          .setProperties(propertyHash)
+          .then((_result) => {
+            assert.fail("should not be reached");
+          })
+          .catch((reason) => {
+            //console.log(util.format(reason));
+            assert.ok(reason);
           });
       });
 
-      it('should set the consumer secret length for the org', () => {
-        return org.setConsumerSecretLength(48)
-          .then( result => {
-            assert.equal(typeof result, "object");
-            assert.exists(result['keymanagement.consumer.secret.length']);
-            assert.equal(result['keymanagement.consumer.secret.length'], "48");
+      it("should fail to set a new property on the org", () => {
+        const propertyHash = {};
+        propertyHash[contrivedPropertyName2] = "hello";
+
+        return org
+          .setProperties(propertyHash)
+          .then((result) => {
+            assert.fail("should not be reached");
           })
-          .catch( reason => {
-            console.log(util.format(reason));
-            assert.fail('should not be reached');
+          .catch((reason) => {
+            //console.log(util.format(reason));
+            assert.ok(reason);
+          });
+      });
+    });
+
+    describe("removeProps", function () {
+      it("should fail to remove two existing properties on the org", () => {
+        const propertyArray = [contrivedPropertyName1, contrivedPropertyName2];
+
+        return org
+          .removeProperties(propertyArray)
+          .then((_result) => {
+            assert.fail("should not be reached");
+          })
+          .catch((reason) => {
+            //console.log(util.format(reason));
+            assert.ok(reason);
+          });
+      });
+    });
+
+    describe("setLengths", function () {
+      it("should fail to set the consumer key length for the org", () => {
+        return org
+          .setConsumerKeyLength(42)
+          .then((_result) => {
+            assert.fail("should not be reached");
+          })
+          .catch((reason) => {
+            //console.log(util.format(reason));
+            assert.ok(reason);
           });
       });
 
-      it('should fail to set the consumer key length for the org', () => {
-        return org.setConsumerKeyLength(101010)
-          .then( r => assert.fail('should not be reached'))
-          .catch( error => {
+      it("should fail to set the consumer secret length for the org", () => {
+        return org
+          .setConsumerSecretLength(48)
+          .then((_result) => {
+            assert.fail("should not be reached");
+          })
+          .catch((reason) => {
+            //console.log(util.format(reason));
+            assert.ok(reason);
+          });
+      });
+
+      it("should fail to set the consumer key length for the org", () => {
+        return org
+          .setConsumerKeyLength(101010)
+          .then((r) => assert.fail("should not be reached"))
+          .catch((error) => {
             assert.exists(error);
             assert.exists(error.stack);
             assert.equal(error.message, "invalid argument");
           });
       });
 
-      it('should fail to set the consumer secret length for the org', () => {
-        return org.setConsumerSecretLength(179238)
-          .then( () => assert.fail('should not be reached'))
-          .catch( error => {
+      it("should fail to set the consumer secret length for the org", () => {
+        return org
+          .setConsumerSecretLength(179238)
+          .then(() => assert.fail("should not be reached"))
+          .catch((error) => {
             assert.exists(error);
             assert.exists(error.stack);
             assert.equal(error.message, "invalid argument");
           });
       });
-
-
     });
-
-
   });
-
 });

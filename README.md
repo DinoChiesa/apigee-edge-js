@@ -67,6 +67,18 @@ apigee.connect(options).then(...);
 
 ```
 
+For Apigee X or hybrid,
+obtain a token with `gcloud auth print-access-token` and then :
+
+```js
+const apigeejs = require('apigee-edge-js'),
+      apigee = apigeejs.apigee;
+
+let options = { org : 'my-org', apigeex: true, token: 'kjkdjskjskjs.abcdefg' };
+apigee.connect(options).then(...);
+
+```
+
 The methods on the various objects accept callbacks, and return promises. In code
 you write that uses this library, it's probably best if you choose one or the
 other. Promises are probably better, because they're more succinct. But some
