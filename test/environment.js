@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 
-/* global process, path, describe, faker, it, before, after */
+/* global process, path, describe, faker, it, before, after, assert, require */
 
 const common = require("./common"),
   util = require("util");
@@ -272,7 +272,7 @@ describe("Environment", function () {
           vhost: vhostName,
           port,
           aliases: [hostalias],
-          keyStore: keyStoreName,
+          keyStore: keyStoreName1,
           keyAlias
         };
         try {
