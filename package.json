@@ -1,13 +1,13 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.4.36",
+  "version": "0.4.37",
   "description": "nodejs library for the administration API for Apigee (Edge and X and hybrid).",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
-    "test1": "node_modules/mocha/bin/mocha --grep '^Proxy.*' --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
-    "simpletest": "node_modules/mocha/bin/mocha  --reporter spec",
-    "badgegen": "node_modules/mocha/bin/mocha  --reporter mocha-badge-generator"
+    "test": "node_modules/mocha/bin/mocha.js --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
+    "test1": "node_modules/mocha/bin/mocha.js --grep '^Proxy.*' --reporter mocha-multi-reporters --reporter-options configFile=multi-reporter-config.json",
+    "simpletest": "node_modules/mocha/bin/mocha.js  --reporter spec",
+    "badgegen": "node_modules/mocha/bin/mocha.js  --reporter mocha-badge-generator"
   },
   "repository": {
     "type": "git",
@@ -28,9 +28,10 @@
     "dateformat": "3.0.3",
     "debug": "^4.3.3",
     "netrc": "0.1.3",
-    "postman-request": "^2.88.1-postman.33",
+    "postman-request": "^2.88.1-postman.40",
     "qs": "^6.5.3",
     "readline-sync": "1.4.9",
+    "request-debug": "^0.2.0",
     "sprintf-js": "1.1.2",
     "url-join": "2.0.x",
     "xml2js": "0.5.0"
@@ -39,7 +40,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "^7.1.1",
     "faker": "4.1.0",
-    "mocha": "^9.2.2",
+    "mocha": "^11.1.0",
     "mocha-badge-generator": "^0.11.0",
     "mocha-multi-reporters": "^1.1.7"
   },
@@ -49,6 +50,7 @@
   },
   "overrides": {
     "strip-ansi": "5.2.0",
+    "micromatch": "4.0.8",
     "badge-up": {
       "svgo": {
         "css-select": {

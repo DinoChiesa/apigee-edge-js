@@ -3,7 +3,7 @@
 //
 // Tests for operations on Developer apps.
 //
-// Copyright 2017-2023 Google LLC
+// Copyright 2017-2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ describe("DeveloperApp", function () {
         developerEmail,
         lastName,
         firstName,
-        userName: firstName + lastName
+        userName: firstName + lastName,
       };
     let apiProducts = [];
 
@@ -45,7 +45,7 @@ describe("DeveloperApp", function () {
         .then(() => org.products.get())
         .then((result) => {
           apiProducts = result;
-        })
+        }),
     );
 
     after(() => org.developers.del({ developerEmail }));
@@ -55,7 +55,7 @@ describe("DeveloperApp", function () {
         const options = {
           developerEmail,
           name: entityName,
-          apiProduct: apiProducts[0]
+          apiProduct: apiProducts[0],
         };
 
         return org.developerapps
@@ -76,7 +76,7 @@ describe("DeveloperApp", function () {
         const options = {
           developerEmail,
           name: entityName,
-          apiProduct: apiProducts[0]
+          apiProduct: apiProducts[0],
         };
 
         return org.developerapps
@@ -87,7 +87,7 @@ describe("DeveloperApp", function () {
             assert.exists(error.result);
             assert.equal(
               error.result.message,
-              `App with name ${entityName} already exists`
+              `App with name ${entityName} already exists`,
             );
           });
       });
@@ -97,34 +97,27 @@ describe("DeveloperApp", function () {
         const options = {
           developerEmail,
           name: entityName + "-B",
-          apiProduct: fakeName
+          apiProduct: fakeName,
         };
         return org.developerapps
           .create(options)
           .then(() => assert.fail("should not be reached"))
           .catch((error) => {
-            // This should be 404, but is 500 due to a bug in Edge
-            assert.equal(error, "Error: bad status: 500");
-            assert.exists(error.result);
             //console.log(error.result.message);
+            assert.equal(error, "Error: bad status: 404");
+            assert.exists(error.result);
             assert.exists(error.result.message);
-            // hack
             assert.equal(
               error.result.message,
-              "Unexpected error while loading data"
+              `Product with id [${fakeName}] does not exist`,
             );
-            // assert.isTrue(
-            //   error.result.message.startsWith(
-            //     `API Product [${fakeName}] does not exist`
-            //   )
-            // );
           });
       });
 
       it("should fail to create a developer app - no name", () => {
         const options = {
           developerEmail,
-          apiProduct: faker.random.alphaNumeric(22)
+          apiProduct: faker.random.alphaNumeric(22),
         };
 
         return org.developerapps
@@ -138,7 +131,7 @@ describe("DeveloperApp", function () {
       it("should fail to create a developer app - no developer", () => {
         const options = {
           name: entityName + "-C",
-          apiProduct: faker.random.alphaNumeric(22)
+          apiProduct: faker.random.alphaNumeric(22),
         };
 
         return org.developerapps
@@ -152,7 +145,7 @@ describe("DeveloperApp", function () {
       it("should fail to create a developer app - no product", () => {
         const options = {
           developerEmail,
-          name: entityName + "-D"
+          name: entityName + "-D",
         };
 
         return org.developerapps
@@ -196,7 +189,7 @@ describe("DeveloperApp", function () {
             assert.exists(reason.result.message);
             assert.equal(
               reason.result.message,
-              `App named ${nonExistentApp} does not exist under ${developerEmail}`
+              `App named ${nonExistentApp} does not exist under ${developerEmail}`,
             );
           });
       });
@@ -212,7 +205,7 @@ describe("DeveloperApp", function () {
             assert.exists(error.result.message);
             assert.equal(
               error.result.message,
-              `DeveloperId ${nonExistentDev} does not exist in organization ${org.conn.orgname}`
+              `DeveloperId ${nonExistentDev} does not exist in organization ${org.conn.orgname}`,
             );
           });
       });
@@ -242,7 +235,7 @@ describe("DeveloperApp", function () {
       it("should update the custom attributes on an existing developerapp", () => {
         const attributes = {
           updatedBy: "apigee-edge-js-test",
-          updateDate: new Date().toISOString()
+          updateDate: new Date().toISOString(),
         };
         return org.developerapps
           .update({ developerEmail, name: entityName, attributes })
@@ -252,7 +245,7 @@ describe("DeveloperApp", function () {
             assert.equal(result.attributes.length, 2 + originalAttrCount);
             assert.isTrue(
               result.attributes.find((x) => x.name == "updatedBy").value ==
-                "apigee-edge-js-test"
+                "apigee-edge-js-test",
             );
             assert(result.attributes.find((x) => x.name == "updateDate"));
           });
@@ -267,7 +260,7 @@ describe("DeveloperApp", function () {
             assert.equal(result.attributes.length, 2 + originalAttrCount);
             assert.isTrue(
               result.attributes.find((x) => x.name == "updatedBy").value ==
-                "apigee-edge-js-test"
+                "apigee-edge-js-test",
             );
             assert(result.attributes.find((x) => x.name == "updateDate"));
           });
@@ -281,7 +274,7 @@ describe("DeveloperApp", function () {
             developerEmail,
             name: entityName,
             replace: true,
-            attributes
+            attributes,
           })
           .then((result) => {
             assert.exists(result.attributes);
@@ -326,11 +319,11 @@ describe("DeveloperApp", function () {
             assert.exists(error.result);
             assert.equal(
               error.result.code,
-              "developer.service.AppDoesNotExist"
+              "developer.service.AppDoesNotExist",
             );
             assert.equal(
               error.result.message,
-              `App named ${fakeName} does not exist under ${developerEmail}`
+              `App named ${fakeName} does not exist under ${developerEmail}`,
             );
           });
       });
@@ -346,11 +339,11 @@ describe("DeveloperApp", function () {
             assert.exists(error.result);
             assert.equal(
               error.result.code,
-              "developer.service.DeveloperIdDoesNotExist"
+              "developer.service.DeveloperIdDoesNotExist",
             );
             assert.equal(
               error.result.message,
-              `DeveloperId ${fakeEmail} does not exist in organization ${org.conn.orgname}`
+              `DeveloperId ${fakeEmail} does not exist in organization ${org.conn.orgname}`,
             );
           });
       });

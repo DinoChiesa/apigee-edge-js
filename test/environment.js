@@ -3,7 +3,7 @@
 //
 // Tests for environment operations.
 //
-// Copyright 2018-2023 Google LLC.
+// Copyright 2018-2025 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ describe("Environment", function () {
           (e, result) => {
             assert.isNotNull(e, "the expected error did not occur");
             done();
-          }
+          },
         );
       });
     });
@@ -85,7 +85,7 @@ describe("Environment", function () {
               .then((result) => {
                 assert.isAtLeast(result.length, 1, "zero results");
               })
-              .then(() => count + 1)
+              .then(() => count + 1),
           );
         return environments.reduce(fn, Promise.resolve(0));
       });
@@ -96,14 +96,14 @@ describe("Environment", function () {
           function (e, result) {
             assert.isNotNull(e, "the expected error did not occur");
             done();
-          }
+          },
         );
       });
 
       it("should inquire each vhost in each environment", () => {
         let fn2 = (env) => (p, vhost) =>
           p.then((count) =>
-            org.environments.getVhost({ env, vhost }).then(() => count + 1)
+            org.environments.getVhost({ env, vhost }).then(() => count + 1),
           );
 
         let fn1 = (p, env) =>
@@ -114,7 +114,7 @@ describe("Environment", function () {
                 assert.isAtLeast(vhosts.length, 1, "zero results");
                 return vhosts.reduce(fn2(env), Promise.resolve(0));
               })
-              .then(() => count + 1)
+              .then(() => count + 1),
           );
 
         return environments.reduce(fn1, Promise.resolve(0));
@@ -156,10 +156,10 @@ describe("Environment", function () {
       // Creation of vhosts works only with a Cert that has been signed by a commercial CA.
 
       const certFile1 = path.resolve(
-        path.join(resourceDir, "apigee-edge-js-20231212.cert")
+        path.join(resourceDir, "20250115-0335.cert"), //  apigee-edge-js-20231212.cert
       );
       const certFile2 = path.resolve(
-        path.join(resourceDir, "apigee-edge-js-wildcard-expired.cert")
+        path.join(resourceDir, "apigee-edge-js-wildcard-expired.cert"),
       );
 
       //const certFile = resolveHome( '~/dev/dinochiesa.net/keys/fullchain.pem');
@@ -174,7 +174,7 @@ describe("Environment", function () {
         //console.log(`selectedEnv: ${selectedEnvironment}`);
         const options = {
           environment: selectedEnvironment,
-          name: keyStoreName1
+          name: keyStoreName1,
         };
         return org.keystores.create(options).then((_r) => {
           options.certificateFile = certFile1;
@@ -194,26 +194,28 @@ describe("Environment", function () {
         org.keystores
           .del({
             environment: selectedEnvironment,
-            name: keyStoreName1
+            name: keyStoreName1,
           })
           .catch((e) => {
             console.log("in after all, error: " + util.format(e));
             throw e;
-          })
+          }),
       );
 
       it("should create a vhost w/ explicit port", () => {
         const port = 443;
         //const hostalias = faker.lorem.word() + '-' + faker.random.number() + '.apigee-edge-js.net';
         // must be www.dinochiesa.net or dinochiesa.net ?
-        const hostalias = "dinochiesa.net";
+        //const hostalias = "dinochiesa.net";
+        // to make this work I had to create a cert with letsencrypt manually
+        const hostalias = "user.dchiesa.demo.altostrat.com";
         const options = {
           env: selectedEnvironment,
           vhost: contrivedNamePrefix + "-" + faker.random.alphaNumeric(8),
           port,
           aliases: [hostalias],
           keyStore: keyStoreName1,
-          keyAlias
+          keyAlias,
         };
         return org.environments.createVhost(options).catch((e) => {
           console.log("w/ explicit port, error: " + util.format(e.result));
@@ -223,13 +225,14 @@ describe("Environment", function () {
 
       it("should create a vhost w/ no port", () => {
         //const hostalias = faker.lorem.word() + '-' + faker.random.number() + '.apigee-edge-js.net';
-        const hostalias = "apigee-js-test.dinochiesa.net";
+        //const hostalias = "apigee-js-test.dinochiesa.net";
+        const hostalias = "user.dchiesa.demo.altostrat.com";
         const options = {
           env: selectedEnvironment,
           vhost: contrivedNamePrefix + "-" + faker.random.alphaNumeric(8),
           aliases: [hostalias],
           keyStore: keyStoreName1,
-          keyAlias
+          keyAlias,
         };
         return org.environments.createVhost(options).catch((e) => {
           console.log("w/ no port, error: " + util.format(e.result));
@@ -237,7 +240,7 @@ describe("Environment", function () {
         });
       });
 
-      it("should fail to create a vhost with an expired cert", () => {
+      it("should fail to create a vhost with an expired cert", async () => {
         //const hostalias = faker.lorem.word() + '-' + faker.random.number() + '.apigee-edge-js.net';
         const hostalias = "apigee-js-test.dinochiesa.net";
         const options = {
@@ -245,12 +248,16 @@ describe("Environment", function () {
           vhost: contrivedNamePrefix + "-" + faker.random.alphaNumeric(8),
           aliases: [hostalias],
           keyStore: keyStoreName2,
-          keyAlias
+          keyAlias,
         };
-        return org.environments.createVhost(options).catch((e) => {
-          console.log("w/ no port, error: " + util.format(e.result));
-          throw e;
-        });
+        try {
+          await org.environments.createVhost(options);
+        } catch (e) {
+          // TODO: be more explicit about the expected error
+          assert.isNotNull(e, "expected an error while creating");
+          return;
+        }
+        assert.isOk(false, "createVhost must throw");
       });
 
       it("should fail to create a vhost with invalid port", async () => {
@@ -273,11 +280,12 @@ describe("Environment", function () {
           port,
           aliases: [hostalias],
           keyStore: keyStoreName1,
-          keyAlias
+          keyAlias,
         };
         try {
           await org.environments.createVhost(options);
         } catch (e) {
+          // TODO: be more explicit about the expected error
           assert.isNotNull(e, "expected an error while creating");
           return;
         }
@@ -288,7 +296,7 @@ describe("Environment", function () {
         let env = selectedEnvironment;
         let fn = (p, vhost) =>
           p.then((count) =>
-            org.environments.deleteVhost({ vhost, env }).then(() => count + 1)
+            org.environments.deleteVhost({ vhost, env }).then(() => count + 1),
           );
         return org.environments.getVhosts({ env }).then((vhosts) =>
           vhosts
@@ -298,7 +306,7 @@ describe("Environment", function () {
               if (numDeleted < 2) {
                 assert.fail(`deleted ${numDeleted} vhosts... not enough!`);
               }
-            })
+            }),
         );
       });
     });

@@ -23,6 +23,8 @@
 const common = require("./common");
 const util = require("util");
 
+//require("request-debug")(require("postman-request"));
+
 const delay = (ms) =>
   function (x) {
     return new Promise((resolve) => setTimeout(() => resolve(x), ms));
@@ -47,7 +49,7 @@ describe("AppCredential", function () {
         developerEmail,
         lastName,
         firstName,
-        userName: firstName + lastName
+        userName: firstName + lastName,
       };
     let apiProducts = [];
 
@@ -56,24 +58,37 @@ describe("AppCredential", function () {
         .create(createOptions)
         .then(() => org.products.get())
         .then((result) => {
-          apiProducts = result;
+          apiProducts = result.apiProduct
+            ? result.apiProduct.map((p) => p.name)
+            : result;
         })
         .then(delay(1200)) // not sure why.  But we need to wait til the dev exists.
         .then(() => {
           const appCreateOptions = {
             developerEmail,
             name: entityName,
-            apiProduct: apiProducts[0]
+            apiProduct: apiProducts[0],
           };
           return org.developerapps.create(appCreateOptions);
-        })
+        }),
     );
 
     after(() =>
-      org.developers
-        .del({ developerEmail })
+      org.developerapps
+        .get({ developerEmail })
+        .then((apps) => {
+          let p = Promise.resolve({});
+          if (apps && apps.length) {
+            const reducer = (promise, item) =>
+              promise.then((a) =>
+                org.developerapps.del({ developerEmail, name: item }),
+              );
+            p = apps.reduce(reducer, Promise.resolve([]));
+          }
+          return p.then((_) => org.developers.del({ developerEmail }));
+        })
         // with mint orgs, this can fail
-        .catch((reason) => console.log(util.format(reason)))
+        .catch((reason) => console.log(util.format(reason))),
     );
 
     describe("add", function () {
@@ -82,8 +97,9 @@ describe("AppCredential", function () {
           developerEmail,
           appName: entityName,
           expiry: "60m",
-          apiProducts: [apiProducts[0]]
+          apiProducts: [apiProducts[0]],
         };
+
         return org.appcredentials
           .add(options)
           .then((result) => {
@@ -99,7 +115,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: entityName,
-          apiProducts: [apiProducts[0]]
+          apiProducts: [apiProducts[0]],
         };
         return org.appcredentials
           .add(options)
@@ -117,7 +133,7 @@ describe("AppCredential", function () {
           developerEmail,
           appName: entityName,
           apiProducts: [apiProducts[0]],
-          consumerKey: testCredential
+          consumerKey: testCredential,
         };
         return org.appcredentials
           .add(options)
@@ -135,7 +151,7 @@ describe("AppCredential", function () {
           developerEmail,
           //appName : entityName,
           apiProducts: [apiProducts[0]],
-          consumerKey: faker.lorem.word() + faker.random.number()
+          consumerKey: faker.lorem.word() + faker.random.number(),
         };
         return org.appcredentials
           .add(options)
@@ -154,7 +170,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: entityName,
-          consumerKey: testCredential
+          consumerKey: testCredential,
         };
         return org.appcredentials.get(options).then((result) => {
           //console.log(JSON.stringify(result, null, 2));
@@ -170,7 +186,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: entityName,
-          consumerKey: faker.lorem.word() + faker.random.number() // DNE
+          consumerKey: faker.lorem.word() + faker.random.number(), // DNE
         };
         return org.appcredentials
           .get(options)
@@ -186,7 +202,7 @@ describe("AppCredential", function () {
     describe("find", function () {
       it("should find a previously added credential", () => {
         const options = {
-          consumerKey: testCredential
+          consumerKey: testCredential,
         };
         return org.appcredentials.find(options).then((result) => {
           assert.equal(result.key, testCredential);
@@ -199,7 +215,7 @@ describe("AppCredential", function () {
 
       it("should not find a non-existent credential", () => {
         const options = {
-          consumerKey: faker.lorem.word() + faker.random.number()
+          consumerKey: faker.lorem.word() + faker.random.number(),
         };
         return org.appcredentials
           .find(options)
@@ -245,7 +261,7 @@ describe("AppCredential", function () {
           developerEmail,
           appName: entityName,
           consumerKey: testCredential,
-          product: apiProducts[1]
+          product: apiProducts[1],
         };
         return org.appcredentials.addProduct(options).then((result) => {
           //console.log(JSON.stringify(result, null, 2));
@@ -266,7 +282,7 @@ describe("AppCredential", function () {
           appName: entityName,
           consumerKey:
             "xxx-" + faker.lorem.word() + "-" + faker.random.number(), // DNE
-          product: apiProducts[1]
+          product: apiProducts[1],
         };
         return org.appcredentials
           .addProduct(options)
@@ -283,7 +299,7 @@ describe("AppCredential", function () {
           developerEmail,
           appName: entityName,
           consumerKey: testCredential,
-          product: apiProducts[1]
+          product: apiProducts[1],
         };
         return org.appcredentials
           .removeProduct(options)
@@ -304,7 +320,7 @@ describe("AppCredential", function () {
           developerEmail,
           appName: entityName,
           consumerKey: testCredential,
-          product: apiProducts[2]
+          product: apiProducts[2],
         };
         return org.appcredentials
           .removeProduct(options)
@@ -318,7 +334,7 @@ describe("AppCredential", function () {
             assert.equal(error, "Error: bad status: 500");
             assert.equal(
               error.result.message,
-              "APIProduct is not associated with consumer key"
+              "APIProduct is not associated with consumer key",
             );
           });
       });
@@ -332,7 +348,7 @@ describe("AppCredential", function () {
             developerEmail,
             appName: entityName,
             consumerKey: testCredential,
-            attributes: { attr1, attr2 }
+            attributes: { attr1, attr2 },
           };
         return org.appcredentials
           .update(options)
@@ -362,7 +378,7 @@ describe("AppCredential", function () {
             developerEmail,
             appName: entityName,
             consumerKey: fakeCredential,
-            attributes: { attr1, attr2 }
+            attributes: { attr1, attr2 },
           };
         return org.appcredentials
           .update(options)
@@ -377,7 +393,7 @@ describe("AppCredential", function () {
             assert.equal(
               error.result.message,
               //"API_KEY_NOT_FOUND" // MINT
-              "Invalid consumer key for Given App"
+              "Invalid consumer key for Given App",
             );
           });
       });
@@ -388,7 +404,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: entityName,
-          consumerKey: testCredential
+          consumerKey: testCredential,
         };
         return org.appcredentials
           .del(options)
@@ -405,7 +421,7 @@ describe("AppCredential", function () {
       it("should fail to delete when not specifying a credential", () => {
         const options = {
           developerEmail,
-          appName: entityName
+          appName: entityName,
           //consumerKey : faker.lorem.word() + faker.random.number()
         };
         return org.appcredentials
@@ -422,7 +438,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: entityName,
-          consumerKey: faker.lorem.word() + faker.random.number()
+          consumerKey: faker.lorem.word() + faker.random.number(),
         };
         return org.appcredentials
           .del(options)
@@ -433,7 +449,7 @@ describe("AppCredential", function () {
             assert.equal(error, "Error: bad status: 404");
             assert.equal(
               error.result.code,
-              "keymanagement.service.InvalidClientIdForGivenApp"
+              "keymanagement.service.InvalidClientIdForGivenApp",
             );
           });
       });
@@ -442,7 +458,7 @@ describe("AppCredential", function () {
         const options = {
           developerEmail,
           appName: faker.lorem.word(),
-          consumerKey: faker.lorem.word() + faker.random.number()
+          consumerKey: faker.lorem.word() + faker.random.number(),
         };
         return org.appcredentials
           .del(options)
@@ -453,7 +469,7 @@ describe("AppCredential", function () {
             assert.equal(error, "Error: bad status: 404");
             assert.equal(
               error.result.code,
-              "developer.service.AppDoesNotExist"
+              "developer.service.AppDoesNotExist",
             );
           });
       });
