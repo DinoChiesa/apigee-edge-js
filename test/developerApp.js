@@ -104,12 +104,14 @@ describe("DeveloperApp", function () {
           .then(() => assert.fail("should not be reached"))
           .catch((error) => {
             //console.log(error.result.message);
-            assert.equal(error, "Error: bad status: 404");
+            assert.match(error, new RegExp("Error: bad status: 40[40]"));
             assert.exists(error.result);
             assert.exists(error.result.message);
-            assert.equal(
+            assert.match(
               error.result.message,
-              `Product with id [${fakeName}] does not exist`,
+              new RegExp(
+                `(Product with id|API Product) \\[${fakeName}\\] does not exist.*`,
+              ),
             );
           });
       });

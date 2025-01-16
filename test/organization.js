@@ -3,7 +3,7 @@
 //
 // Tests for Developer operations.
 //
-// Copyright 2018-2023 Google LLC
+// Copyright 2018-2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2023-December-12 16:03:42>
+// last saved: <2025-January-16 21:59:51>
 
 /* global describe, faker, it, assert */
 
@@ -31,6 +31,17 @@ describe("Organization", function () {
   common.connectApigee(function (org) {
     const contrivedPropertyName1 = faker.random.alphaNumeric(22),
       contrivedPropertyName2 = faker.random.alphaNumeric(22);
+
+    describe("getName", function () {
+      it("should get the name of the org", () =>
+        org
+          .getName()
+          .then((name) => {
+            assert.isNotNull(name);
+            assert.equal(name, config.org);
+          })
+          .catch((_reason) => assert.fail("should not be reached")));
+    });
 
     describe("getProps", function () {
       it("should get properties of the org", () =>
@@ -46,7 +57,7 @@ describe("Organization", function () {
     });
 
     describe("addProps", function () {
-      it("should fail to add a property to the org", () => {
+      it("should fail to add a property to the org (this used to be possible)", () => {
         const propertyHash = {};
         propertyHash[contrivedPropertyName1] = 42;
 
