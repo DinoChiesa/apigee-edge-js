@@ -18,43 +18,41 @@
 // limitations under the License.
 //
 // created: Sat Apr 29 09:17:48 2017
-// last saved: <2022-April-01 13:57:42>
+// last saved: <2025-September-16 20:41:20>
 
 /* global path, faker, describe, it, before, after */
 
-const common = require('./common'),
-      util = require('util'),
-      fs = require('fs');
+const common = require("./common"),
+  util = require("util"),
+  fs = require("fs");
 
-describe('Keystore', function() {
+describe("Keystore", function () {
   const resourceDir = "./test/resources",
-        dateVal = new Date().valueOf(),
-        contrivedNameBasePrefix = 'apigee-edge-js-test-',
-        contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
+    dateVal = new Date().valueOf(),
+    contrivedNameBasePrefix = "apigee-edge-js-test-",
+    contrivedNamePrefix = contrivedNameBasePrefix + dateVal;
 
   this.timeout(common.testTimeout);
   this.slow(common.slowThreshold);
 
-  common.connectApigee(org => {
-
+  common.connectApigee((org) => {
     let envlist = [];
-      before(done => {
-        org.environments.get((e, result) => {
-          assert.isNull(e, "error listing: " + util.format(e));
-          envlist = result.filter(item => item != "portal");
-          done();
-        });
+    before((done) => {
+      org.environments.get((e, result) => {
+        assert.isNull(e, "error listing: " + util.format(e));
+        envlist = result.filter((item) => item != "portal");
+        done();
       });
+    });
 
-    describe('create', () => {
-
-      it('should create a keystore in each environment', done => {
+    describe("create", () => {
+      it("should create a keystore in each environment", (done) => {
         var numDoneEnv = 0;
-        envlist.forEach(function(env){
+        envlist.forEach(function (env) {
           const options = {
-                environment : env,
-                name : contrivedNamePrefix + '-ks1'
-              };
+            environment: env,
+            name: contrivedNamePrefix + "-ks1",
+          };
           org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating: " + util.format(e));
             numDoneEnv++;
@@ -65,13 +63,13 @@ describe('Keystore', function() {
         });
       });
 
-      it('should fail to create a keystore in each environment (duplicate)', done => {
+      it("should fail to create a keystore in each environment (duplicate)", (done) => {
         var numDoneEnv = 0;
-        envlist.forEach(env => {
+        envlist.forEach((env) => {
           const options = {
-                environment : env,
-                name : contrivedNamePrefix + '-ks1'
-              };
+            environment: env,
+            name: contrivedNamePrefix + "-ks1",
+          };
           org.keystores.create(options, (e, result) => {
             assert.isNotNull(e, "error creating: " + util.format(e));
             numDoneEnv++;
@@ -81,16 +79,14 @@ describe('Keystore', function() {
           });
         });
       });
-
     });
 
-
-    describe('get', () => {
+    describe("get", () => {
       let combinations = {};
-      before(done => {
+      before((done) => {
         let numDone = 0;
-        envlist.forEach(env => {
-          org.keystores.get({environment:env}, (e, result) => {
+        envlist.forEach((env) => {
+          org.keystores.get({ environment: env }, (e, result) => {
             numDone++;
             combinations[env] = result;
             if (numDone == envlist.length) {
@@ -100,9 +96,9 @@ describe('Keystore', function() {
         });
       });
 
-      it('should list all keystores for each environment', done => {
+      it("should list all keystores for each environment", (done) => {
         let numDoneEnv = 0;
-        envlist.forEach(environment => {
+        envlist.forEach((environment) => {
           org.keystores.get({ environment }, (e, result) => {
             assert.isNull(e, "error listing: " + util.format(e));
             assert.isTrue(result.length > 0);
@@ -114,15 +110,15 @@ describe('Keystore', function() {
         });
       });
 
-      it('should get details of each keystore', done => {
+      it("should get details of each keystore", (done) => {
         let numDone = 0;
         //console.log('combos: ' + JSON.stringify(combinations, null, 2));
         let keys = Object.keys(combinations);
-        keys.forEach(environment => {
+        keys.forEach((environment) => {
           const options = { environment },
-                keystores = combinations[environment];
+            keystores = combinations[environment];
           let numKeystoresDone = 0;
-          keystores.forEach(keystore => {
+          keystores.forEach((keystore) => {
             options.keystore = keystore;
             org.keystores.get(options, (e, result) => {
               assert.isNull(e, "error querying: " + util.format(e));
@@ -138,14 +134,14 @@ describe('Keystore', function() {
         });
       });
 
-      it('should fail to get a non-existent keystore', function(done){
+      it("should fail to get a non-existent keystore", function (done) {
         var numDone = 0;
-        envlist.forEach(function(env){
+        envlist.forEach(function (env) {
           const options = {
-                environment : env,
-                name : 'keystore-' + faker.random.alphaNumeric(23)
-              };
-          org.keystores.get(options, function(e, result){
+            environment: env,
+            name: "keystore-" + faker.random.alphaNumeric(23),
+          };
+          org.keystores.get(options, function (e, result) {
             assert.isNotNull(e, "the expected error did not occur");
             numDone++;
             if (numDone == envlist.length) {
@@ -156,62 +152,74 @@ describe('Keystore', function() {
       });
     });
 
-    describe('import cert', () => {
-      let certFileList;
-      before(done => {
-        var actualPath = path.resolve(resourceDir);
-        fs.readdir(actualPath, (e, items) => {
-          assert.isNull(e, "error getting cert and key: " + util.format(e));
-          var re1 = new RegExp('^.+\.cert$');
-          certFileList = items
-            .filter(item => item.match(re1) )
-            .map(item => path.resolve( path.join(resourceDir, item)) );
-          done();
-        });
+    describe("import cert", () => {
+      let certFilePath;
+      before((done) => {
+        const actualPath = path.resolve(resourceDir);
+        certFilePath = common.findLatestCertKeyPair(actualPath);
+        done();
       });
 
-      it('should import key and cert into a keystore', done => {
+      it("should import key and cert into a keystore", (done) => {
         this.timeout(65000);
         var numDone = 0;
-        let tick = () => { if (++numDone == envlist.length) { done(); } };
+        let tick = () => {
+          if (++numDone == envlist.length) {
+            done();
+          }
+        };
         //org.conn.verbosity = 1;
-        envlist.forEach(environment => {
+        envlist.forEach((environment) => {
           var options = {
-                environment,
-                name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
-              };
+            environment,
+            name: contrivedNamePrefix + "-" + faker.random.alphaNumeric(14),
+          };
           org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
-            options.certificateFile = certFileList[0];
-            options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
-            options.alias = 'alias-' + faker.random.alphaNumeric(8);
+            options.certificateFile = certFilePath;
+            options.keyFile = certFilePath.replace(
+              new RegExp("\\.cert$"),
+              ".key",
+            );
+            options.alias = "alias-" + faker.random.alphaNumeric(8);
             org.keystores.importCert(options, (e, result) => {
-              assert.isNull(e, "error importing cert and key: " + util.format(e));
+              assert.isNull(
+                e,
+                "error importing cert and key: " + util.format(e),
+              );
               tick();
             });
           });
         });
       });
 
-      it('should fail to import key + cert (no name)', done => {
+      it("should fail to import key + cert (no name)", (done) => {
         this.timeout(65000);
         var numDone = 0;
-        const tick = () => { if (++numDone == envlist.length) { done(); } };
+        const tick = () => {
+          if (++numDone == envlist.length) {
+            done();
+          }
+        };
         //org.conn.verbosity = 1;
-        envlist.forEach(environment =>{
+        envlist.forEach((environment) => {
           var options = {
-                environment,
-                name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
-              };
+            environment,
+            name: contrivedNamePrefix + "-" + faker.random.alphaNumeric(14),
+          };
           org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
-            options.certificateFile = certFileList[0];
-            options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
-            options.alias = 'alias-' + faker.random.alphaNumeric(8);
+            options.certificateFile = certFilePath;
+            options.keyFile = certFilePath.replace(
+              new RegExp("\\.cert$"),
+              ".key",
+            );
+            options.alias = "alias-" + faker.random.alphaNumeric(8);
             delete options.name;
-            org.keystores.importCert(options)
-              .then(r => assert.fail('should not be reached'))
-              .catch(e => {
+            org.keystores
+              .importCert(options)
+              .then((r) => assert.fail("should not be reached"))
+              .catch((e) => {
                 assert.isNotNull(e, "expected an error");
                 tick();
               });
@@ -219,40 +227,46 @@ describe('Keystore', function() {
         });
       });
 
-      it('should fail to import key + cert (no cert)', done => {
+      it("should fail to import key + cert (no cert)", (done) => {
         this.timeout(65000);
         var numDone = 0;
-        const tick = () => { if (++numDone == envlist.length) { done(); } };
+        const tick = () => {
+          if (++numDone == envlist.length) {
+            done();
+          }
+        };
         //org.conn.verbosity = 1;
-        envlist.forEach(environment => {
+        envlist.forEach((environment) => {
           var options = {
-                environment,
-                name : contrivedNamePrefix + '-' + faker.random.alphaNumeric(14)
-              };
+            environment,
+            name: contrivedNamePrefix + "-" + faker.random.alphaNumeric(14),
+          };
           org.keystores.create(options, (e, result) => {
             assert.isNull(e, "error creating keystore: " + util.format(e));
-            //options.certificateFile = certFileList[0];
-            options.keyFile = certFileList[0].replace(new RegExp('\\.cert$'), '.key');
-            options.alias = 'alias-' + faker.random.alphaNumeric(8);
-            org.keystores.importCert(options)
-              .then(r => assert.fail('should not be reached'))
-              .catch(e => {
+            //options.certificateFile = certFilePath;
+            options.keyFile = certFilePath.replace(
+              new RegExp("\\.cert$"),
+              ".key",
+            );
+            options.alias = "alias-" + faker.random.alphaNumeric(8);
+            org.keystores
+              .importCert(options)
+              .then((r) => assert.fail("should not be reached"))
+              .catch((e) => {
                 assert.isNotNull(e, "expected an error");
                 tick();
               });
           });
         });
       });
-
     });
 
-
-    describe('get aliases', () => {
+    describe("get aliases", () => {
       var combinations = [];
-      before(done => {
+      before((done) => {
         var numDone = 0;
-        envlist.forEach(environment => {
-          org.keystores.get({environment}, (e, result) => {
+        envlist.forEach((environment) => {
+          org.keystores.get({ environment }, (e, result) => {
             numDone++;
             combinations.push([environment, result]);
             if (numDone == envlist.length) {
@@ -262,7 +276,7 @@ describe('Keystore', function() {
         });
       });
 
-      it('should get aliases for each keystore in each env', done => {
+      it("should get aliases for each keystore in each env", (done) => {
         this.timeout(65000);
         var numDoneCombo = 0;
 
@@ -277,10 +291,11 @@ describe('Keystore', function() {
           }
         }
 
-        combinations.forEach( combo => {
-          const environment = combo[0], keystores = combo[1];
+        combinations.forEach((combo) => {
+          const environment = combo[0],
+            keystores = combo[1];
           var numDoneKeystores = 0;
-          keystores.forEach(keystore => {
+          keystores.forEach((keystore) => {
             var options = { environment, keystore };
             org.keystores.getAliases(options, (e, result) => {
               assert.isNull(e, "error: " + util.format(e));
@@ -289,10 +304,15 @@ describe('Keystore', function() {
               var aliases = result;
               if (aliases.length === 0) {
                 numDoneKeystores++;
-                checkNext(environment, keystore, aliases.length, numDoneKeystores, keystores.length);
-              }
-              else {
-                aliases.forEach(alias => {
+                checkNext(
+                  environment,
+                  keystore,
+                  aliases.length,
+                  numDoneKeystores,
+                  keystores.length,
+                );
+              } else {
+                aliases.forEach((alias) => {
                   options.alias = alias;
                   org.keystores.getAlias(options, (e, result) => {
                     assert.isNull(e, "error: " + util.format(e));
@@ -300,7 +320,13 @@ describe('Keystore', function() {
                     numDoneAliases++;
                     if (numDoneAliases == aliases.length) {
                       numDoneKeystores++;
-                      checkNext(environment, keystore, aliases.length, numDoneKeystores, keystores.length);
+                      checkNext(
+                        environment,
+                        keystore,
+                        aliases.length,
+                        numDoneKeystores,
+                        keystores.length,
+                      );
                     }
                   });
                 });
@@ -309,19 +335,19 @@ describe('Keystore', function() {
           });
         });
       });
-
     });
 
-
-    describe('delete', () => {
+    describe("delete", () => {
       let combinations = {};
-      before( done => {
+      before((done) => {
         let numDone = 0;
-        envlist.forEach(environment => {
-          org.keystores.get({environment}, (e, result) => {
+        envlist.forEach((environment) => {
+          org.keystores.get({ environment }, (e, result) => {
             numDone++;
-            if ( ! e) {
-              combinations[environment] = result.filter(name => name.startsWith(contrivedNameBasePrefix));
+            if (!e) {
+              combinations[environment] = result.filter((name) =>
+                name.startsWith(contrivedNameBasePrefix),
+              );
             }
             if (numDone == envlist.length) {
               done();
@@ -330,16 +356,16 @@ describe('Keystore', function() {
         });
       });
 
-      it('should delete the temporary keystores', done => {
+      it("should delete the temporary keystores", (done) => {
         let numDone = 0;
 
         //console.log('deleting: ' + JSON.stringify(combinations, null, 2));
         let keys = Object.keys(combinations);
-        keys.forEach(environment => {
+        keys.forEach((environment) => {
           const options = { environment },
-                keystores = combinations[environment];
+            keystores = combinations[environment];
           let numDoneKeystores = 0;
-          keystores.forEach(keystore => {
+          keystores.forEach((keystore) => {
             options.keystore = keystore;
             //console.log('  delete: %s/%s', env, keystore);
             org.keystores.del(options, (e, result) => {
@@ -356,16 +382,17 @@ describe('Keystore', function() {
         });
       });
 
-      it('should fail to delete non-existent keystores', done => {
+      it("should fail to delete non-existent keystores", (done) => {
         let numDone = 0;
-        envlist.forEach(env => {
+        envlist.forEach((env) => {
           const options = {
-                environment : env,
-                name : 'non-existent-keystore-' + faker.random.alphaNumeric(23)
-              };
-          org.keystores.del(options)
-            .then(r => assert.fail('expected an error'))
-            .catch(e => {
+            environment: env,
+            name: "non-existent-keystore-" + faker.random.alphaNumeric(23),
+          };
+          org.keystores
+            .del(options)
+            .then((r) => assert.fail("expected an error"))
+            .catch((e) => {
               assert.isNotNull(e, "the expected error did not occur");
               numDone++;
               if (numDone == envlist.length) {
@@ -374,9 +401,6 @@ describe('Keystore', function() {
             });
         });
       });
-
     });
-
   });
-
 });

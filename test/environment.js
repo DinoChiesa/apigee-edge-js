@@ -155,9 +155,10 @@ describe("Environment", function () {
 
       // Creation of vhosts works only with a Cert that has been signed by a commercial CA.
 
-      const certFile1 = path.resolve(
-        path.join(resourceDir, "20250115-0335.cert"), //  apigee-edge-js-20231212.cert
+      const latestCertPath = common.findLatestCertKeyPair(
+        path.resolve(resourceDir),
       );
+      const certFile1 = path.resolve(latestCertPath); // like 20250916-1845.cert
       const certFile2 = path.resolve(
         path.join(resourceDir, "apigee-edge-js-wildcard-expired.cert"),
       );
