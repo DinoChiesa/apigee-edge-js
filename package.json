@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.4.39",
+  "version": "0.4.40",
   "description": "nodejs library for the administration API for Apigee (Edge and X and hybrid).",
   "main": "index.js",
   "scripts": {
@@ -42,8 +42,8 @@
     "mocha-multi-reporters": "^1.1.7"
   },
   "engines": {
-    "node": ">= 16.13.1",
-    "npm": ">= 8.3.0"
+    "node": ">= 20.19.5",
+    "npm": ">= 10.9.3"
   },
   "overrides": {
     "strip-ansi": "5.2.0",
