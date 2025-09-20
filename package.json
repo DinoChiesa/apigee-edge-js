@@ -1,6 +1,6 @@
 {
   "name": "apigee-edge-js",
-  "version": "0.4.40",
+  "version": "0.4.41",
   "description": "nodejs library for the administration API for Apigee (Edge and X and hybrid).",
   "main": "index.js",
   "scripts": {
@@ -48,12 +48,9 @@
   "overrides": {
     "strip-ansi": "5.2.0",
     "micromatch": "4.0.8",
-    "badge-up": {
-      "svgo": {
-        "css-select": {
-          "nth-check": "2.0.1"
-        }
-      }
+    "brace-expansion": "2.0.2",
+    "@rpl/badge-up": {
+      "svgo": "2.8.0"
     }
   }
 }
